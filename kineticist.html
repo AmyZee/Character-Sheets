@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<style>
+	#bodycontent{
+		border: 1px solid black;
+		border-radius: 1em;
+		border-top-right-radius: 4em;
+		margin-top: 3em;
+		padding: 1em;
+		outline: 1px solid black;
+		outline-offset: -0.4em;
+		font-family: "Souvenir"
+	}
+	#info{
+		position: absolute;
+		left: 54%;
+		top: 15%;
+		width: 41%;
+		height: 38.5em;
+		background: #ffd;
+		padding: 0.5em;
+		border: 4px solid #bdb;
+		border-radius: 0.5em;
+	}
+	table{
+		border-collapse: collapse;
+		margin: 0.5em auto;
+	}
+	th, td{
+		border: 1px solid black; margin: 0 auto; text-align: center;
+	}
+	h1{
+		font-size: 1em;
+		font-weight: 500;
+		margin: 0.5em 0;
+	}
+	h3{
+		margin-top: 0.5em;
+		margin-bottom: 0.2em;
+	}
+	.actions{
+		font-family: "action_icons";
+		width: 3em;
+		height: 1.6em;
+	}
+	#resources{
+		/*background: #555;*/
+		width: 520px;
+		color: #ddd;
+		height: 6em;
+		position: absolute;
+		top: 0.5em;
+		left: calc(50% - 260px);
+	}
+	#resources > div{
+		background: #fff;
+		display: inline-block;
+		border: 4px solid #bdb;
+		border-radius: 2em;
+		height: 2em;
+		width: 2em;
+		line-height: 2em;
+		font-size: 2em;
+		text-align: center;
+		/*box-shadow: 0 0 8px black;*/
+		margin: 0.2em;
+		cursor: default;
+		outline: 1px solid #880;
+		transition: all 0.1s ease;
+	}
+	#resources > .active{
+		border: 4px solid #aca;
+		background: #bdb;
+		color: #fff;
+		/*box-shadow: 0 0 8px #880;*/
+	}
+		#resources > #stance.steamknight-active{
+			border: 4px solid #ddd;
+			background: #eee;
+			color: #fff;
+		}
+		#resources > #stance.thermalnimbus-active-cold{
+			border: 4px solid #bbd;
+			background: #ccf;
+			color: #fff;
+		}
+		#resources > #stance.thermalnimbus-active-fire{
+			border: 4px solid #dbb;
+			background: #fcc;
+			color: #fff;
+		}
+	#feats{
+		position: absolute;
+		top: 420px;
+		left: 272px;
+		background: #fff;
+		border: 2px solid #bbb;
+		outline: 1px solid #000;
+		outline-offset: 0px;
+		border-radius: 4px;
+		padding: 0.5em;
+	}
+	#inventory{
+		position: absolute;
+		top: 680px;
+		left: calc(54% + 8px);
+		border: 1px solid #000;
+		width: 550px;
+		padding: 100px 0.25em 0.25em;
+		border-radius: 4px;
+		background: #ddc;
+	}
+	#skills, #skill-actions{
+		position: absolute;
+		top: 234px;
+		left: 280px;
+		columns: 2;
+		width: 440px;
+	}
+
+</style>
+<button id="togglecombat" style="position: absolute; top: 0.2em;" onclick="toggleCombat()">Combat OFF</button>
+<div id="bodycontent">
+<h1>Human Undine Magical Experiment Kineticist</h1>
+<h2>Level <span id="level">1</span></h2>
+
+<div id="basic-attributes">STR +2 | DEX +1 | CON +4 | INT +1 | WIS +0 | CHA +0 | HP 20</div>
+<div id="basic-defenses">Class DC 17 ●◦◦◦ | AC 17 ●◦◦◦ | Fort +9 ●●◦◦ | Reflex +6 ●●◦◦ | Will +3 ●◦◦◦</div>
+<div id="inventory">
+Adventurer's Pack, Artisan's Tools, Basic Crafter's Book, Explorer's Clothing, Traveler's Chair, Scale Mail<br>
+Bulk 5.2 | Encumbered: 7 | Maximum: 12 | CP 0 | SP 3 | GP 0 | PP 0<br>
+Speed: 25 ft., swim Speed 10 ft., [Amphibious] | Common, Aquan, Dwarven
+</div>
+
+<div id="resources">
+	<div class="actions" id="action1" onclick="this.classList.toggle('active')">á</div><div class="actions" id="action2" onclick="this.classList.toggle('active')">á</div><div class="actions" id="action3" onclick="this.classList.toggle('active')">á</div><div class="actions" id="action4" onclick="this.classList.toggle('active')">ä</div>
+	<!--<div id="kineticaura" onmouseover="kineticAura()" onclick="this.classList.toggle('active')">☼</div>-->
+	<div id="stance" onmouseover="steamKnight()" onclick="this.classList.remove('steamknight-active'); this.classList.remove('thermalnimbus-active-cold'); this.classList.remove('thermalnimbus-active-fire');"><span style="display: inline-block; width: 24px; height: 24px; text-align:center; line-height: 22px; border: 1px solid #bba; border-radius: 50%;">⋅</span></div>
+</div>
+
+
+<div id="class-abilies">
+
+	<br><br>
+	<span onmouseover="kineticAura()" onclick="activateActions(1)"><span class="actions">á</span> ☼ Channel Elements</span><br>
+	<span onmouseover="steamKnight()" onclick="activateActions(1); document.getElementById('stance').classList.toggle('steamknight-active'), document.getElementById('stance').classList.remove('thermalnimbus-active-fire'), document.getElementById('stance').classList.remove('thermalnimbus-active-cold')" class="level-6" style="color:#bbd;"><span class="actions">á</span> ⨀ Steam Knight Stance</span><br>
+	<br>
+	<span onmouseover="deflectingWave()"><span class="actions">ä</span> Deflecting Wave</span><br>
+	<br>
+
+
+	<span onmouseover="basicDamage1()" onclick="activateActions(1)"><span class="actions">á</span> Elemental Blast 1</span><br>
+
+
+	<span onmouseover="oceansBalm()" onclick="activateActions(1)" class="level-2" style="color:#bbd;"><span class="actions">á</span> Ocean's Balm</span><br>
+	<span onmouseover="extractElement()" onclick="activateActions(1)" class="level-3" style="color:#bbd;"><span class="actions">á</span> Extract Element</span><br>
+	<br>
+	<span onmouseover="basicDamage2()" onclick="activateActions(2)"><span class="actions">â</span> Elemental Blast 2</span><br>
+	<span onmouseover="burningJet()" onclick="activateActions(2)"><span class="actions">â</span> Burning Jet</span><br>
+	<span onmouseover="flyingFlame()" onclick="activateActions(2)"><span class="actions">â</span> Flying Flame</span><br>
+	<span onmouseover="returnToTheSea()" onclick="activateActions(2)" class="level-4" style="color:#bbd;"><span class="actions">â</span> Return to the Sea</span><br>
+	<span onmouseover="thermalNimbus()" onclick="activateActions(2); thermalNimbusElement == 'cold' ? (document.getElementById('stance').classList.toggle('thermalnimbus-active-cold'), document.getElementById('stance').classList.remove('thermalnimbus-active-fire')) : (document.getElementById('stance').classList.toggle('thermalnimbus-active-fire'), document.getElementById('stance').classList.remove('thermalnimbus-active-cold'))" class="level-5" style="color:#bbd;"><span class="actions">â</span> ⨀ Thermal Nimbus</span><br>
+	<span onmouseover="callTheHurricane()" onclick="activateActions(2)" class="level-8" style="color:#bbd;"><span class="actions">â</span> Call the Hurricane</span><br>
+
+	<br>
+
+	<span onmouseover="baseKinesis()" onclick="activateActions(2)"><span class="actions">â</span>Base Kinesis</span><br>
+
+</div>
+
+
+<div id="skills">
+	Perception | +3 ●◦◦◦<br>
+	Arcana | +1 ◦◦◦◦<br>
+	Acrobatics | +4 ●◦◦◦<br>
+	Athletics | +5 ●◦◦◦<br>
+	Crafting | +4 ●◦◦◦<br>
+	Deception | +0 ◦◦◦◦<br>
+	Diplomacy | +0 ◦◦◦◦<br>
+	Intimidation | +0 ◦◦◦◦<br>
+	Lore: Academia | +4 ●◦◦◦<br>
+	Medicine | +0 ◦◦◦◦<br>
+	Nature | +3 ●◦◦◦<br>
+	Occultism | +4 ●◦◦◦<br>
+	Performance | +0 ◦◦◦◦<br>
+	Religion | +0 ◦◦◦◦<br>
+	Society | +1 ◦◦◦◦<br>
+	Stealth | +1 ◦◦◦◦<br>
+	Survival | +3 ●◦◦◦<br>
+	Thievery | +1 ◦◦◦◦<br>
+</div>
+
+<div id="skill-actions" style="display: none;">
+	<span onclick="activateActions(1)"><span class="actions">á</span> Disarm</span><br>
+	<span onclick="activateActions(1)"><span class="actions">á</span> Grapple</span><br>
+	<span onclick="activateActions(1)"><span class="actions">á</span> Shove</span><br>
+	<span onclick="activateActions(1)"><span class="actions">á</span> Reposition</span><br>
+	<span onclick="activateActions(1)"><span class="actions">á</span> Trip</span><br>
+	<span onclick="activateActions(1)"><span class="actions">á</span> Tumble Through</span><br>
+	<span onclick="activateActions(1)"><span class="actions">á</span> Take Cover</span><br>
+	<span onclick="activateActions(1)"><span class="actions">á</span> Hide</span><br>
+	<span onclick="activateActions(1)"><span class="actions">á</span> Sneak</span><br>
+	<span onclick="activateActions(1)"><span class="actions">á</span> Recall Knowledge</span><br>
+	<span onclick="activateActions(1)"><span class="actions">á</span> Leap</span><br>
+	<span onclick="activateActions(1)"><span class="actions">á</span> Point Out</span><br>
+	<span class="actions">ä</span> Grab an Edge<br>
+</div>
+
+
+<div id="feats" style="padding: 0 1em">
+	<h3>Feats &amp; Skill Increases</h3>
+	Ancestry: General Training (Medium armor proficiency)<br>
+	Background: Academia Lore<br>
+	<hr>
+	Class 1: Flying Flame<br>
+	Bonus: Burning Jet + Deflecting Wave<br>
+	<hr>
+	Class 2: Ocean's Balm | Skill 2: Slippery Prey<br>
+	<hr>
+	General 3: Fleet | Skill Increases (Acrobatics to ●●◦◦)<br>
+	<hr>
+	Class 4: Return to the Sea | Skill 4: Nimble Crawl<br>
+	<hr>
+	Class 5: Thermal Nimbus, Fire Aura Junction | Ancestry 5: Skillful Tail<br>
+	ASI: Con Str Dex Wis | Skill Increases (Athletics to ●●◦◦)<br>
+	<hr>
+	Class 6: Steam Knight Stance | Skill 6: Rapid Mantel<br>
+	<hr>
+	General 7: Untrained Improvisation<br>
+	Skill Increases (Acrobatics to ●●●◦)<br>
+	<hr>
+	Class 8: Call the Hurricane | Skill 8: Kip Up<br>
+	<hr>
+</div>
+
+
+<div id="info"></div>
+</div>
+
+
+<script>
+
+var level = 1
+var strength = 2
+var dexterity = 1
+var constitution = 4
+var intelligence = 1
+var wisdom = 0
+var charisma = 0
+
+document.addEventListener("keydown", function(e){
+	if(e.key == "ArrowRight"){
+		level++
+	}
+	if(e.key == "ArrowLeft"){
+		level--
+	}
+	document.getElementById("level").innerHTML = level
+
+	if(level == 5){
+		strength = 3; dexterity = 2; constitution = 4; wisdom = 1
+	} else if (level == 4){
+		strength = 2; dexterity = 1; constitution = 4; wisdom = 0
+	}
+
+
+	if(combat == 0){
+		document.getElementById("basic-attributes").innerHTML = `
+			STR +${strength} | DEX +${dexterity} | CON +${level>4 ? constitution + "." : constitution} | INT +${intelligence} | WIS +${wisdom} | CHA +${charisma} | HP ${8 + level*12}
+		`
+	} else {
+		document.getElementById("basic-attributes").innerHTML = `
+			HP ${8 + level*12}
+		`
+	}
+
+
+	document.getElementById("basic-defenses").innerHTML = `
+		Class DC ${level>6 ? 10 + constitution + level + 4 : 10 + constitution + level + 2} ${level>6 ? "●●◦◦" : "●◦◦◦"} | AC ${16 + level} ●◦◦◦ | Fort +${level>6 ? constitution + level + 6 : constitution + level + 4} ${level>6 ? "●●●◦" : "●●◦◦"} | Reflex +${dexterity + level + 4} ●●◦◦ | Will +${level>2 ? wisdom + level + 4 : wisdom + level + 2} ${level>2 ? "●●◦◦" : "●◦◦◦"}
+	`
+
+	for(var i = 0; i < document.getElementsByClassName("level-"+level).length; i++){
+		document.getElementsByClassName("level-"+level)[i].style.color = "#000"
+	}
+	for(var i = 0; i < document.getElementsByClassName("level-"+(level+1)).length; i++){
+		document.getElementsByClassName("level-"+(level+1))[i].style.color = "#bbd"
+	}
+	
+	skills()
+
+})
+
+
+
+
+
+
+
+function toggleCombat(){
+
+	if (combat == 1){
+
+		combat = 0
+		document.getElementById("togglecombat").innerHTML = "Combat OFF"
+		document.getElementById("skills").style.display = "block"
+		document.getElementById("feats").style.display = "block"; skills()
+		document.getElementById("skill-actions").style.display = "none"
+
+	} else {
+
+		combat = 1
+		document.getElementById("togglecombat").innerHTML = "Combat ON"
+		document.getElementById("skills").style.display = "none"
+		document.getElementById("feats").style.display = "none"
+		document.getElementById("skill-actions").style.display = "block"
+
+	}
+
+
+	if(combat == 0){
+		document.getElementById("basic-attributes").innerHTML = `
+			STR +${strength} | DEX +${dexterity} | CON +${level>4 ? constitution + "." : constitution} | INT +${intelligence} | WIS +${wisdom} | CHA +${charisma} | HP ${8 + level*12}
+		`
+	} else {
+		document.getElementById("basic-attributes").innerHTML = `
+			HP ${8 + level*12}
+		`
+	}
+
+}
+
+
+var combat = 0
+var basicDamageDice = "d6"
+var basicDamageRange = "60 ft"
+var basicDamageMelee = false //Toggles between ranged and melee
+var basicDamageTwoActions = true //Toggles between one and two actions
+var element = "fire"
+var thermalNimbusElement = "fire"
+
+function skills(){
+
+	document.getElementById("skills").innerHTML = `
+
+		Perception | +${level+2} ●◦◦◦<br>
+		Arcana | +${level>6?level:1} ◦◦◦◦<br>
+		Acrobatics | +${level>6?level+7:level>2?level+5:level+3} ●${level>2?'●':'◦'}${level>6?'●':'◦'}◦<br>
+		Athletics | +${level>4?level+6:level+4} ●${level>4?'●':'◦'}◦◦<br>
+		Crafting | +${level+3} ●◦◦◦<br>
+		Deception | +${level>6?level-1:0} ◦◦◦◦<br>
+		Diplomacy | +${level>6?level-1:0} ◦◦◦◦<br>
+		Intimidation | +${level>6?level-1:0} ◦◦◦◦<br>
+		Lore: Academia | +${level+3} ●◦◦◦<br>
+		Medicine | +${level>6?level-1:0} ◦◦◦◦<br>
+		Nature | +${level+2} ●◦◦◦<br>
+		Occultism | +${level+3} ●◦◦◦<br>
+		Performance | +${level>6?level-1:0} ◦◦◦◦<br>
+		Religion | +${level>6?level-1:0} ◦◦◦◦<br>
+		Society | +${level>6?level:1} ◦◦◦◦<br>
+		Stealth | +${level>6?level:1} ◦◦◦◦<br>
+		Survival | +${level+2} ●◦◦◦<br>
+		Thievery | +${level>6?level:1} ◦◦◦◦<br>
+
+	`
+
+}
+
+function activateActions(amount){
+	for(var i = 0; i < amount; i++){
+		if(document.getElementById("action3").classList.contains("active")){
+			document.getElementById("action3").classList.remove("active")
+			document.getElementById("action2").classList.remove("active")
+			document.getElementById("action1").classList.remove("active")
+			i = amount
+		} else if(document.getElementById("action2").classList.contains("active")){
+			//Active 3
+			document.getElementById("action3").classList.add("active")
+		} else if(document.getElementById("action1").classList.contains("active")){
+			//Active 2
+			document.getElementById("action2").classList.add("active")
+		} else {
+			//Active 1
+			document.getElementById("action1").classList.add("active")
+		}
+	}
+	
+	
+}
+
+function kineticAura(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Kinetic Aura | Channel Elements</h2>
+		[Air] [Aura] [Kineticist] [Primal] [Water]<br>
+		<b>Requirements:</b> Your kinetic gate isn't active.<br>
+		<br>
+		Your kinetic aura activates, and as part of this action, you can use a <b>Elemental Blast 1,</b> or <b>Steam Knight Stance</b>.<br>
+		<hr>
+		Your kinetic aura is a 10-foot emanation where pieces of your all your kinetic elements flow around you.<br>
+		It automatically deactivates if you're knocked out, you use an impulse with the [Overflow] trait, or your Dismiss the aura.<br>
+		Though you can't use new impulses while your kinetic aura is deactivated, you can Sustain any that can be sustained.<br>
+		Stance impulses are connected to your kinetic aura and end when the aura deactivates.<br>
+		<hr>
+		${level>4 ? "<b>Level 5:</b> Enemies in your kinetic aura gain weakness to fire from your fire impulses. The weakness is equal to half your level (minimum weakness 1).<br><hr>" : ""}
+		<p style="text-align: center; font-family: monospace">
+
+			- o o o -<br>
+			o o o o o<br>
+			o o x o o<br>
+			o o o o o<br>
+			- o o o -
+
+		</p>
+		<br>
+	`
+}
+
+function basicDamage1(){
+
+	document.getElementById("info").innerHTML = `
+
+		<h2><span class="actions">á</span> ${basicDamageMelee ? "Melee" : "Ranged"} One-Action ${element=="bludgeoning" ? " Bludgeoning" : element=="cold" ? " Cold" : element=="fire" ? " Fire" : ""} Elemental Blast</h2>
+		[Attack] [Impulse] [Kineticist] [Primal]<br>
+		<br>
+		<span onclick="basicDamageMelee = true; basicDamage1()"><u>Melee</u></span> <span onclick="basicDamageMelee = false; basicDamage1()"><u>Range</u></span>
+| <span onclick="element = 'bludgeoning'; basicDamageDice = 'd8'; basicDamageRange = '30 ft'; basicDamage1()"><u>Bludgeoning</u></span> <span onclick="element = 'cold'; basicDamageDice = 'd8'; basicDamageRange = '30 ft'; basicDamage1()"><u>Cold</u></span> <span onclick="element = 'fire'; basicDamageDice = 'd6'; basicDamageRange = '60 ft'; basicDamage1()"><u>Fire</u></span></span><br>
+		<br>
+		<b>Attack:</b> +7 vs AC (${basicDamageRange})<br>
+		&nbsp;&nbsp;<b>Crit success:</b> The target takes double damage.<br>
+		&nbsp;&nbsp;<b>Success:</b> ${Math.ceil(level/4)}${basicDamageDice} + ${basicDamageMelee ? strength : "0"}<br>
+	`
+}
+
+function basicDamage2(){
+
+	document.getElementById("info").innerHTML = `
+
+		<h2><span class="actions">â</span> ${basicDamageMelee ? "Melee" : "Ranged"} Two-Action ${element=="bludgeoning" ? " Bludgeoning" : element=="cold" ? " Cold" : element=="fire" ? " Fire" : ""} Elemental Blast</h2>
+		[Attack] [Impulse] [Kineticist] [Primal]<br>
+		<br>
+		<span onclick="basicDamageMelee = true; basicDamage2()"><u>Melee</u></span> <span onclick="basicDamageMelee = false; basicDamage2()"><u>Range</u></span>
+| <span onclick="element = 'bludgeoning'; basicDamageDice = 'd8'; basicDamageRange = '30 ft'; basicDamage2()"><u>Bludgeoning</u></span> <span onclick="element = 'cold'; basicDamageDice = 'd8'; basicDamageRange = '30 ft'; basicDamage2()"><u>Cold</u></span> <span onclick="element = 'fire'; basicDamageDice = 'd6'; basicDamageRange = '60 ft'; basicDamage2()"><u>Fire</u></span></span><br>
+		<br>
+		<b>Attack:</b> +7 vs AC (${basicDamageRange})<br>
+		&nbsp;&nbsp;<b>Crit success:</b> The target takes double damage.<br>
+		&nbsp;&nbsp;<b>Success:</b> ${Math.ceil(level/4)}${basicDamageDice} + ${basicDamageMelee ? strength + constitution : constitution}<br>
+	`
+}
+
+function deflectingWave(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">ä</span> Deflecting Wave</h2>
+		[Impulse] [Kineticist] [Primal] [Water]<br>
+		<br>
+		<b>Trigger:</b> You would take acid, bludgeoning, fire, or slashing damage from an enemy's attack, spell, or other hostile effect.<br>
+		<b>Requirements:</b> You are aware of the hostile effect, and you aren't off-guard against it.<br>
+		<b>Effect:</b><br>
+		&nbsp;&nbsp;Bludgeoning: You gain <b>${level}</b> resistance to it.<br>
+		&nbsp;&nbsp;Slashing: You gain <b>${level}</b> resistance to it.<br>
+		&nbsp;&nbsp;Acid: You gain <b>${level*2}</b> resistance to it.<br>
+		&nbsp;&nbsp;Fire: You gain <b>${level*2}</b> resistance to it.<br>
+		<hr>
+		<i>Bludgeoning or Slashing: Resistance equal to your level.<br>
+		Acid or Fire: Resistance equal to double your level.<br>
+		If the effect deals more than one applicable type of damage, apply the highest resistance, but apply it only once.</i>
+	`
+}
+
+function burningJet(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">â</span> Burning Jet</h2>
+		[Fire] [Impulse] [Kineticist] [Primal]<br>
+		<br>
+		<i>A condensed burst of flame shoots behind you, propelling you with sheer force.</i><br>
+		<br>
+		Stride up to <b>${level>5 ? "60" : "40"}</b> feet in a straight line. Movement from this impulse ignores difficult terrain and doesn't trigger reactions.<br>
+		<span style="color:${level>5 ? "#000" : "#bba"}">${level>5 ? "" : "Level 6:"}You can choose to Leap up to 40 feet in any direction instead of Striding. If you're in the air at the end of the Leap, you fall normally.</span><br>
+		<span style="color:${level>9 ? "#000" : "#bba"}">Level 10: As 6th level, but you hover briefly after leaping into the air. If you Leap, you don't fall until the end of your next turn. If you use Burning Jet again on a subsequent turn, you remain airborne.</span><br>
+		<hr>
+		<i>Level 6: The maximum distance of the Stride is 60 feet.</i>
+
+	`
+}
+
+function flyingFlame(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">â</span> Flying Flame</h2>
+		[Fire] [Impulse] [Kineticist] [Primal]<br>
+		<br>
+		A Tiny shape of flame appears, taking a form of your choice—such as a bird, an arrow, or a simple sphere.<br>
+		It Flies from you up to 30 feet in a path you choose.<br>
+		Each creature it passes through takes <b>${level>8 ? "5d6" : level>6 ? "4d6" : level>4 ? "3d6" : level>2 ? "2d6" : "1d6"}</b> fire damage with a basic Reflex save against your class DC.<br>
+		A creature attempts only one save, even if the flame passes through it multiple times.<br>
+		<br>
+		<hr>
+		<i>Level 1: 1d6<br>
+		Level +2: The damage increases by 1d6.</i>
+
+	`
+}
+
+function baseKinesis(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">â</span> Base Kinesis</h2>
+		[Impulse] [Kineticist] [Primal]<br>
+		<br>
+		It's trivial for you to create some of your element or alter a portion of it that already exists.<br>
+		Choose one of your kinetic elements to affect.<br>
+		This impulse has a range of <b>${level>8 ? "60" : level>4 ? "45" : "30"}</b> feet, and the Bulk of the target must be <b>${level>8 ? "up to Bulk 2" : level>4 ? "up to Bulk 1" : "neglectible or light"}.</b> The GM decides what Bulk the element is.<br>
+		You can't affect an element that's magical, secured in place (like a stone mortared in a wall), or attended by a creature unwilling to let you.<br>
+		<br>
+		Choose one of the following options, though the GM might allow you to make similar small alterations.<br>
+		Base Kinesis can't deal damage or cause conditions unless otherwise noted.<br>
+		<ul>
+		<li><b>Generate</b> You bring an ordinary, non-magical piece of the chosen element from its elemental plane.<br>
+		The element can be used for any of its normal uses. For example, air can be breathed by an air-breathing creature, and fire casts light and can ignite flammable substances.
+		<li><b>Move</b> Move an existing piece of the element up to 20 feet in any direction. If you bring it in your space, you can catch it in an open hand.<br>
+		You can Sustain the impulse to keep moving the element.
+		<li><b>Suppress</b> You destroy an existing piece of element, such as snuffing out a flame or evaporating water from a cup.<br>
+		This affects only natural forms of the element, not durable, crafted goods like a stone statue, metal lock, or wooden door.
+		</ul>
+		<i>Level 1: 30 feet, neglectible or light | Level +4: The range increases by 15 feet, and the maximum Bulk increases by 1 (allowing Bulk 1 at 5th level).</i>
+	`
+}
+
+function oceansBalm(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>1 ? '#000' : '#bba'}"><h2><span class="actions">á</span> Ocean's Balm</h2>
+		[Healing] [Impulse] [Kineticist] [Manipulate] [Primal] [Vitality] [Water]<br>
+		<br>
+		<i>A blessing of the living sea salves wounds and douses flames.</i><br>
+		Touch a willing living creature. It regains <b>${level>8 ? "5d8" : level>6 ? "4d8" : level>4 ? "3d8" : level>2 ? "2d8" : "1d8"}</b> Hit Points and gains <b>${level>8 ? "resistance 6" : level>6 ? "resistance 5" : level>4 ? "resistance 4" : level>2 ? "resistance 3" : "resistance 2"}</b> to fire for 1 minute.<br>
+		If it has persistent fire damage, it can attempt a flat check to remove it with appropiate help.<br>
+		The target is temporarily immunte to healing from Ocean's Balm for 10 minutes.<br>
+		<br>
+		<hr>
+		<i>Level 1: 1d8, resistance 2<br>
+		Level +2: The healing increases by 1d8, and the resistance increases by 1.</i></span>
+	`
+}
+
+function extractElement(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>2 ? '#000' : '#bba'}"><h2><span class="actions">á</span> Extract Element</h2>
+		[Impulse] [Kineticist] [Primal]<br>
+		<br>
+		You extract elemental matter from a creature's body to weaken it and take its power for your own.<br>
+		Target a creature within 30 feet that has a trait matching one of your kinetic elements or is made of one of your kinetic elements.<br>
+		The target takes <b>${level>8 ? "6d4" : level>6 ? "5d4" : level>4 ? "4d4" : level>2 ? "3d4" : "2d4"}</b> damage (with no damage type) and becomes susceptible to your impulses, depending on its Fortitude save against your class DC.<br>
+		<br>
+		<b>Critical Success</b> The creature is unaffected.<br>
+		<b>Success</b> The creature takes half damage, and you add some of its elemental matter to your kinetic aura.<br>
+		&nbsp;&nbsp;Your impulses bypass any immunity the creature has to their elemental trait or traits, and the target takes a -1 circumstance penalty to its saves and AC against your impulses.<br>
+		&nbsp;&nbsp;If the target normally has a resistance that would apply to damage from one of your impulses, ignore that resistance;<br>
+		&nbsp;&nbsp;if it normally would be immune to that damage type, it instead has resistance equal to its level to damage from the impulse.<br>
+		&nbsp;&nbsp;You can't target a creature with Extract Element if elemental matter you extracted from it is already in your kinetic aura.<br>
+		&nbsp;&nbsp;These effects lasts for 5 minutes or until your kinetic aura ends, whichever comes first.<br>
+		<b>Failure</b> As success, but the creature takes full damage.<br>
+		<b>Critical Failure</b> As failure, but the creature takes double damage.<br>
+		<br>
+		<hr>
+		<i>Level 1: 2d4<br>
+		Level +2: The damage increases by 1d4.</i></span>
+	`
+}
+
+function returnToTheSea(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>3 ? '#000' : '#bba'}"><h2><span class="actions">â</span> Return to the Sea</h2>
+		[Impulse] [Kineticist] [Morph] [Primal] [Water]<br>
+		<br>
+		Target <b>${level>5 ? "up to 5 willing creatures" : "a willing creature"}</b> within 30 ft.<br>
+		For 10 minutes, it gains the effects of the <i>feet to fins</i> spell, can breathe water, and gets a +1 status bonus to AC and saves against any creatures with the Amphibious, Aquatic, or Water trait.<br>
+		In addition, its attacks ignore the effects water normally has on bludgeoning and slashing attacks.<br>
+		If you use <i>Return to the Sea</i> again, any existing one ends.<br>
+		<br>
+		<hr>
+		<i>Level 1: One willing creature<br>
+		<i>Level 6: Up to 5 willing creatures.</i>
+		<br>
+		<br>
+		<h2>Feet to Fins</h2>
+		The target's feet transform into fins, improving mobility in the water but reducing it on land.<br>
+		The target gains a swim Speed equal to its normal land Speed, but its land Speed becomes 5 feet.</span>
+
+
+	`
+}
+
+function thermalNimbus(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>4 ? '#000' : '#bba'}"><h2><span class="actions">â</span> <span style="display: inline-block; width: 24px; height: 24px; text-align:center; line-height: 22px; border: 1px solid ${level>4 ? '#000' : '#bba'}; border-radius: 50%;">⋅</span> Thermal ${thermalNimbusElement == 'cold' ? 'Cold' : 'Fire'} Nimbus</h2>
+		[Fire] [Impulse] [Kineticist] [Primal] [Stance]<br>
+		<br>
+		<span onclick="thermalNimbusElement='cold'; document.getElementById('stance').classList.toggle('thermalnimbus-active-cold'), document.getElementById('stance').classList.remove('thermalnimbus-active-fire'); thermalNimbus()"><u>Cold</u></span>
+		<span onclick="thermalNimbusElement='fire'; document.getElementById('stance').classList.toggle('thermalnimbus-active-fire'), document.getElementById('stance').classList.remove('thermalnimbus-active-cold'); thermalNimbus()"><u>Fire</u></span>
+		<br>
+		<br>
+		<i>You direct waves of warmth into or out of your kinetic gate to drastically shift the temperature around you.</i><br>
+		<br>
+		Choose cold or fire. You and allies in your kinetic aura gain Resist ${thermalNimbusElement == 'cold' ? 'Cold' : 'Fire'} <b>${level}</b>.<br>
+		Any creature that starts its turn in your kinetic aura or moves into your aura during its turn takes <b>${Math.floor(level/2)}</b> damage ${thermalNimbusElement == 'cold' ? '' : '<i>(+<b>'+Math.floor(level/2)+'</b> fire weakness)</i>'} of the chosen type. Elemental resistance from a gate junction is cumulative with resistance from Thermal Nimbus.<br>
+		<hr>
+		<i>Resistance: Equal to your level.</i><br>
+		<i>Damage: Equal to half your level.</i><br>
+	`
+
+}
+
+function steamKnight(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>4 ? '#000' : '#bba'}"><h2><span class="actions">á</span> <span style="display: inline-block; width: 24px; height: 24px; text-align:center; line-height: 22px; border: 1px solid ${level>4 ? '#000' : '#bba'}; border-radius: 50%;">⋅</span> Steam Knight Stance</h2>
+		[Composite] [Fire] [Impulse] [Kineticist] [Primal] [Stance] [Water]<br>
+		<br>
+		<i>You shape your kinetic aura into swirling armor of steam that scalds your enemies and propels you on super-heated jet streams.</i><br>
+		A creature can take damage from Steam Knight only once per round. Your steam armor has the following effects.<br>
+		<ul>
+		<li>You gain a +10-foot status bonus to your Speed.
+		<li>When you Leap, you can jump up to your Speed. You don't immediately fall at the end of the jump, provided you Leap again with your next action.<br>
+		If you Leap over a creature and come within 10 feet, that creature takes <b>2d6</b> fire damage with a basic Reflex save against your class DC.
+		<li>At the start of each of your turns, you can emit steam as a free action.<br>
+		It deals <b>2d6</b> fire damage to each creature in your kinetic aura with a basic Reflex save against your class DC. A creature that fails is also pushed 5 feet.
+		</ul>
+		<br>
+		<hr>
+		<i>Level +5: The fire damage from a jump or blast of steam increases by 1d6.</i></span>
+	`
+}
+
+
+
+function callTheHurricane(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>7 ? '#000' : '#bba'}"><h2><span class="actions">â</span> Call the Hurricane</h2>
+		[Impulse] [Kineticist] [Overflow] [Primal] [Water]<br>
+		<br>
+		<i>Massive waves spiral around you, with you as the eye of the hurricane.</i><br>
+		The waves appear in a 20-foot emanation, or a 30-foot emanation if you're in a body of water.<br>
+		Each creature in the area takes <b>6d8</b> bludgeoning damage with a basic Reflex save against your class DC.<br>
+		A creature that fails its save is battered by the waves and pushed 10 feet (or 20 feet on a critical failure.)<br>
+		<br>
+		<hr>
+		Level +2: The damage increases by 1d8.</span>
+	`
+}
+
+</script>
