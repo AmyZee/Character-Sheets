@@ -1,0 +1,3134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+html, body{
+	margin: 0;
+	font-family: "Georgia";
+	line-height: 1.4em;
+	font-size: 0.92em;
+}
+body{
+	height: 100vh;
+	transition: 0.2s all;
+}
+h1{
+	margin-bottom: 0em;
+}
+h3{
+	margin-bottom: 0.2em;
+}
+#top{
+	border-bottom: 1px solid black;
+}
+#left-container, #middle, #right, #extra-right{
+	float:left;
+	margin: 1em;
+}
+#left, #middle{
+	width: 350px;
+}
+#right{
+	width: 450px;
+}
+#bottom{
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	color: white;
+	background: rgba(0,0,0,0.5);
+}
+#right{
+	background: antiquewhite;
+	border-radius: 0.5em;
+	height: 500px;
+	padding: 0.5em;
+	border: 1px solid lightgrey;
+}
+.attack{
+	background: floralwhite;
+	border-radius: 0.3em;
+	padding: 1em 0.5em;
+	margin: 0.5em;
+}
+/*action economy*/
+.standard{
+	color: red;
+}
+.swift{
+	color: green;
+}
+.move{
+	color: orange;
+}
+.immediate{
+	color: blue;
+}
+.disabled{
+	display: inline-block;
+	color: grey;
+	transform: scale(0.85);
+	transform-origin: left;
+}
+input:disabled{
+	transform: scale(0.85);
+}
+/*Cooldowns*/
+.cooldown0{
+	/*box-shadow: 0 0 1px 1px gold;*/
+}
+.cooldown2{
+	filter: contrast(0) sepia(100%) hue-rotate(320deg) saturate(5);
+}
+.cooldown1{
+	filter: sepia(100%) hue-rotate(30deg) drop-shadow(0 0 2px burlywood) saturate(5) brightness(125%);
+}
+/*Hiding feats/traits*/
+@keyframes hiding{
+	from {display: inline-block;}
+	to {transform: translateX(-1em); opacity: 0}
+}
+@keyframes showing{
+	from {display: inline-block; opacity: 0; transform: translateX(-1em);}
+	to {transform: translateX(1em); opacity: 1;}
+}
+.invisible{
+	animation: hiding 500ms;
+	display: none;
+}
+.visible{
+	animation: showing 500ms;
+}
+body:has(.shroud-of-water-bg){
+	background: rgba(180, 200, 220, 0.5);
+}
+
+
+#
+</style>
+</head>
+<body>
+
+<div id="top"><span id="level" onmouseover="drawInfo('new-this-level')"><u>Level 1</u></span> | Loriley, Strongtail Seasinger Merfolk | A. Modifiers: <span id="ability-modifiers">0.	3.	4.	2	-1	-1.</span> | Saves: <span id="saving-throws">- 5 6 - -1 -</span>| <button onclick="advanceTurn()">Next turn</button><button onclick="conMod+=1">Con +1</button></button><button onclick="conMod-=1">Con -1</button></button><button onclick="dexMod+=1">Dex +1</button></button><button onclick="dexMod-=1">Dex -1</button></div>
+<div id="left-container">
+	<div id="left">Elemental Blast</div>
+	<div id="middle-left"></div>	
+</div>
+
+<div id="middle">Maneuvers</div>
+<div id="right">Info</div>
+<div id="extra-right">Inventory</div>
+<div id="bottom">Something</div>
+
+<script>
+
+var level = 1
+var strMod = 0
+var dexMod = 3
+var psychicMetamorphosis = -1
+var conMod = 4
+var intMod = 2
+var wisMod = -1
+var chaMod = -1
+var rangedMelee = "ranged"
+var element = "Frost"
+var elementalFluxActiveElement = "air-flux"
+var baseBurn = 0
+var modifiedBurn = 0
+var infusionSpecialization = 0
+var resourceBurn = 0
+var resourceAnimus = 5
+var modifiedAnimus = 0
+var spellSlots = 4
+var blessSpellSlot = 1
+var empowerSpell = 0
+var maximizeSpell = 0
+var piercingSpell = 0
+var ACShieldBonus = 0
+var ACItemBonus = 0 //Magic Armor, Ring of Protection, Amulet of Natural Armor
+var crackedPaleGreenGem = 0 //1 = +1 attack (Competence)
+var beltOfMightyConstitution = 0 //2, 4, 6 = CONscore
+var mithralChainShirt = -1 //-1 = none; 0 = mithral nonmagic chain shirt equipped; 1, 2, 3, 4 = mithral magic chain shirt +1, +2, +3, +4 equipped
+var mithralScaleMail = 0
+var CONItemBonus = 0 //Belt of Mighty Constitution, Belt of Physical Might
+var shroudOfWaterShieldBonus = 0
+var shroudOfWaterCoalescenceBonus = 0
+
+document.body.addEventListener("keydown", function(e){
+	if(e.code == "ArrowLeft"){
+		level--
+	} else if(e.code == "ArrowRight"){
+		level++
+	} else if (e.code == "ArrowUp" || e.code == "ArrowDown"){
+		resourceBurn = 0
+		animus = 1 + conMod
+	}
+	if (psychicMetamorphosis < 1){
+		dexMod = 3
+	} else {
+		dexMod = 4
+	}
+	if (level < 4){
+		conMod = 4
+	}
+	else if (level < 12){
+		conMod = 5
+	}
+	else if (level < 20){
+		conMod = 6
+	}
+	else if (level == 20){
+		conMod = 7
+	}
+	if (level < 15){
+		resourceAnimus = conMod + 1
+	} else {
+		resourceAnimus = conMod + 1 + 2 //Feat: Extra Animus
+	}
+	
+
+
+	if (e.code == "ArrowLeft" || e.code == "ArrowRight" || e.code == "ArrowUp" || e.code == "ArrowDown") {
+		drawTop()
+		drawLeft()
+		drawMiddle()
+		drawMiddleLeft()
+		drawExtraRight()
+
+		document.getElementById("level").innerHTML = `
+		
+			<u>Level ${level}</u>
+
+		`
+	}
+
+})
+
+function drawTop(){
+
+	//Saving throws
+	if(level == 1){
+		var savingThrows = `- ${dexMod + 2} ${conMod + 2} - -1 -`
+	}
+	if (level == 2){
+		var savingThrows = `- ${dexMod + 2} ${conMod +2} - 1 -`
+	}
+	if (level > 2 && level < 13){
+		let dexSaveBonus = dexMod + Math.floor((level / 2) - 0.5) + 2 //2 2 | 3 3 4 4 5 5 6 6 7 7 8 8 9 9 10 10 11 11
+		let conSaveBonus = conMod + Math.floor((level / 2) - 0.5) + 2 //2 2 | 3 3 4 4 5 5 6 6 7 7 8 8 9 9 10 10 11 11
+		let wisSaveBonus = -1 + Math.floor((level / 3) - 0.3) + 2 //0 2 | 2 3 3 3 4 4 4 5 5 5 6 6 6 7 7 7 8 8
+		var savingThrows = `- ${dexSaveBonus} ${conSaveBonus} - ${wisSaveBonus} -`
+	}
+	if (level == 13){
+		let dexSaveBonus = dexMod + 7 //Base equal to lvl 12 saves as calculated above
+		let conSaveBonus = conMod + 7
+		let wisSaveBonus = -1 + 5 + 1 //+1 bonus from Adept Animus at this level
+		var savingThrows = `- ${dexSaveBonus} ${conSaveBonus} - ${wisSaveBonus} -` 
+	}
+	if (level == 14){
+		let dexSaveBonus = dexMod + 7 + 1
+		let conSaveBonus = conMod + 7 + 1
+		let wisSaveBonus = -1 + 5 + 1
+		var savingThrows = `- ${dexSaveBonus} ${conSaveBonus} - ${wisSaveBonus} -` 
+	}
+	if (level == 15){
+		let dexSaveBonus = dexMod + 7 + 1
+		let conSaveBonus = conMod + 7 + 1
+		let wisSaveBonus = -1 + 5 + 2
+		var savingThrows = `- ${dexSaveBonus} ${conSaveBonus} - ${wisSaveBonus} -` 
+	}
+	if (level == 16){
+		let dexSaveBonus = dexMod + 7 + 1
+		let conSaveBonus = conMod + 7 + 1
+		let wisSaveBonus = -1 + 5 + 2
+		var savingThrows = `- ${dexSaveBonus} ${conSaveBonus} - ${wisSaveBonus} -` 
+	}
+	if (level == 17){
+		let dexSaveBonus = dexMod + 7 + 2
+		let conSaveBonus = conMod + 7 + 2
+		let wisSaveBonus = -1 + 5 + 3
+		var savingThrows = `- ${dexSaveBonus} ${conSaveBonus} - ${wisSaveBonus} -` 
+	}
+	if (level == 18){
+		let dexSaveBonus = dexMod + 7 + 2 + 0 //+Kineticist lvl 13 does not get any new bonus
+		let conSaveBonus = conMod + 7 + 2 + 0
+		let wisSaveBonus = -1 + 5 + 3 + 0
+		var savingThrows = `- ${dexSaveBonus} ${conSaveBonus} - ${wisSaveBonus} -` 
+	}
+	if (level == 19){
+		let dexSaveBonus = dexMod + 7 + 2 + 1
+		let conSaveBonus = conMod + 7 + 2 + 1
+		let wisSaveBonus = -1 + 5 + 3 + 0
+		var savingThrows = `- ${dexSaveBonus} ${conSaveBonus} - ${wisSaveBonus} -` 
+	}
+	if (level == 20){
+		let dexSaveBonus = dexMod + 7 + 2 + 1
+		let conSaveBonus = conMod + 7 + 2 + 1
+		let wisSaveBonus = -1 + 5 + 3 + 1
+		var savingThrows = `- ${dexSaveBonus} ${conSaveBonus} - ${wisSaveBonus} -` 
+	}
+
+
+
+	document.getElementById("top").innerHTML = `
+
+		<span id="level" onmouseover="drawInfo('new-this-level')">Level ${level}</span> | Loriley, Strongtail Seasinger Merfolk, <span onclick="document.getElementById('titles-inner').classList.toggle('invisible'); document.getElementById('titles-inner').classList.toggle('visible')"><u style="cursor:pointer">Titles:</u> <span id="titles-inner" class="invisible">Roil Dancer Water Kineticist ${level < 2 ? "<span class='disabled'>" : ""}Esoteric Starseeker Spirit Channeler Psychic ${level < 13 ? "<span class='disabled'>" : ""}Animus Adept${level < 13 ? "</span>" : ""}${level < 2 ? "</span>" : ""}</span></span> | A. Modifiers: <span id="ability-modifiers">${strMod}.	${dexMod}${psychicMetamorphosis < 1 ? "." : ""}	${conMod}${level < 4 ? "." : level < 8 ? "" : level < 12 ? "." : level < 16 ? "" : level < 20 ? "." : ""}	2	-1	-1.</span> | Saves: <span id="saving-throws">${savingThrows}</span>| Initiative: +${level < 7 ? dexMod : dexMod + 4 /*Gerboa*/} | <button onclick="advanceTurn()">Next turn</button><button onclick="conMod+=1">Con +1</button></button><button onclick="conMod-=1">Con -1</button></button><button onclick="dexMod+=1">Dex +1</button></button><button onclick="dexMod-=1">Dex -1</button>
+		${level < 2 ? "" : `
+			<button onclick="psychicMetamorphosis == -1 ? psychicMetamorphosis = 0 : psychicMetamorphosis = 1; psychicMetamorphosis == 1 ? dexMod = 4 : dexMod = 3; drawTop(); drawInfo(); drawExtraRight()" ${psychicMetamorphosis == 1 ? "disabled" : ""} onmouseover="drawInfo('metamorphosis')">${psychicMetamorphosis == -1 ? "Begin" : "Finish"} Metamorphosis (Dex)</button>
+		`}
+
+	`
+
+
+}
+
+function drawLeft(){
+
+	baseBurn = 0
+	modifiedBurn = 0
+	modifiedAnimus = 0
+
+
+	document.getElementById("left").innerHTML = `
+
+		<div id="resources">
+			Burn: ${resourceBurn} / ${3 + conMod} | Animus: ${resourceAnimus}<br>
+			<span class="${level < 4 ? "disabled" : ""}">Elemental Overflow: +${Math.min(resourceBurn, level < 4 ? 0 : level < 7 ? 1 : level < 10 ? 2 : level < 18 ? 3 : 4)} (max ${level < 4 ? 0 : level < 7 ? 1 : level < 10 ? 2 : level < 18 ? 3 : 4}) ${level < 7 ? "" : resourceBurn < 3 ? "" : resourceBurn < 5 ? "<br>(CON +2, DEX +2)" : level < 12 ? "<br>(CON +2, DEX +2)" : "<br>(CON +4, DEX +2, STR +2)"}</span><br>
+			<span class="${level < 2 ? "disabled" : ""}">Spell Slots: <span id="spell-slot-1">🌀</span><span id="spell-slot-2">🌀</span><span id="spell-slot-3">🌀</span><span id="spell-slot-4">🌀</span> Bless: <span id="bless-spell-slot" style="filter:hue-rotate(185deg) brightness(1.5)">🌀</span></span></span><br>
+			${level < 5 ? "1" : level < 8 ? "2" : level < 10 ? "3" : level < 12 ? "4" : level < 16 ? "5" : level < 17 ? "6" : level < 19 ? "7" : level < 20 ? "8" : "9"} unspent Radiant Dawn Essence
+		</div>
+
+
+		<div id="elemental-blast-calculation">
+			<h2 onmouseover="drawInfo('elemental-blast')">Elemental Blast</h2>
+			
+			<input type="radio" name="element" id="frost" onchange='startingBurn(this, 0)' checked><label for="frost" onmouseover="drawInfo('frost')" class="standard">Cold (Cold)</label><br>
+			<input type="radio" name="element" id="water" ${level < 8 ? "disabled" : ""} onchange='startingBurn(this, 0);'><label for="water" onmouseover="drawInfo('water')" class="standard ${level < 8 ? "disabled" : ""}">Water (Bludgeoning)</label><br>
+			<input type="radio" name="element" id="ice" ${level < 8 ? "disabled" : ""} onchange='startingBurn(this, 2)'><label for="ice" onmouseover="drawInfo('ice')" class="standard ${level < 8 ? "disabled" : ""}">Ice (Half Pierce/Half Cold) (Burn 2)</label><br>
+
+			<hr>
+			
+			<input type="checkbox" id="kinetic-blade" onchange='addRemoveBurn(this, 1)'><label for="kinetic-blade" onmouseover="drawInfo('kinetic-blade')">Kinetic Blade (Burn 1)</label><br>
+			&nbsp;&nbsp;<input type="checkbox" id="maneuver-initiatied" onchange='addRemoveBurn(this, -1)'><label for="maneuver-initiatied" onmouseover="drawInfo('maneuver-initiatied')">Initiate a Maneuver -1</label><br>
+			<input type="checkbox" id="extended-range" onchange='addRemoveBurn(this, 1)'><label for="extended-range" onmouseover="drawInfo('extended-range')">Extended Range (Burn 1)</label><br>
+
+			<hr>
+
+			<input type="checkbox" id="pushing-infusion" disabled="true"} onchange='addRemoveBurn(this, 1)'><label for="pushing-infusion" onmouseover="drawInfo('pushing-infusion')" class="${level < 8 ? "disabled" : ""}">Pushing Infusion (Burn 1) (Water)</label><br>
+			<input type="checkbox" id="entangling-infusion" ${level < 8 ? "disabled" : ""} onchange='addRemoveBurn(this, 2)'><label for="entangling-infusion" onmouseover="drawInfo('entangling-infusion')" class="${level < 8 ? "disabled" : ""}">Entangling Infusion (Burn 2) (Cold, Ice)</label><br>
+
+			<hr>
+			
+			<input type="checkbox" id="fight-fire-with-fire" onchange='addRemoveBurn(this, -1); addRemoveAnimus(this, 2)'><label for="fight-fire-with-fire" onmouseover="drawInfo('fight-fire-with-fire')">2 Animus: Fight Fire With Fire -1</label><br>
+			<input type="checkbox" id="infusion-specialization" checked disabled><label for="infusion-specialization" onmouseover="drawInfo('infusion-specialization')" class="${level < 6 ? "disabled" : ""}">Infusion Specialization ${level < 6 ? "-0" : level < 9 ? "-1" : level < 12 ? "-2" : level < 20 ? "-3" : "-4"}</label><br>
+			
+			<hr>
+
+			<input type="checkbox" id="piercing-spell" ${level < 7 ? "disabled" : ""} onchange='addRemovePiercing(this, 1)'><label for="piercing-spell" onmouseover="drawInfo('piercing-spell')" class="${level < 7 ? "disabled" : ""}">Piercing Spell (Burn 1)</label><br>		
+			<input type="checkbox" id="empower-spell" ${level < 6 ? "disabled" : ""} onchange='addRemoveEmpower(this, 1)'><label for="empower-spell" onmouseover="drawInfo('empower-spell')" class= "${level < 6 ? "disabled" : ""}">Empower Spell (Burn 1)</label><br>
+			<input type="checkbox" id="maximize-spell" ${level < 10 ? "disabled" : ""} onchange='addRemoveMaximize(this, 2)'><label for="maximize-spell" onmouseover="drawInfo('maximize-spell')" class="${level < 10 ? "disabled" : ""}">Maximize Spell (Burn 2)</label><br>
+	
+			<hr>
+			
+			<input type="checkbox" id="gather-power" ${level < 12 ? "onchange='addRemoveBurn(this, -1); addRemoveAnimus(this, 1)" : "onchange='addRemoveBurn(this, -2); addRemoveAnimus(this, 1)'"} '><label for="gather-power" onmouseover="drawInfo('gather-power')" class="move">1 Animus: Gather Power ${level < 12 ? "-1" : "-2"}</label><br>
+			<input type="checkbox" id="gather-might" ${level < 9 ? "disabled" : ""} ${level < 12 ? "onchange='addRemoveBurn(this, 0); addRemoveAnimus(this, 1)" : "onchange='addRemoveBurn(this, 0); addRemoveAnimus(this, 1)'"} '><label for="gather-might" onmouseover="drawInfo('gather-might')" class=" ${level < 9 ? "disabled" : ""} move">1 Animus: Gather Might</label><br>
+			<input type="checkbox" id="animus-healing" ${level < 11 ? "disabled" : ""} ${level < 12 ? "onchange='addRemoveBurn(this, 0); addRemoveAnimus(this, 1)" : "onchange='addRemoveBurn(this, 0); addRemoveAnimus(this, 1)'"} '><label for="animus-healing" onmouseover="drawInfo('animus-healing')" class="${level < 11 ? "disabled" : ""} move">1 Animus: Heal 2d6</label><br>
+			<h3>Total</h3>
+			Burn: <span id="burn-total">${baseBurn + modifiedBurn + infusionSpecialization}</span>
+		</div>
+		<button onclick = "resourceBurn += Math.max(baseBurn + modifiedBurn + infusionSpecialization, 0); resourceAnimus -= modifiedAnimus; drawLeft(); drawExtraRight()">Accept Burn & Anima cost</button>
+
+	`
+}
+
+function drawMiddleLeft(){
+	document.getElementById("middle-left").innerHTML = `
+		<br><hr style="border-bottom: 1px solid purple	; padding: 1px;">
+		<span onmouseover="drawInfo('shroud-of-water')" class="${level < 3 ? 'disabled' : ''}"><input type="checkbox" id="shroud-of-water-used" class="cooldown0" onclick="shroudOfWaterShieldBonus == 1 ? shroudOfWaterShieldBonus = 0 : shroudOfWaterShieldBonus = 1; advanceCooldown(this); drawExtraRight(); this.classList.toggle('shroud-of-water-bg');"><label for="shroud-of-water-used"><button onclick="ACShieldBonus += 1; calculateBurnChanges()">🛡️🔥</button> Shroud of Water</span></span><br>
+		<span onmouseover="drawInfo('basic-hydrokinesis')">Basic Hydrokinesis</span><br>
+		<button onclick="castSpell('floating-disk')"><span class="standard" onmouseover="drawInfo('floating-disk')">🌀 Floating Disk</span></button><br>
+		<span class="${level < 2 ? 'disabled' : ''}">Prestidigitation, Mage Hand</span><br>
+		<span class="${level < 2 ? 'disabled' : ''}">Stabilize, Detect Magic</span><br>
+	`
+}
+
+function drawMiddle(){
+
+	var essence = level < 6 ? " (Essence: <input type='checkbox'>)" : level < 11 ? " (Essence: <input type='checkbox'><input type='checkbox'>)" : level < 16 ? " (Essence: <input type='checkbox'><input type='checkbox'><input type='checkbox'>)" : " (Essence: <input type='checkbox'><input type='checkbox'><input type='checkbox'><input type='checkbox'>)"
+	var animus = level < 8 ? " (Animus: 0-1)" : level < 15 ? " (Animus: 0-2)" : " (Animus: 0-3)"
+
+	document.getElementById("middle").innerHTML = `
+
+		<span class="standard ${level < 3 ? 'disabled' : ''}" onmouseover="drawInfo('kinetic-cover')">Kinetic Cover</span><br>
+		<button onclick="castSpell('bless')"><span class="standard" onmouseover="drawInfo('bless')"><span style="filter:hue-rotate(185deg) brightness(1.5)">🌀</span> Bless</span></button><br>
+
+		<h3 class="standard">Strikes</h3></span>
+
+		📖 💪<br>
+
+		<input type="checkbox" id="staunching-strike-prepared" ${level < 8 ? "checked" : level < 9 ? "" : "checked"}><input type="checkbox" id="staunching-strike-used" class="cooldown0" onclick="advanceCooldown(this)"><span onmouseover="drawInfo('staunching-strike')">${level < 5 ? "Staunching Strike" : level < 9 ? "Staunching Strike" : "Disrupt Essence"} ${essence}</span><br>
+
+		<input type="checkbox" id="elemental-strike-prepared" ${level < 3 ? "disabled" : "checked"}><input type="checkbox" id="elemental-strike-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 3 ? 'disabled' : ''}><label for="elemental-strike" onmouseover="drawInfo('elemental-strike')" class="${level < 3 ? 'disabled' : ''}">${level < 5 ? "Offensive Roll" : level < 11 ? "Elemental Strike" : "Energy Hammer"} ${level < 5 ? "" : animus}</label><br>
+
+		<input type="checkbox" id="lifeburst-strike-prepared" ${level < 8 ? "disabled" : level < 13 ? "checked" : level < 15 ? "disabled" : "checked"}><input type="checkbox" id="lifeburst-strike-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 8 ? "disabled" : level < 13 ? "" : level < 15 ? "disabled" : ""}><label for="lifeburst-strike" onmouseover="drawInfo('lifeburst-strike')" class="${level < 8 ? 'disabled' : ''}">${level < 13 ? "Lifeburst Strike": level < 15 ? "-" : "Karmic Strike"} ${level < 8 ? "" : level < 13 ? essence : level < 15 ? "" : essence}</label><br>
+
+		<input type="checkbox" id="arcane-torrent-prepared" ${level < 13 ? 'disabled' : 'checked'}><input type="checkbox" id="arcane-torrent-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 13 ? 'disabled' : ''}><span onmouseover="drawInfo('arcane-torrent')" class="${level < 13 ? 'disabled' : ''}">Arcane Torrent (Animus: 0 or 2)</span><br>
+
+		<input type="checkbox" id="eldritch-prepared" ${level < 14 ? 'disabled' : level < 17 ? 'checked' : 'disabled'}><input type="checkbox" id="eldritch-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 14 ? 'disabled' : level < 17 ? '' : 'disabled'}><span onmouseover="drawInfo('eldritch')" class="${level < 14 ? 'disabled' : level < 17 ? '' : 'disabled'}">Eldritch Energy Hammer ${level < 17 ? animus : ""}</span><br>
+
+		<input type="checkbox" id="judgement-day-prepared" ${level < 19 ? 'disabled' : 'checked'}><input type="checkbox" id="judgement-day-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 19 ? 'disabled' : ''}><span onmouseover="drawInfo('judgement-day')" class="${level < 19 ? 'disabled' : ''}">Judgement Day ${level < 19 ? "" : essence}</span><br>
+
+
+		<h3 class="swift">Boosts</h3>
+
+		<input type="checkbox" id="lifeburst-imbuement-prepared" ${level < 10 ? "disabled" : level < 15 ? "checked" : "disabled"}><input type="checkbox" id="lifeburst-imbuement-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 10 ? 'disabled' : level < 15 ? '' : 'disabled'}><label for="lifeburst-imbuement" onmouseover="drawInfo('lifeburst-imbuement')" class="${level < 10 ? 'disabled' : level < 15 ? '' : 'disabled'}">Lifeburst Imbuement${level < 10 ? "" : level < 15 ? essence : ""}</label><br>
+
+		<input type="checkbox" id="expose-weakness-prepared" ${level < 7 ? 'disabled' : level < 10 ? "checked" : level < 11 ? "" : level < 12 ? "checked" : ""}><input type="checkbox" id="expose-weakness-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 7 ? 'disabled' : level < 10 ? "" : level < 11 ? "" : level < 12 ? "" : ""}><label for="expose-weakness" onmouseover="drawInfo('expose-weakness')" class="${level < 7 ? 'disabled' : level < 10 ? "checked" : level < 11 ? "" : level < 12 ? "checked" : ""}">Expose Weakness ${level < 7 ? "" : essence}</label><br>
+
+		<input type="checkbox" id="fluctuation-movement-prepared" ${level < 3 ? "checked" : level < 5 ? "" : level < 9 ? "checked" : ""}><input type="checkbox" id="fluctuation-movement-used" class="cooldown0" onclick="advanceCooldown(this)"><label for="fluctuation-movement" onmouseover="drawInfo('fluctuation-movement')">Fluctuation Movement</label><br>
+
+		<input type="checkbox" id="leaping-dragon-prepared" ${level < 4 ? 'disabled' : level < 5 ? '' : ''}><input type="checkbox" id="leaping-dragon-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 4 ? 'disabled' : ''}><label for="leaping-dragon" onmouseover="drawInfo('leaping-dragon')" class="${level < 4 ? 'disabled' : ''}">Leaping Dragon</label><br>
+
+		<button style="${level < 13 ? "" : "color: green;"}" onmouseover="drawInfo('glyphs')" ${level < 13 ? "disabled" : ""}>Glyphs</button><br>
+
+		<h3 class="immediate">Counters</h3>
+
+		<input type="checkbox" id="bolster-prepared" ${level < 7 ? "checked" : level < 18 ? "disabled" : level < 19 ? "" : level < 20 ? "disabled" : ""}><input type="checkbox" id="bolster-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 7 ? "" : level < 18 ? "disabled" : level < 19 ? "" : level < 20 ? "disabled" : ''}><label for="bolster" class="${level < 7 ? "" : level < 18 ? "disabled" : level < 19 ? "" : level < 20 ? "disabled" : ''}" onmouseover="drawInfo('bolster')">${level < 7 ? "Bolster" : level < 18 ? "-" : "King's Castle"} ${level < 7 ? essence : level < 18 ? "" : level < 19 ? essence : level < 20 ? "" : essence}</label><br>
+		
+		<input type="checkbox" id="witness-to-glory-prepared" ${level < 5 ? 'disabled' : 'checked'}><input type="checkbox" id="witness-to-glory-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 5 ? 'disabled' : ''}><label for="witness-to-glory" onmouseover="drawInfo('witness-to-glory')" class="${level < 5 ? 'disabled' : ''}">Witness to Glory ${level < 5 ? "" : essence}</label><br>
+		
+		<input type="checkbox" id="redirecting-flux-prepared" ${level < 16 ? 'disabled' : 'checked'}><input type="checkbox" id="redirecting-flux-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 16 ? 'disabled' : ''}><label for="redirecting-flux" onmouseover="drawInfo('redirecting-flux')" class="${level < 16 ? 'disabled' : ''}">Redirecting Flux ${animus}</label><br>
+		
+		<input type="checkbox" id="decree-of-vengeance-prepared" ${level < 17 ? 'disabled' : 'checked'}><input type="checkbox" id="decree-of-vengeance-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 17 ? 'disabled' : ''}><label for="decree-of-vengeance" onmouseover="drawInfo('decree-of-vengeance')" class="${level < 17 ? 'disabled' : ''}">Decree of Vengeance ${level < 16 ? "" : essence}</label><br>
+
+		<button onclick="castSpell('burst-of-adrenaline')"><span class="immediate" onmouseover="drawInfo('burst-of-adrenaline')">🌀 Burst of Adrenaline</span></button><br>
+		<br>
+
+		<input type="checkbox" id="noblesse-obliege-prepared" ${level < 12 ? "disabled" : "checked"}><input type="checkbox" id="noblesse-obliege-used" class="cooldown0" onclick="advanceCooldown(this)" ${level < 12 ? 'disabled' : ''}><label for="noblesse-obliege" onmouseover="drawInfo('noblesse-obliege')" class="${level < 12 ? 'disabled' : ''}">Noblesse Obliege ${level < 12 ? "" : essence}</label><br>
+
+		<h3 class="swift">Stances</h3>
+
+		<input type="radio" name="stance" id="elemental-nimbus" ${level < 5 ? "disabled" : ""}><label for="elemental-nimbus" onmouseover="drawInfo('elemental-nimbus')" class="${level < 5 ? 'disabled' : ''}">Elemental Nimbus</label><br>
+		<input type="radio" name="stance" id="spoils-of-war" checked><label for="spoils-of-war" onmouseover="drawInfo('spoils-of-war')">Spoils of War ${essence}</label><br>
+		<input type="radio" name="stance" id="elemental-flux" ${level < 8 ? "disabled" : ""}><label for="elemental-flux" class="${level < 8 ? "disabled" : ""}" onmouseover="drawInfo('elemental-flux')">Elemental Flux</label><br>
+		<input type="radio" name="stance" id="enter-the-vortex" ${level < 12 ? 'disabled' : ''}><label for="enter-the-vortex" onmouseover="drawInfo('enter-the-vortex')" class="${level < 12 ? 'disabled' : ''}">Enter the Vortex</label><br>
+		<input type="radio" name="stance" id="battle-against-the-sun" ${level < 16 ? 'disabled' : ''}><label for="enter-the-vortex" onmouseover="drawInfo('battle-against-the-sun')" class="${level < 16 ? 'disabled' : ''}">Battle Against the Sun ${level < 16 ? "" : essence}</label><br>
+		<span class="standard">Elemental Flux: Change Active Element</span><br>
+		&nbsp;&nbsp;<input type="radio" name="active-element" id="air-flux" onchange="elementalFluxActiveElement = this.id" checked><label for="air-flux">Air</label>
+		&nbsp;&nbsp;<input type="radio" name="active-element" id="earth-flux" onchange="elementalFluxActiveElement = this.id"><label for="earth-flux">Earth</label><br>
+		&nbsp;&nbsp;<input type="radio" name="active-element" id="fire-flux" onchange="elementalFluxActiveElement = this.id"><label for="fire-flux">Fire</label>
+		&nbsp;&nbsp;<input type="radio" name="active-element" id="water-flux" onchange="elementalFluxActiveElement = this.id"><label for="water-flux">Water</label><br>
+		<span class="swift">Swap Radiant Dawn Essence</span><br>
+		<br>
+
+
+	`
+
+}
+
+function drawExtraRight(){
+	document.getElementById("extra-right").innerHTML = `
+
+		<b>Defenses</b></br>
+		<span onclick="document.getElementById('AC-calculation-inner').classList.toggle('invisible'); document.getElementById('AC-calculation-inner').classList.toggle('visible')">AC [${
+				//Armor
+				10 +
+				(level < 7 ? (shroudOfWaterCoalescenceBonus == 1 ? 4 : 4) : level < 11 ? (shroudOfWaterCoalescenceBonus == 1 ? 5 : 4) : level < 20 ? (shroudOfWaterCoalescenceBonus == 1 ? 6 : 4) : (shroudOfWaterCoalescenceBonus == 1 ? 7 : 4)) +
+				//Armor enhancement bonus
+				ACItemBonus +
+				//Shield
+				(level < 7 ?	(shroudOfWaterShieldBonus == 1 ? 2 + Math.min(resourceBurn, 1) : 0) : level < 11 ? (shroudOfWaterShieldBonus == 1 ? 3 + Math.min(resourceBurn, 1) : 0) : level < 20 ? (shroudOfWaterShieldBonus == 1 ? 4 + Math.min(resourceBurn, 2) : 0) : (shroudOfWaterShieldBonus == 1 ? 5 + Math.min(resourceBurn, 2) : 0)) +
+				//Natural Armor
+				2 +
+				//Enh. Natural Armor
+				0 +
+				//Dexterity
+				dexMod +
+				//Dodge
+				0
+			}]
+			<span class="invisible" id="AC-calculation-inner">
+				= 10
+				+ ${level < 7 ? (shroudOfWaterCoalescenceBonus == 1 ? 4 : 4) : level < 11 ? (shroudOfWaterCoalescenceBonus == 1 ? 5 : 4) : level < 20 ? (shroudOfWaterCoalescenceBonus == 1 ? 6 : 4) : (shroudOfWaterCoalescenceBonus == 1 ? 7 : 4)} (Armor)
+
+				+ ${ACItemBonus} (Enh. Armor)
+				+ ${level < 7 ?	(shroudOfWaterShieldBonus == 1 ? 2 + Math.min(resourceBurn, 1) : 0) : level < 11 ? (shroudOfWaterShieldBonus == 1 ? 3 + Math.min(resourceBurn, 1) : 0) : level < 20 ? (shroudOfWaterShieldBonus == 1 ? 4 + Math.min(resourceBurn, 2) : 0) : (shroudOfWaterShieldBonus == 1 ? 5 + Math.min(resourceBurn, 2) : 0) } (Shield)
+				+ 2 (Natural)<br>
+				+ 0 (Enh. Natural)
+				+ ${dexMod} (Dexterity)
+				+ 0 (Dodge)
+			</span>
+		</span><br>
+		<span onclick="document.getElementById('hp-description-inner').classList.toggle('invisible'); document.getElementById('hp-description-inner').classList.toggle('visible')">
+			HP&nbsp;&nbsp;&nbsp;<span id="nonlehtal-damage-taken">${resourceBurn * level}</span>&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;13&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;${8 + conMod + 1}<small> (${Math.floor(level * 4.5) + 4 + (level * conMod) + 1})</small>&nbsp;&nbsp;&nbsp;&nbsp;(0)<br>
+			<span class="invisible" id="hp-description-inner"><small>Nonlethal / HP / Max HP (Avg. Max HP) (Temp HP)</small></span>
+		</span>
+		<br>
+
+		<span onclick="document.getElementById('starting-inventory-inner').classList.toggle('invisible'); document.getElementById('starting-inventory-inner').classList.toggle('visible')"><b>Starting Inventory</b><br>
+			<span class="invisible" id="starting-inventory-inner">
+				<span onmouseover="drawInfo('chain-shirt')">[Equipped] Chain Shirt</span><br>
+				<span onmouseover="drawInfo('wand-of-cure-light-wounds')">[50] Wand, Cure Light Wounds</span><br>
+				<span onmouseover="drawInfo('wooden-holy-symbol')">Wooden Holy Symbol</span><br>
+				<span onmouseover="drawInfo('spell-component-pouch')">Spell Component Pouch</span><br>
+				<span onmouseover="drawInfo('belt-pouch')">Belt Pouch</span><br>
+				<span onmouseover="drawInfo('trail-rations')">Trail Rations (1 day) x3</span><br>
+				<span onmouseover="drawInfo('waterskin')">Waterskin</span><br>
+				<span onmouseover="drawInfo('land-limbs')">[Equipped] Land Limbs</span><br>
+				<span onmouseover="drawInfo('travelers-outfit')">Traveler's Outfit</span><br>
+				<span onmouseover="drawInfo('bandolier')">Bandolier</span><br>
+				<hr>
+				<b>Starting Carrying Capacity:</b><br>
+				43.5 lbs. + money<br>
+				<hr>
+				<b>Load</b> 0-38 light, 39-76 medium<br>
+				+3 Max Dex, -3 Check Penalty<br>
+				<b>Base Speed (Medium load)</b><br>
+				· 10 ft. (Normal)<br>
+				· 15 ft. (Land Limbs)<br>
+				· 20 ft. (Land Limbs+Fluc. Move.)<br>
+				<br>
+			</span>
+		</span>
+		<span onclick="document.getElementById('upgrades-inner').classList.toggle('invisible'); document.getElementById('upgrades-inner').classList.toggle('visible')"><b>Upgrades</b><br>
+			<span class="invisible" id="upgrades-inner">
+				<input type="checkbox" id="cracked-pale-green-prism" class="cooldown0" onclick="calculateUpgrades(this);">+1 Cracked Pale Green Prism (Ioun Stone) 4,000<br>
+				<input type="checkbox" id="belt-of-mighty-constitution" class="cooldown0" onclick=calculateUpgrades(this);">+2 Belt of Mighty Constitution 4,000 gp<br>
+				<input type="checkbox" id="mithral-chain-shirt-0" class="${mithralChainShirt == 0 ? "cooldown1" : "cooldown0"}" ${mithralChainShirt == 0 ? "checked" : ""} onclick="calculateUpgrades(this)">+0 Mithral Shirt (+9 AC in E.Overflow) 1,100 gp<br>	<!-- 4 Armor bonus + 4 Dex -> 5 Dex when Elemental Overload -->
+				<input type="checkbox" id="mithral-chain-shirt-1" class="${mithralChainShirt == 1 ? "cooldown1" : "cooldown0"}" ${mithralChainShirt == 1 ? "checked" : ""} onclick="calculateUpgrades(this)">+1 Mithral Chain Shirt (+10 AC) 2,100 gp<br>		<!-- 4 Armor bonus + 1 Armor Enh. bonus + 4 Dex -> 5 Dex when Elemental Overload -->
+				<input type="checkbox" id="mithral-chain-shirt-2" class="${mithralChainShirt == 2 ? "cooldown1" : "cooldown0"}" ${mithralChainShirt == 2 ? "checked" : ""} onclick="calculateUpgrades(this);">+2 Mithral Chain Shirt (+11 AC) 5,100 gp<br>
+				<input type="checkbox" id="mithral-chain-shirt-3" class="${mithralChainShirt == 3 ? "cooldown1" : "cooldown0"}" ${mithralChainShirt == 3 ? "checked" : ""} onclick="calculateUpgrades(this)"><span class="disabled">+3 Mithral Chain Shirt (+12 AC) 10,100 gp</span><br>
+				<input type="checkbox" id="mithral-chain-shirt-4" class="${mithralChainShirt == 4 ? "cooldown1" : "cooldown0"}" ${mithralChainShirt == 4 ? "checked" : ""} onclick="calculateUpgrades(this);"><span class="disabled">+4 Mithral Chain Shirt (+13 AC) 17,100 gp</span><br>
+				<input type="checkbox" id="mithral-scale-mail-2" class="${mithralScaleMail == 2 ? "cooldown1" : "cooldown0"}" ${mithralScaleMail == 2 ? "checked" : ""} onclick="calculateUpgrades(this)">+2 Mithral Scale Mail (+12 AC) 8,050 gp<br>			<!-- Nonproficient: Armor check penalty on attacks and STR/DEX skills. Base ACP 4. Mithral: ACP -3. Magic (aka Masterwork): ACP -1. Total: 0 ACP penalty. Mithral: treated as light armor for all but proficiencies: sleeping in armor, movement speed reduction, etc. -->
+				<input type="checkbox" id="mithral-scale-mail-3" class="${mithralScaleMail == 3 ? "cooldown1" : "cooldown0"}" ${mithralScaleMail == 3 ? "checked" : ""} onclick="calculateUpgrades(this);">+3 Mithral Scale Mail (+13 AC) 13,050 gp<br>
+				Big 6<br>
+				<br>
+			</span>
+		</span>
+		<b>Skills</b><br>
+		. = Class Skill<br>
+		# = Can't be used untrained<br>
+		Total | Ranks | Description<br>
+		<span onmouseover="drawInfo('acrobatics')">${level < 5 ? dexMod + level + 3 : dexMod + 4 + 3} | ${level < 5 ? level : 4} .Acrobatics (-ACP)</span><br>
+		<span onmouseover="drawInfo('appraise')">${intMod} | 0 Appraise</span><br>
+		<span onmouseover="drawInfo('bluff')">${chaMod} | 0 ${level < 2 ? "" : "."}Bluff</span><br>
+		<span onmouseover="drawInfo('climb')">${strMod} | 0 Climb (-ACP)</span><br>
+		<span onmouseover="drawInfo('craft')">${intMod + 1 + 3} | 1 .Craft</span><br>
+		<span onmouseover="drawInfo('diplomacy')">${chaMod} | 0 ${level < 2 ? "" : "."}Diplomacy</span><br>
+		<span onmouseover="drawInfo('disable-device')">— | 0 #Disable Device</span><br>
+		<span onmouseover="drawInfo('disguise')">${chaMod} | 0 Disguise</span><br>
+		<span onmouseover="drawInfo('escape-artist')">${dexMod} | 0 Escape Artist (-ACP)</span><br>
+		<span onmouseover="drawInfo('fly')">${level < 3 ? dexMod : level < 6 ? dexMod + 3 + 3 : dexMod + 6 + 3} | ${level < 3 ? 0 : level < 6 ? 3 : 6} ${level < 2 ? "" : "."}Fly (-Armor Check Pen.)</span><br>
+		<span onmouseover="drawInfo('handle-animal')">— | 0 #Handle Animal</span><br>
+		<span onmouseover="drawInfo('heal')">${level < 2 ? wisMod + 0 : wisMod + 1 + 3} | ${level < 2 ? 0 : 1} .Heal</span><br>
+		<span onmouseover="drawInfo('intimidate')">${chaMod} | 0 .Intimidate</span><br>
+		<span onmouseover="drawInfo('knowledge')">${
+			level < 4 ? "—" :
+				level < 6 ? intMod + 1 + 3 :
+					level < 7 ? intMod + 2 + 3 :
+						level < 8 ? intMod + 4 + 3 :
+							level < 9 ? intMod + 5 + 3 :
+								level < 10 ? intMod + 7 + 3 :
+									level < 11 ? intMod + 9 + 3 :
+										level < 13 ? intMod + 11 + 3 :
+											level < 14 ? intMod + 13 + 3 : intMod + level + 3
+		}
+		| ${
+			level < 4 ? 0 :
+				level < 6 ? 1 :
+					level < 7 ? 2 :
+						level < 8 ? 4 :
+							level < 9 ? 5 :
+								level < 10 ? 7 :
+									level < 11 ? 9 :
+										level < 13 ? 11 :
+											level < 14 ? 13 : level
+		} ${level < 2 ? "" : "."}#Knowledge (Arcana)</span><br>		
+		<span onmouseover="drawInfo('knowledge')">${
+			level < 5 ? "—" :
+				level < 7 ? intMod + 1 + 3 :
+					level < 8 ? intMod + 2 + 3 :
+						level < 9 ? intMod + 4 + 3 :
+							level < 10 ? intMod + 5 + 3 :
+								level < 11 ? intMod + 6 + 3 :
+									level < 14 ? intMod + 8 + 3 :
+										level < 15 ? intMod + 9 + 3 :
+											level < 16 ? intMod + 10 + 3 :
+												level < 17 ? intMod + 11 + 3 :
+													level < 18 ? intMod + 12 + 3 :
+														level < 19 ? intMod + 15 + 3 :
+															level < 20 ? intMod + 18 + 3 : intMod + 20 + 3
+		}
+		| ${
+			level < 5 ? 0 :
+				level < 7 ? 1 :
+					level < 8 ? 2 :
+						level < 9 ? 4 :
+							level < 10 ? 5 :
+								level < 11 ? 6 :
+									level < 14 ? 8 :
+										level < 15 ? 9 :
+											level < 16 ? 10 :
+												level < 17 ? 11 :
+													level < 18 ? 12 :
+														level < 19 ? 15 :
+															level < 20 ? 18 : 20
+		} .#Knowledge (Nature)</span><br>
+		<span onmouseover="drawInfo('knowledge')">${
+			level < 2 ? "—" :
+				level < 4 ? intMod + 1 + 3 :
+					level < 7 ? intMod + 2 + 3 :
+						level < 8 ? intMod + 4 + 3 :
+							level < 9 ? intMod + 6 + 3 :
+								level < 10 ? intMod + 8 + 3 :
+									level < 11 ? intMod + 10 + 3 : intMod + level + 3
+		}
+		| ${
+			level < 2 ? 0 :
+				level < 4 ? 1 :
+					level < 7 ? 2 :
+						level < 8 ? 4 :
+							level < 9 ? 6 :
+								level < 10 ? 8 :
+									level < 11 ? 10 : level
+		} ${level < 2 ? "" : "."}#Knowledge (Local)</span><br>
+		<span onmouseover="drawInfo('knowledge')">${level < 5 ? "—" : intMod + 1 + 3} | ${level < 5 ? 0 : 1} ${level < 2 ? "" : "."}#Knowledge (Religion)</span><br>
+		<span onmouseover="drawInfo('knowledge')">${level < 5 ? "—" : intMod + 1 + 3} | ${level < 5 ? 0 : 1} ${level < 2 ? "" : "."}#Knowledge (Dungeon.)</span><br>
+		<span onmouseover="drawInfo('knowledge')">${level < 5 ? "—" : intMod + 1 + 3} | ${level < 5 ? 0 : 1} ${level < 2 ? "" : "."}#Knowledge (Planes)</span><br>
+		<span onmouseover="drawInfo('linguistics')">— | 0 ${level < 2 ? "" : "."}#Linguistics</span><br>
+		<span onmouseover="drawInfo('perception')">${level < 7 ? wisMod + level + 3 : wisMod + level + 2 + 3} | ${level < 7 ? level : level + " (+2)"} .Perception</span><br>
+		<span onmouseover="drawInfo('perform')">${level < 4 ? chaMod + 0 + 2 : level < 5 ? chaMod + 1 + 2 : level < 20 ? chaMod + 2 + 2 : chaMod + 3 + 2} | ${level < 4 ? 0 : level < 5 ? 1 : level < 20 ? 2 : 3} (+2) Perform (Sing)</span><br>
+		<span onmouseover="drawInfo('profession')">— | 0 .#Profession</span><br>
+		<span onmouseover="drawInfo('ride')">${dexMod + 0} | 0 Ride (-ACP)</span><br>
+		<span onmouseover="drawInfo('sense-motive')">${level < 3 ? wisMod + 0 : level < 7 ? wisMod + 1 + 3 : wisMod + 1 + 2 + 3} | ${level < 3 ? 0 : level < 7 ? 1 : "1 (+2)"} ${level < 2 ? "" : "."}Sense Motive</span><br>
+		<span onmouseover="drawInfo('sleight-of-hand')">— | 0 #Sleight of Hand (-ACP)</span><br>
+		<span onmouseover="drawInfo('spellcraft')">${level < 4 ? "—" : level < 12 ? intMod + 1 + 3 : intMod + 5 + 3} | ${level < 4 ? 0 : level < 12 ? 1 : 5} .#Spellcraft</span><br>
+		<span onmouseover="drawInfo('stealth')">${dexMod + 1 + 3} | 1 .Stealth (-ACP)</span><br>
+		<span onmouseover="drawInfo('survival')">${wisMod + 0} | 0 Survival</span><br>
+		<span onmouseover="drawInfo('swim')">${strMod + 1 + 3} | 1 .Swim (-ACP)</span><br>
+		<span onmouseover="drawInfo('use-magic-device')">${chaMod + 1 + 3} | 1 #.Use Magic Device</span><br>
+
+
+	`
+}
+
+function drawBottom(){
+
+	document.getElementById("bottom").innerHTML = `
+
+		<span onclick="document.getElementById('traits-inner').classList.toggle('invisible'); document.getElementById('traits-inner').classList.toggle('visible')"><u style="cursor:pointer">Traits:</u>
+			<span class="invisible" id="traits-inner">Rich Parents; Unorthodox Method (Solar Wind -> Radiant Dawn); Magical Klutz; Magical Knack</span>
+		</span>|
+		<span onclick="document.getElementById('feats-inner').classList.toggle('invisible'); document.getElementById('feats-inner').classList.toggle('visible')"><u style="cursor:pointer">Feats:</u>
+			<span class="invisible" id="feats-inner">1. Weapon Finesse; 3. Magic Trick - Disk Rider; 5. Extra Readied Maneuver; 7. Expanded Metakinesis (Piercing Spell); 9. Gather Might, 11. Animus Healing, 13. Discipline Focus (Elemental Flux), 15. Extra Animus, 17. —???—, 19. —???—</span>
+		</span><br>
+		<span onclick="document.getElementById('talents-low-level-inner').classList.toggle('invisible'); document.getElementById('talents-low-level-inner').classList.toggle('visible')"><u style="cursor:pointer">Talents:</u>
+			<span class="invisible" id="talents-low-level-inner">1: Extended Range; 2: -; 3: Kinetic Cover; 4: Pushing Invocation; 5: -; 6: -; 7: Elemental Whispers (Jerboa) (+4 Initiative, Alertness); 8: Extended Element (Water/Ice/Entangling Infusion); 9: -; 10: -; 11: Shimmering Mirage; 20: Wall</span>
+		</span>
+
+
+	`
+
+}
+
+
+/* Left column calculations: */
+function startingBurn(element, amount){
+	//Toggle Pushing/Entangle, which are connected to this choice
+	if (element.id == "frost" || element.id == "ice"){
+		document.getElementById("pushing-infusion").disabled = true
+		document.getElementById("entangling-infusion").disabled = false
+	} else if (element.id == "water"){
+		document.getElementById("pushing-infusion").disabled = false
+		document.getElementById("entangling-infusion").disabled = true
+	}
+	//Actual calculations
+	element.id == "frost" ? window.element = "Frost" : element.id == "water" ? window.element = "Water" : window.element = "Ice"
+	baseBurn = amount
+	totalTheBurn()
+}
+
+function addRemoveBurn(element, amount){
+	if(element.checked){
+		modifiedBurn += amount
+	} else {
+		modifiedBurn -= amount
+	}
+	totalTheBurn()
+}
+function addRemoveAnimus(element, amount){
+	if(element.checked){
+		modifiedAnimus += amount
+	} else {
+		modifiedAnimus -= amount
+	}
+	totalTheBurn()
+}
+function addRemoveEmpower(element, amount){
+	element.checked ? empowerSpell = 1 : empowerSpell = 0
+	addRemoveBurn(element, amount)
+}
+function addRemoveMaximize(element, amount){
+	element.checked ? maximizeSpell = 1 : maximizeSpell = 0
+	addRemoveBurn(element, amount)
+}
+function addRemovePiercing(element, amount){
+	element.checked ? piercingSpell = 1 : piercingSpell = 0
+	addRemoveBurn(element, amount)
+}
+
+function totalTheBurn(){
+	infusionSpecialization = level < 15 ? Math.min(0 - Math.floor((level / 3) - 3/3), 0) : level < 20 ? -3 : -4
+	document.getElementById("burn-total").innerHTML = `${baseBurn + modifiedBurn + infusionSpecialization}<br>
+	Effective Burn: ${Math.max(baseBurn + modifiedBurn + infusionSpecialization, 0)} Animus: ${modifiedAnimus}
+	`
+}
+
+function castSpell(spell){
+	if(spell == "bless"){
+		if(blessSpellSlot == 1){
+			blessSpellSlot = 0
+			document.getElementById("bless-spell-slot").style.filter = "grayscale(1) brightness(1.5)"
+			return
+		}
+	}
+	if(spellSlots != 0){
+		spellSlots -= 1
+		if(spellSlots == 0){
+			document.getElementById("spell-slot-1").style.filter = "grayscale(1) brightness(1.5)"
+		}
+		if(spellSlots == 1){
+			document.getElementById("spell-slot-2").style.filter = "grayscale(1) brightness(1.5)"
+		}
+		if(spellSlots == 2){
+			document.getElementById("spell-slot-3").style.filter = "grayscale(1) brightness(1.5)"
+		}
+		if(spellSlots == 3){
+			document.getElementById("spell-slot-4").style.filter = "grayscale(1) brightness(1.5)"
+		}
+	} else {
+		spellSlots = 4
+		blessSpellSlot = 1
+		document.getElementById("spell-slot-1").style.filter = ""
+		document.getElementById("spell-slot-2").style.filter = ""
+		document.getElementById("spell-slot-3").style.filter = ""
+		document.getElementById("spell-slot-4").style.filter = ""
+		document.getElementById("bless-spell-slot").style.filter = "hue-rotate(185deg) brightness(1.5)"
+
+	}
+}
+
+/* End left-column calculations */
+
+function advanceTurn(){
+	resourceAnimus += 1
+	shroudOfWaterCoalescenceBonus = 0
+	drawLeft()
+	drawExtraRight()
+}
+
+
+function advanceCooldown(element){
+	if (element.classList.contains("cooldown0")){
+		element.classList.replace("cooldown0", "cooldown1")
+	} else if (element.classList.contains("cooldown2")){
+		element.classList.replace("cooldown2", "cooldown1")
+		element.checked = "true"
+	} else {
+		element.classList.replace("cooldown1", "cooldown0")
+	}
+}
+
+function calculateBurnChanges(){
+	resourceBurn = resourceBurn + 1
+
+	//Elemental Overflow
+
+	// if (resourceBurn <= Math.min(resourceBurn, Math.floor((level/3 - 1/3).toPrecision(7)))){
+		if (resourceBurn < 3){
+			if (psychicMetamorphosis < 1){
+				dexMod = 3
+			} else {
+				dexMod = 4
+			}
+			if (level < 4){
+				conMod = 4
+			}
+			else if (level < 12){
+				conMod = 5
+			}
+			else if (level < 20){
+				conMod = 6
+			}
+			else if (level == 20){
+				conMod = 7
+			}
+		} else if (level > 6 && resourceBurn == 3){
+			conMod += 1 //+2 CONscore total
+			dexMod += 1 //+2 DEXscore total
+		} else if (level > 11 && resourceBurn == 5){
+			conMod += 1 //+4 CONscore total, +2 DEXscore total
+			strMod += 1 //+2 STRscore total
+		}
+	// }
+	//document.getElementById("ability-modifiers").innerHTML = `${strMod}.	${dexMod}	${conMod}	2	-1	-1.`
+	drawTop()
+	drawLeft()
+	drawExtraRight()
+}
+
+function calculateUpgrades(element){
+	if (element.id == "mithral-chain-shirt-0"){
+		if (mithralChainShirt == 0){
+			mithralChainShirt = -1
+			element.classList.replace("cooldown1", "cooldown0")
+			console.log("disabled ", mithralChainShirt, ACItemBonus)
+		} else {
+			mithralChainShirt = 0
+			element.classList.replace("cooldown0", "cooldown1")
+			element.checked = true
+			console.log("enabled ", mithralChainShirt, ACItemBonus)
+		}
+		if (mithralChainShirt == 0){
+			ACItemBonus = 0
+		} else {
+			ACItemBonus = 0
+		}
+	}
+	if (element.id == "mithral-chain-shirt-1"){
+		if (mithralChainShirt == 1){
+			mithralChainShirt = -1
+			element.classList.replace("cooldown1", "cooldown0")
+			console.log("disabled ", mithralChainShirt, ACItemBonus)
+		} else {
+			mithralChainShirt = 1
+			element.classList.replace("cooldown0", "cooldown1")
+			element.checked = true
+			console.log("enabled ", mithralChainShirt, ACItemBonus)
+		}
+		if (mithralChainShirt == 1){
+			ACItemBonus = 1
+		} else {
+			ACItemBonus = 0
+		}
+	}
+	if (element.id == "mithral-chain-shirt-2"){
+		if (mithralChainShirt == 2){
+			mithralChainShirt = -1
+			element.classList.replace("cooldown1", "cooldown0")
+			console.log("disabled ", mithralChainShirt, ACItemBonus)
+		} else {
+			mithralChainShirt = 2
+			element.classList.replace("cooldown0", "cooldown1")
+			element.checked = true
+			console.log("enabled ", mithralChainShirt, ACItemBonus)
+		}
+		if (mithralChainShirt == 2){
+			ACItemBonus = 2
+		} else {
+			ACItemBonus = 0
+		}
+	}
+	if (element.id == "mithral-chain-shirt-3"){
+		if (mithralChainShirt == 3){
+			mithralChainShirt = -1
+			element.classList.replace("cooldown1", "cooldown0")
+			console.log("disabled ", mithralChainShirt, ACItemBonus)
+		} else {
+			mithralChainShirt = 3
+			element.classList.replace("cooldown0", "cooldown1")
+			element.checked = true
+			console.log("enabled ", mithralChainShirt, ACItemBonus)
+		}
+		if (mithralChainShirt == 3){
+			ACItemBonus = 3
+		} else {
+			ACItemBonus = 0
+		}
+	}
+	if (element.id == "mithral-chain-shirt-4"){
+		if (mithralChainShirt == 4){
+			mithralChainShirt = -1
+			element.classList.replace("cooldown1", "cooldown0")
+			console.log("disabled ", mithralChainShirt, ACItemBonus)
+		} else {
+			mithralChainShirt = 4
+			element.classList.replace("cooldown0", "cooldown1")
+			element.checked = true
+			console.log("enabled ", mithralChainShirt, ACItemBonus)
+		}
+		if (mithralChainShirt == 4){
+			ACItemBonus = 4
+		} else {
+			ACItemBonus = 0
+		}
+	}
+	if (element.id == "mithral-scale-mail-2"){
+		if (mithralScaleMail == 2){
+			mithralScaleMail = 0
+			element.classList.replace("cooldown1", "cooldown0")
+			console.log("disabled ", mithralScaleMail, ACItemBonus)
+		} else {
+			mithralScaleMail = 2
+			element.classList.replace("cooldown0", "cooldown1")
+			element.checked = true
+		}
+		if (mithralScaleMail == 2){
+			ACItemBonus = 2
+		} else {
+			ACItemBonus = 0
+		}
+	}
+	if (element.id == "mithral-scale-mail-3"){
+		if (mithralScaleMail == 3){
+			mithralScaleMail = 0
+			element.classList.replace("cooldown1", "cooldown0")
+			console.log("disabled ", mithralScaleMail, ACItemBonus)
+		} else {
+			mithralScaleMail = 3
+			element.classList.replace("cooldown0", "cooldown1")
+			element.checked = true
+		}
+		if (mithralScaleMail == 3){
+			ACItemBonus = 3
+		} else {
+			ACItemBonus = 0
+		}
+	}
+	drawExtraRight()
+
+}
+
+
+
+function drawInfo(element){
+
+	var closeRange = level < 3 ? "25 ft." : level < 5 ? "30 ft." : level < 7 ? "35 ft." : level < 9 ? "40 ft." : level < 11 ? "45 ft." : level < 13 ? "50 ft." : level < 15 ? "55 ft." : level < 17 ? "60 ft." : level < 19 ? "65 ft." : "70 ft."
+
+
+
+	elementalBlastAttack = ""
+	elementalBlastDamage = ""
+	function calculateBlastDamage(tempOverride){
+
+		//tempOverride = temporary variable overrides for mouseover on kinetic blasts
+
+
+		//BAB + DEX, - 1 level from multiclassing a 0 BAB class
+		if(level < 3){
+			if(rangedMelee == "ranged"){
+				elementalBlastAttack += `[R] ${window.element} Blast +`
+				var attackBonus = dexMod
+			} else {
+			//BAB + DEX Weapon Finesse
+				elementalBlastAttack += `[M] ${window.element} Blast +`
+				var attackBonus = dexMod
+			}
+		} else {
+			if(rangedMelee == "ranged"){
+				elementalBlastAttack += `[R] ${window.element} Blast +`
+				var attackBonus = Math.floor((level-1) * 3 / 4) + dexMod
+			} else {
+			//BAB + DEX Weapon Finesse
+				elementalBlastAttack += `[M] ${window.element} Blast +`
+				var attackBonus = Math.floor((level-1) * 3 / 4) + dexMod
+			}
+		}
+			
+		
+		//Elemental Overflow
+		if (level < 4){
+			//Nothing happens
+		} else if (level < 7){
+			attackBonus += Math.min(resourceBurn, 1)
+		} else if (level < 10){
+			attackBonus += Math.min(resourceBurn, 2)
+		} else if (level < 18){
+			attackBonus += Math.min(resourceBurn, 3)
+		} else{
+			attackBonus += Math.min(resourceBurn, 4)
+		}		
+
+		elementalBlastAttack += String(attackBonus)
+
+
+		if((document.getElementById("frost").checked && tempOverride == undefined) || tempOverride == "frost"){
+			elementalBlastAttack += " vs. Touch AC (30 ft.)"
+		} else {
+			elementalBlastAttack += " vs. AC (30 ft.)"
+		}
+
+		elementalBlastDamage = ""
+
+		if ((document.getElementById("frost").checked && tempOverride == undefined) || tempOverride == "frost"){
+
+			if(empowerSpell == 1 && maximizeSpell == 1){
+				if(level < 5){
+					elementalBlastDamage += `${6 + Math.floor(conMod / 2)} + half (1d6 + ${Math.floor(conMod / 2)}) cold`
+				} else if (level < 9){
+					elementalBlastDamage += `${12 + Math.floor(conMod / 2)} + half (2d6 + ${Math.floor(conMod / 2)}) cold`
+				} else if (level < 18){
+					elementalBlastDamage += `${18 + Math.floor(conMod / 2)} + half (3d6 + ${Math.floor(conMod / 2)}) cold`
+				} else {
+					elementalBlastDamage += `${24 + Math.floor(conMod / 2)} + half (4d6 + ${Math.floor(conMod / 2)}) cold`
+				}
+
+			} else if(empowerSpell == 1){
+				if(level < 5){
+					elementalBlastDamage += `1d6 + ${Math.floor(conMod / 2)} cold x 1.5`
+				} else if (level < 9){
+					elementalBlastDamage += `2d6 + ${Math.floor(conMod / 2)} cold x 1.5`
+				} else if (level < 18){
+					elementalBlastDamage += `3d6 + ${Math.floor(conMod / 2)} cold x 1.5`
+				} else {
+					elementalBlastDamage += `4d6 + ${Math.floor(conMod / 2)} cold x 1.5`
+				}
+
+			} else if(maximizeSpell == 1){
+				if(level < 5){
+					elementalBlastDamage += `${6 + Math.floor(conMod / 2)} cold`
+				} else if (level < 9){
+					elementalBlastDamage += `${12 + Math.floor(conMod / 2)} cold`
+				} else if (level < 18){
+					elementalBlastDamage += `${18 + Math.floor(conMod / 2)} cold`
+				} else {
+					elementalBlastDamage += `${24 + Math.floor(conMod / 2)} cold`
+				}
+
+			} else {
+				if(level < 5){
+					elementalBlastDamage += `1d6 + ${Math.floor(conMod / 2)} cold`
+				} else if (level < 9){
+					elementalBlastDamage += `2d6 + ${Math.floor(conMod / 2)} cold`
+				} else if (level < 18){
+					elementalBlastDamage += `3d6 + ${Math.floor(conMod / 2)} cold`
+				} else{
+					elementalBlastDamage += `4d6 + ${Math.floor(conMod / 2)} cold`
+				}
+			}
+
+			//lvl 1: 1d6 + half CON
+			//lvl 5: 2d6 + half CON
+			//lvl 9: 3d6 + half CON
+
+			//Maximized & Empowered: Base damage 6, 12, 18, then add half of (1d6/2d6/3d6 + half CON)
+			//Empowered: += "x 1.5"
+
+
+		} else if ((document.getElementById("water").checked && tempOverride == undefined) || tempOverride == "water"){
+
+
+			if(empowerSpell == 1 && maximizeSpell == 1){
+				if(level < 5){
+					if (level < 4){
+						elementalBlastDamage += "11 + half (1d6 + 5) bludgeoning"
+					} else {
+						elementalBlastDamage += "12 + half (1d6 + 6) bludgeoning"
+					}
+				} else if (level < 9){
+					elementalBlastDamage += "19 + half (2d6 + 7) bludgeoning"
+				} else {
+					elementalBlastDamage += "26 + half (3d6 + 8) bludgeoning"
+				}
+
+			} else if(empowerSpell == 1){
+				if(level < 5){
+					if (level < 4){
+						elementalBlastDamage += "1d6 + 5 bludgeoning x 1.5"
+					} else {
+						elementalBlastDamage += "1d6 + 6 bludgeoning x 1.5"
+					}
+				} else if (level < 9){
+					elementalBlastDamage += "2d6 + 7 bludgeoning x 1.5"
+				} else {
+					elementalBlastDamage += "3d6 + 8 bludgeoning x 1.5"
+				}
+
+			} else if(maximizeSpell == 1){
+				if(level < 5){
+					if (level < 4){
+						elementalBlastDamage += "11 bludgeoning"
+					} else {
+						elementalBlastDamage += "12 bludgeoning"
+					}
+				} else if (level < 9){
+					elementalBlastDamage += "19 bludgeoning"
+				} else {
+					elementalBlastDamage += "26 bludgeoning"
+				}
+
+			} else {
+				if(level < 5){
+					if (level < 4){
+						elementalBlastDamage += "1d6 + 5 bludgeoning"
+					} else {
+						elementalBlastDamage += "1d6 + 6 bludgeoning"
+					}
+				} else if (level < 9){
+					elementalBlastDamage += "2d6 + 7 bludgeoning"
+				} else {
+					elementalBlastDamage += "3d6 + 8 bludgeoning"
+				}
+			}
+			//lvl 1: 1d6 + 1 + CON
+			//lvl 5: 2d6 + 2 + CON
+			//lvl 9: 3d6 + 3 + CON
+
+			//Maximized & Empowered: Base damage 6, 12, 18, then add half of (1d6/2d6/3d6 + 1/2/3 + CON)
+			//Empowered: += "x 1.5"
+
+		} else if ((document.getElementById("ice").checked && tempOverride == undefined) || tempOverride == "ice") {
+
+			//Ice
+
+			if(empowerSpell == 1 && maximizeSpell == 1){
+				if (level < 5){
+					elementalBlastDamage += `${12 + conMod + 2} + half (2d6 + ${conMod + 2}) piercing/cold`
+				} else if (level < 9){
+					elementalBlastDamage += `${24 + conMod + 4} + half (4d6 + ${conMod + 4}) piercing/cold`
+				} else if (level < 18){
+					elementalBlastDamage += `${36 + conMod + 6} + half (6d6 + ${conMod + 6}) piercing/cold`
+				} else {
+					elementalBlastDamage += `${48 + conMod + 8} + half (6d6 + ${conMod + 8}) piercing/cold`
+				}
+
+			} else if(empowerSpell == 1){
+				if (level < 5){
+					elementalBlastDamage += `2d6 + ${conMod + 2} piercing/cold x 1.5`
+				} else if (level < 9){
+					elementalBlastDamage += `4d6 + ${conMod + 4} piercing/cold x 1.5`
+				} else if (level < 18) {
+					elementalBlastDamage += `6d6 + ${conMod + 6} piercing/cold x 1.5`
+				} else {
+					elementalBlastDamage += `8d6 + ${conMod + 8} piercing/cold x 1.5`
+				}
+
+			} else if(maximizeSpell == 1){
+				if (level < 5){
+					elementalBlastDamage += `${12 + conMod + 2} piercing/cold`
+				} else if (level < 9){
+					elementalBlastDamage += `${24 + conMod + 4} piercing/cold`
+				} else if (level < 18){
+					elementalBlastDamage += `${36 + conMod + 6} piercing/cold`
+				} else {
+					elementalBlastDamage += `${48 + conMod + 8} piercing/cold`
+				}
+
+			} else {
+				if (level < 5){
+					elementalBlastDamage += `2d6 + ${conMod + 2} piercing/cold`
+				} else if (level < 9){
+					elementalBlastDamage += `4d6 + ${conMod + 4} piercing/cold`
+				} else if (level < 18) {
+					elementalBlastDamage += `6d6 + ${conMod + 6} piercing/cold`
+				} else {
+					elementalBlastDamage += `8d6 + ${conMod + 8} piercing/cold`
+				}
+			}
+
+			//lvl 8: 4d6 + 4 + CON
+			//lvl 9: 6d6 + 4 + CON
+
+			//Maximized & Empowered: Base damage 24, 36, then add half of (4d6/6d6 + 4/6 + CON)
+			//Empowered: += "x 1.5"
+
+		}
+		//Physical blast or Energy Blast or Composite
+		//Level
+		//Empower Spell
+		//Maximize Spell
+		//Energy type "cold" "bludgeoning" "half cold/half piercing"
+		return `${elementalBlastAttack}<br><br>${elementalBlastDamage}` 
+	}
+
+
+	if (element == "staunching-strike"){
+
+		if (level < 9){
+
+			document.getElementById("right").innerHTML = `
+
+				<h3>Staunching Strike</h3>
+				<b>Strike</b> — Melee or Ranged attack<br>
+				<b>Target</b> One creature
+				<div class="attack">
+				${calculateBlastDamage()}
+				</div>
+				On hit: You can heal yourself and allies within ${closeRange} for a total number of <b>${conMod}</b> hit points, divided as you choose between you and your allies.<br>
+				<br>
+				1 Essence: <b>${conMod + 3}</b> hit points.<br>
+				<span class="${level < 6 ? "disabled" : ""}">2 Essence: <b>${conMod + 6}</b> hit points.</span><br>
+
+			`
+
+			/*document.getElementById("right").innerHTML = `
+
+				<h3>Curate Strike</h3>
+				<b>Strike</b> — Melee or Ranged attack<br>
+				<b>Target</b> One creature
+				<div class="attack">${calculateBlastDamage()}</div>
+				On hit, you can heal yourself and allies within ${closeRange} for a total number of <b>${conMod * 2}</b> hit points, divided as you choose between you and your allies.<br>
+				<br>Alternatively, you may choose to grant a single ally within close range a saving throw against an ongoing effect on them that offers multiple saving throws over time to negate, or has its duration measured in rounds at the effect’s original DC, at the effect’s original DC. If it succeeds, the effect ends. This does not progress poison, diseases, or similar effects on a failed saving throw.<br>
+					<br>
+					1 Essence: <b>${conMod + 2 + 4}</b> hit points.<br>
+					<span class="${level < 6 ? "disabled" : ""}">2 Essence: <b>${conMod + 2 + 8}</b> hit points.</span><br>
+
+
+			`*/
+
+		} else {
+
+			document.getElementById("right").innerHTML = `
+
+				<h3>Disrupt Essence</h3>
+				<b>Strike</b> — Melee or Ranged attack<br>
+				<b>Target</b> One creature
+				<div class="attack">${calculateBlastDamage()}</div>
+
+				On hit, the target must make a Will save (DC <b>${10 + (Math.floor((level/2) - 0.5)) + conMod}</b>) or have a single Extraordinary <i>(Ex)</i> or supernatural <i>(Su)</i> ability that requires an action to activate, special sense, or special movement type of your choice disabled for <b>${conMod}</b> rounds. You must be aware of the ability in order to disable it (Such as a successful knowledge check, or having seen it in action).<br>
+				<br>
+				1 Essence: DC <b>${10 + (Math.floor((level/2) - 0.5)) + conMod + 1}</b>, disabled for <b>${conMod + 1}</b> rounds.<br>
+				<span class="${level < 6 ? "disabled" : ""}">2 Essence: DC <b>${10 + (Math.floor((level/2) - 0.5)) + conMod + 2}</b>, disabled for <b>${conMod + 2}</b> rounds. Disable a second ability.</span><br>
+				<span class="${level < 11 ? "disabled" : ""}">3 Essence: DC <b>${10 + (Math.floor((level/2) - 0.5)) + conMod + 3}</b>, disabled for <b>${conMod + 3}</b> rounds.</span><br>
+				<span class="${level < 16 ? "disabled" : ""}">4 Essence: DC <b>${10 + (Math.floor((level/2) - 0.5)) + conMod + 4}</b>, disabled for <b>${conMod + 4}</b> rounds. Disable a third ability.</span><br>
+			`
+
+		}
+	}
+
+
+	if (element == "elemental-strike"){
+		
+		if (level < 5){
+			document.getElementById("right").innerHTML = `
+
+				<h3>Offensive Roll</h3>
+				<b>Strike</b> — Melee attack<br>
+				<b>Target</b> One creature<br>
+				<div class="attack">${calculateBlastDamage()}</div>
+				Move at least 10 ft. alongside an enemy (which provokes attacks of opportunity unless you use Acrobatics to tumble) and make a Acrobatics check with a DC equal to the target’s Armor Class.<br>
+				If successful, the target is considered <i>flat-footed</i> and the strike inflicts an additional 1d6 points of damage. You may move up to his full base speed, making the attack along any point of the moment.<br>
+				<hr>
+				<b>Tumble</b> (Acrobatics)<br>
+				<i>Special</i> Cannot use if medium/heavy load, or medium/heavy armor<br>
+				Half speed through threatened area - Acrobatics vs enemy CMD<br>
+				Full speed through threatened area - Acrobatics vs enemy CMD + 10<br>
+				Move at half speed through an enemy's space - Acrobatics vs enemy CMD + 5, fail = lose move and trigger an attack of opportunity<br>
+				<br>
+			`
+
+		}
+
+		else if (level < 11){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Elemental Strike</h3>
+			<b>Strike</b> — Melee or Ranged attack<br>
+			<b>Target</b> One creature
+			<div class="attack">${calculateBlastDamage()}</div>
+			On hit:<br>
+			&nbsp;&nbsp;<b>Air:</b> + Target rolls Reflex save (DC <b>${12 + conMod}</b>), fail: knocked <i>prone</i>.<br>
+			&nbsp;&nbsp;<b>Fire:</b> + Target rolls Reflex save (DC <b>${12 + conMod}</b>), fail: <i>blinded</i> (1 round).<br>
+			&nbsp;&nbsp;<b>Water:</b> + Target rolls Fort save (DC <b>${12 + conMod}</b>), fail: <i>nauseated</i> (1 round).<br>
+			<br>
+			1 Animus: +1d6 damage, DC <b>${12 + conMod + 1}</b>.<br>
+			<span class="${level < 8 ? 'disabled' : ''}">2 Animus: +2d6 damage, DC <b>${12 + conMod + 2}</b>.</span><br>
+
+		`
+
+		} else {
+
+			document.getElementById("right").innerHTML = `
+
+			<h3>Energy Hammer</h3>
+			<b>Strike</b> — Melee or Ranged attack<br>
+			<b>Target</b> One creature
+			<div class="attack">${calculateBlastDamage()}</div>
+			On hit:<br>
+			&nbsp;&nbsp;<b>Always:</b> +<b>6d6</b> damage<br>
+			<br>
+			&nbsp;&nbsp;<b>Air:</b> + Target rolls Fort save (DC <b>${level < 13 ? 14 + conMod : 14 + conMod + 2 /*feat*/}</b>), fail: <i>deafened</i> (1d4 rounds).<br>
+			&nbsp;&nbsp;<b>Earth:</b> + Target rolls Will save (DC <b>${level < 13 ? 14 + conMod : 14 + conMod + 2 /*feat*/}</b>), fail: <i>stunned</i> (1d4 rounds).<br>
+			&nbsp;&nbsp;<b>Fire:</b> + Target rolls Reflex save (DC <b>${level < 13 ? 14 + conMod : 14 + conMod + 2 /*feat*/}</b>), fail: <i>blinded</i> (1d4 rounds).<br>
+			&nbsp;&nbsp;<b>Water:</b> + Target rolls Fort save (DC <b>${level < 13 ? 14 + conMod : 14 + conMod + 2 /*feat*/}</b>), fail: <i>nauseated</i> (1d4 rnds).<br>
+			<br>
+			1 Animus: <b>7d6</b> damage, DC <b>${level < 13 ? 14 + conMod + 1 : 14 + conMod + 2 /*feat*/ + 1}</b>.<br>
+			<span class="${level < 8 ? 'disabled' : ''}">2 Animus: <b>8d6</b> damage, DC <b>${level < 13 ? 14 + conMod + 2 : 14 + conMod + 2 /*feat*/ + 2}</b>.</span><br>
+			<span class="${level < 15 ? 'disabled' : ''}">3 Animus: <b>9d6</b> damage, DC <b>${level < 13 ? 14 + conMod + 3 : 14 + conMod + 2 /*feat*/ + 3}</b>.</span>
+			`
+
+
+		}
+	}
+
+	if (element == "lifeburst-strike"){
+
+		if (level < 15){
+
+			document.getElementById("right").innerHTML = `
+
+				<h3>Lifeburst Strike</h3>
+				<b>Strike</b> — Melee or Ranged attack<br>
+				<b>Target</b> One creature
+				<div class="attack">${calculateBlastDamage()}</div>
+				On hit, +1d6 points of damage, and you can heal yourself and allies within ${closeRange} for a total number of <b>${conMod * 3}</b> hit points, divided as you choose between you and your allies.<br>
+				<br>
+				Alternatively, one ally within range may make a save with a +2 bonus against an ongoing effect on them that offers multiple saving throws over time to negate, or has its duration measured in rounds at the effect’s original DC. <b>Success</b> the effect ends. <b>Fail</b> This does not progress poison, diseases, or similar effects.<br>
+				<br>
+				1 Essence: <b>${conMod * 3 + 5}</b> hit points.<br>
+				<span class="${level < 6 ? "disabled" : ""}">2 Essence: <b>${conMod * 3 + 10}</b> hit points.</span><br>
+				<span class="${level < 11 ? "disabled" : ""}">3 Essence: <b>${conMod * 3 + 15}</b> hit points.</span><br>
+			`
+
+		} else {
+
+			document.getElementById("right").innerHTML = `
+
+				<h3>Karmic Strike</h3>
+				<b>Strike</b> — Melee or Ranged attack<br>
+				<b>Target</b> One creature
+				<div class="attack">${calculateBlastDamage()}</div>
+				On hit, +4d6 points of damage, and you can heal yourself and allies within ${closeRange} for a total number of <b>${conMod * 6}</b> hit points, divided as you choose between you and your allies.<br>
+				Then, target rolls Will save (DC ${16 + conMod}), fail: have <b>1</b> brand placed upon them for one minute.<br>
+				<div class="attack"><b>— Brand:</b><br>
+				<b>Action</b> Free action by defender on any turn <b>Trigger</b> Branded creature deals damage<br>
+				Remove the brand, take half of the damage. The branded creature then takes half of the mitigated damage.</div>
+				1 Essence: <b>${conMod * 6 + 8}</b> hit points, +1 brand if it failed its Will saving throw by 1.<br>
+				<span class="${level < 6 ? "disabled" : ""}">2 Essence: <b>${conMod * 6 + 16}</b> hit points, +2 brands if it failed its saving throw by 1.</span><br>
+				<span class="${level < 11 ? "disabled" : ""}">3 Essence: <b>${conMod * 6 + 24}</b> hit points, +3 brands if it failed its saving throw by 1.</span><br>
+				<span class="${level < 16 ? "disabled" : ""}">4 Essence: <b>${conMod * 6 + 32}</b> hit points, +4 brands if it failed its saving throw by 1.</span><br>
+			`
+
+		}
+		
+
+	}
+
+	if (element == "arcane-torrent"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Arcane Torrent</h3>
+			<b>Cost</b> Free<br>
+			<b>Range</b> 60 ft.<br>
+			<b>Target</b> One creature<br>
+			<div class="attack">
+			DC <b>${14 + conMod + 2}</b> Reflex negates<br>
+			<br>
+			Deal <b>6d6</b> force damage.
+			</div>
+			<hr>
+			<b>Cost </b>2 animus<br>
+			<b>Range</b> 60 ft.<br>
+			<b>Target</b> All target creatures in a 15-foot burst<br>
+			<div class="attack">
+			DC <b>${14 + conMod + 2}</b> Reflex negates<br>
+			<br>
+			Deal <b>6d6</b> force damage.
+			</div>
+			<br>
+
+		`
+
+	}
+
+	if (element == "eldritch"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Eldritch Energy Hammer</h3>
+			<b>Strike</b> — Melee or Ranged attack<br>
+			<b>Target</b> One creature<br>
+			<div class="attack">${calculateBlastDamage()}</div>
+			On hit: + you affect the target as if you had cast a targeted <i>greater&nbsp;dispel&nbsp;magic</i> on it. Make a dispel check against the spell with the highest caster level affecting the target, using your initiator level as your caster level for the check. If you do not successfully dispel that spell, compare the same result to the spell with the next highest caster level. Repeat this process until you have dispelled one spell affecting the target, or you have failed to dispel every spell. You can only end one spell with this maneuver.<br>
+			If you successfully dispel a spell affecting the target, your target takes 1d6 force damage for each level of the effect dispelled.<br>
+			<br>
+			Animus augmentation: You may spend up to three points of animus to gain a +2 bonus on your dispel check per point of animus spent.
+
+		`
+
+	}
+
+	if (element == "judgement-day"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Judgement Day</h3>
+			<b><i>Special</i></b> Full-Round Action<br>
+			<b>Area</b> ${closeRange} burst centered on you<br>
+			<br>
+			All enemies within the area take <b>50</b> points of untyped damage. A successful DC <b>${19 + conMod}</b> Reflex save halves this damage. Allies within range are healed for 50 points of damage. This healing acts like that of a <i>breath of life</i> spell, with the exception that it isn’t positive energy-based, and it may revive targets that have died since the last sunrise. Allies slain by death effects can attempt another saving throw against that death effect with a +${conMod} bonus. If this save is successful, they are revived with hit points equal to amount of healing done by this maneuver.<br>
+			<br>
+			A creature may only benefit from the breath of life effect of this maneuver once, and must experience sunrise (or wait 24 hours, whichever comes first) before they can gain its benefit again, though it still benefits from this maneuver’s healing normally.<br>
+			<br>
+			1 Essence: <b>65</b> healing and damage, DC <b>${19 + conMod + 1}</b>, save vs death +2<br>
+			<span class="${level < 6 ? "disabled" : ""}">2 Essence: <b>80</b> healing and damage, DC <b>${19 + conMod + 2}</b>, save vs death +4</span><br>
+			<span class="${level < 11 ? "disabled" : ""}">3 Essence: <b>95</b> healing and damage, DC <b>${19 + conMod + 3}</b>, save vs death +6</span><br>
+			<span class="${level < 16 ? "disabled" : ""}">4 Essence: <b>110</b> healing and damage, DC <b>${19 + conMod + 4}</b>, save vs death +8</span><br>
+
+
+
+		`
+
+	}
+
+	if (element == "fluctuation-movement"){
+		
+		document.getElementById("right").innerHTML = `
+
+			<h3>Fluctuation Movement</h3>
+			<b>Target</b> Self<br>
+			<br>
+			Coating your feet in the power of the elements, you alter your movement to grant you a burst of speed and maneuverability. This boost has one of the following effects, based on your active element:<br>
+			<br>
+			<b>Air:</b> You can make a single jump this round as a free action, with a +10 bonus to your Acrobatics check.<br>
+			<b>Earth:</b> Your movement ignores difficult terrain for one round.<br>
+			<b>Fire:</b> Your base land speed increases by 10 feet for one round.<br>
+			<b>Water:</b> You can make one turn of up to 90 degrees as part of the move when charging this round.
+
+
+		`
+	}
+
+	if (element == "expose-weakness"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Expose Weakness</h3>
+			<b>Target</b> One creature<br>
+			<b>Range</b> Melee or Ranged attack<br>
+			<br>
+			You strike with a weak, but swift, attack that hampers an opponent. Make an attack.<br>
+			On hit, deal no damage. The target becomes flat-footed for 1 round.<br>
+			<br>
+			1 Essence: On hit: also reduce the target’s AC by 2 for 1 round.<br>
+			<span class="${level < 6 ? "disabled" : ""}">2 Essence: On hit: also reduce the target's AC by 4 for 1 round.</span><br>
+			<span class="${level < 11 ? "disabled" : ""}">3 Essence: On hit: also reduce the target's AC by 6 for 1 round.</span><br>
+			<span class="${level < 16 ? "disabled" : ""}">4 Essence: On hit: also reduce the target's AC by 8 for 1 round.</span><br>
+
+
+
+
+
+		`
+
+	}
+
+	if (element == "lifeburst-imbuement"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Lifeburst Imbuement</h3>
+			<b>Target</b> One ally <b>Duration</b> One round<br>
+			<br>
+			The target’s next attack that hits deals an additional 2d6 points of damage. When this attack hits, you can also heal yourself and allies within ${closeRange} range for a total number of <b>${conMod * 4}</b> hit points, divided as you choose between you and your allies.<br>
+			<br>
+			1 Essence: <b>${(conMod * 4) + 6}</b> hit points.<br>
+			<span class="${level < 6 ? "disabled" : ""}">2 Essence: <b>${(conMod * 4) + 12}</b> hit points.</span><br>
+			<span class="${level < 11 ? "disabled" : ""}">3 Essence: <b>${(conMod * 4) + 18}</b> hit points.</span><br>
+			<span class="${level < 16 ? "disabled" : ""}">4 Essence: <b>${(conMod * 4) + 24}</b> hit points.</span><br>
+
+
+
+		`
+
+	}
+
+	if (element == "bolster"){
+
+		if (level < 18){
+
+			document.getElementById("right").innerHTML = `
+
+				<h3>Bolster</h3>
+				<b>Range</b> ${closeRange}<br>
+				<b>Trigger</b> An ally is hit by a melee or ranged attack<br>
+				<br>
+				<b>Effect</b><br>
+				Your ally gains DR <b>${conMod}</b>/– for 1 round.<br>
+				<br>
+				1 Essence: DR <b>${conMod + 1}</b>/–<br>
+				<span class="${level < 6 ? "disabled" : ""}">2 Essence: DR <b>${conMod + 2}</b>/–</span><br>
+
+			`
+
+		} else {
+
+			document.getElementById("right").innerHTML = `
+
+				<h3>King's Castle</h3>
+				<b>Range</b> ${closeRange}<br>
+				<b>Trigger</b> You or an ally are attacked<br>
+				<br>
+				<b>Effect</b><br>
+				One willing ally teleports to the space adjacent to the target of the Counter and gains <b>${level - 1}</b> temporary hit points, as well as DR <b>${conMod}</b>/–, both of which last for 1 round. Resolve the attack against the teleported ally instead of the original defender.<br>
+				After the attack is resolved, the ally teleported may make a single melee or ranged attack at their highest base attack bonus against the attacking creature. This attack does not provoke attacks of opportunity.<br>
+				<br>
+				1 Essence: +<b>${level - 1 + 6}</b> tempoary hit points, DR <b>${conMod + 1}</b>/–, +1d6 damage by the teleporting ally.<br>
+				2 Essence: +<b>${level - 1 + 12}</b> tempoary hit points, DR <b>${conMod + 2}</b>/–, +2d6 damage by the teleporting ally.<br>
+				3 Essence: +<b>${level - 1 + 18}</b> tempoary hit points, DR <b>${conMod + 3}</b>/–, +3d6 damage by the teleporting ally.<br>
+				4 Essence: +<b>${level - 1 + 24}</b> tempoary hit points, DR <b>${conMod + 4}</b>/–, +4d6 damage by the teleporting ally.<br>
+				<span class="${level < 6 ? "disabled" : ""}"></span>
+
+			`
+
+		}
+		
+	}
+
+	if (element == "leaping-dragon"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Leaping Dragon</h3>
+			Jump, using an Acrobatics check with a +10 <i>competence</i> bonus. You are treated as if you had a running start.<br>
+			<hr>
+			<b>Acrobatics</b><br>
+			Long Jump: DC equal to distance in ft.; double DC if without a running start.<br>
+			High Jump: DC equal to 4 per 1 foot jumped. Double DC if without a running start.<br>
+			Failed by 4 or less: you may make a DC 20 Reflex save. On a success, you grab the edge.<br>
+			<br>
+			<b>Important DC modifiers</b><br>
+			You can't exceed your total move distance from your base movement speed for the turn.<br>
+			-4 Acrobatics if your base movement speed is less than 30 ft.; +4 if it's more than 30 ft.<br>
+			If you deliberately fall, even because of a missed jump, roll DC 15 Acrobatics. On a success, ignore the fist 10 feet fallen.<br>
+
+
+		`
+
+	}
+
+	if (element == "witness-to-glory"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Witness to Glory</h3>
+			<b>Target</b> One ally within ${closeRange}<br>
+			<b>Trigger</b> Initiative has just been rolled and written down
+			<br>
+			<b><i>Special</i></b> You may activate this counter even if you are flat-footed<br>
+			<br>
+			Target ally gains a +<b>${conMod}</b> bonus on their initiative check, and also gains <b>${level - 1}</b> temporary hit points. These temporary hit points last for <b>${level - 1}</b> minutes or until used.<br>
+			<br>
+			1 Essence: +<b>${conMod + 1}</b> bonus initiative, temporary hit points +<b>${level - 1 + 2}</b><br>
+			<span class="${level < 6 ? "disabled" : ""}">2 Essence: +<b>${conMod + 2}</b> bonus initiative, temporary hit points +<b>${level - 1 + 4}</b></span><br>
+			<span class="${level < 11 ? "disabled" : ""}">3 Essence: +<b>${conMod + 3}</b> bonus initiative, temporary hit points +<b>${level - 1 + 6}</b></span><br>
+			<span class="${level < 16 ? "disabled" : ""}">4 Essence:  +<b>${conMod + 4}</b> bonus initiative, temporary hit points +<b>${level - 1 + 8}</b></span><br>
+
+		`
+
+	}
+
+	if (element == "elemental-nimbus"){
+		
+		document.getElementById("right").innerHTML = `
+
+			<h3>Elemental Nimbus</h3>
+
+			<b>Air:</b> +${level < 11 ? "2" : "4"} bonus on attack rolls against opponents wearing metal armor, and +${level < 11 ? "1d6" : "3d6"} cold damage.<br>
+			<b>Earth:</b> -<br>
+			<b>Fire:</b> +${level < 11 ? conMod : (conMod * 2)} cold damage.<br>
+			<b>Water:</b> On hit, target rolls Fortitude save (DC ${level < 6 ? (11 + conMod) : level < 10 ? (12 + conMod) : level < 14 ? (13 + conMod) : level < 18 ? (14 + conMod) : (15 + conMod)}). A creature cannot be staggered by this stance more than once per round.<br>
+			&nbsp;&nbsp;<b>Fail:</b> Target is <i>staggered</i> for one round.<br>
+			<hr>
+			<b><i>Staggered</i></b><br>
+			<i>You may take a single move action or standard action each round (but not both, nor can he take full-round actions).<br>
+			You can still take free, swift, and immediate actions.</i><br>
+
+
+
+
+		`
+	}
+
+
+	if (element == "redirecting-flux"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Redirecting Flux</h3>
+			<b>Target</b> Self<br>
+			<b>Trigger</b> You are targeted by a spell, power, spell-like ability, or psi-like ability<br>
+			<br>
+			Make a Spellcraft check (DC 15 + the effect’s caster or manifester level). If you succeed, you can redirect that effect to another target of your choice within the spell’s range. If the effect has multiple targets, you can choose to change all of its targets to other valid targets within range.<br>
+			<br>
+			1 Animus: Gain a +2 bonus on your Spellcraft check<br>
+			2 Animus: Gain a +4 bonus on your Spellcraft check<br>
+			3 Animus: Gain a +6 bonus on your Spellcraft check<br>
+
+		`
+
+	}
+
+	if (element == "decree-of-vengeance"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Decree of Vengeance</h3>
+			<b>Target</b> One creature within ${closeRange}<br>
+			<b>Trigger</b> After an attack to you or an ally has been resolved<br>
+			<br>
+			You and your allies rise in revenge against your assailants. You or another <b>1</b> ally threatening the attacker (or with the attacker within the first range increment of a ready ranged weapon) may perform an attack action to make a single attack or initiate a strike with an initiation action of 1 standard action against that attacker.<br>
+			Your ally may use your <i>Sun’s Gleam</i> ability in place of this attack, using your abilities in place of their own score modifiers if they so wish.<br>
+			<br>
+			You also heal yourself and allies within ${closeRange} for a total number of <b>${conMod * 8}</b> hit points, divided as you choose between you and your allies.<br>
+			<br>
+			1 Essence: <b>${conMod * 8 + 10}</b> hit points, <b>2</b> allies in range attack or strike instead.<br>
+			<span class="${level < 6 ? "disabled" : ""}">2 Essence: <b>${conMod * 8 + 20}</b> hit points, <b>3</b> allies in range attack or strike instead.</span><br>
+			<span class="${level < 11 ? "disabled" : ""}">3 Essence: <b>${conMod * 8 + 30}</b> hit points, <b>4</b> allies in range attack or strike instead.</span><br>
+			<span class="${level < 16 ? "disabled" : ""}">4 Essence: <b>${conMod * 8 + 40}</b> hit points, <b>5</b> allies in range attack or strike instead.</span><br>
+
+
+
+		`
+	}
+
+	if (element == "noblesse-obliege"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Noblesse Obliege</h3>
+			<b><i>Special</i></b> Free action<br>
+			<b>Target</b> One ally (not you) in ${closeRange}<br>
+			<b>Trigger</b> An ally would die or be destroyed<br>
+			<br>
+			Targeted ally’s hit points becomes 1. Then, you may make a melee or ranged attack against an enemy. If it hits, it deals an additional 3d6 points of damage and you also heal the ally subject to this maneuver by an amount equal to the damage dealt by this attack. A creature may only benefit from this maneuver once, and must experience sunrise (or wait 24 hours, whichever comes first) before they can gain its benefit again.<br>
+			<br>
+			1 Essence: The ally is also healed for 7 hit points.<br>
+			<span class="${level < 6 ? "disabled" : ""}">2 Essence: The ally is also healed for 14 hit points.</span><br>
+			<span class="${level < 11 ? "disabled" : ""}">3 Essence: The ally is also healed for 21 hit points.</span><br>
+			<span class="${level < 16 ? "disabled" : ""}">4 Essence: The ally is also healed for 28 hit points.</span><br>
+
+
+		`
+	}
+
+	if (element == "spoils-of-war"){
+		
+		document.getElementById("right").innerHTML = `
+
+			<h3>Spoils of War</h3>
+			Allies within ${closeRange} heal <b>${level < 6 ? 3 : level < 11 ? (conMod + 3) : ((conMod * 2) + 3)}</b> hit points whenever they hit with an attack. This effect can only trigger once per round per ally.<br>
+			<br>
+			1 Essence: <b>${level < 6 ? 3 + 1 : level < 11 ? conMod + 3 + 2 : conMod * 2 + 3 + 3}</b> hit points.<br>
+			<span class="${level < 6 ? "disabled" : ""}">2 Essence: <b>${level < 6 ? 3 + 2 : level < 11 ? conMod + 3 + 4 : conMod * 2 + 3 + 6}</b> hit points.</span><br>
+			<span class="${level < 11 ? "disabled" : ""}">3 Essence: <b>${level < 6 ? 3 + 3 : level < 11 ? conMod + 3 + 6 : conMod * 2 + 3 + 9}</b> hit points.</span><br>
+			<span class="${level < 16 ? "disabled" : ""}">4 Essence: <b>${level < 6 ? 3 + 4 : level < 11 ? conMod + 3 + 8 : conMod * 2 + 3 + 12}</b> hit points.</span><br>
+
+		`
+	}
+
+	if (element == "elemental-flux"){
+		
+		document.getElementById("right").innerHTML = `
+
+			<h3>Elemental Flux</h3>
+			<b>Always:</b> +2d6 cold damage, 15 cold resistance.<br>
+			<br>
+			<b>Air:</b> +4 initiative, +4 AC (dodge).<br>
+			<b>Earth:</b> DR 5/Adamantine<br>
+			<b>Fire:</b> Fast healing 1. You glow like a torch as if under the effect of a light spell.<br>
+			<b>Water:</b> +2 bonus on all saving throws.
+
+		`
+	}
+
+	if (element == "enter-the-vortex"){
+			
+			document.getElementById("right").innerHTML = `
+
+				<h3>Enter the Vortex</h3>
+				Riding on the currents of elemental energy, you gain the benefit of a new form of movement. While you maintain this stance, you gain the ability to throw blasts of elemental energy as if using a ranged weapon. These blasts are considered to be part of the thrown weapon group, have a range increment of 30 feet, and deal double damage on a critical hit. Attacks made with these blasts are ranged touch attacks that deal 4d6 <b><i>cold</i></b> damage. In addition, you gain one of the following effects, based on your active element:<br>
+					<br>
+					<b>Air:</b> You gain a fly speed equal to your base land speed, with good maneuverability.<br>
+					<b>Earth:</b> You gain a burrow speed equal to your base land speed, and you gain tremorsense with a range of 30 feet. In addition, you can breath freely while underground.<br>
+					<b>Fire:</b> You gain a +4 circumstance bonus on initiative checks and your base land speed increases by 30 feet.<br>
+					<b>Water:</b> You gain a swim speed equal to twice your base land speed, and you also gain the aquatic and amphibious subtypes.<br>
+
+
+			`
+
+	}
+
+	if (element == "battle-against-the-sun"){
+
+			document.getElementById("right").innerHTML = `
+
+				<h3>Battle Against the Sun</h3>
+				While you maintain this stance, you shed bright light, as if by a daylight spell, out to ${closeRange}<br>
+				<br>
+				Once per round, as a free action that can be taken at any time (including when it is not your turn), you may create a line with a length of 20 feet that originates anywhere within this light. Unlike normal line attacks, this line attack does not need to fire away from you; it may travel in any direction so long as the origin point is within your daylight range. Enemies within the area take <b>${level - 1}</b> damage. A successful DC <b>${16 + conMod}</b> Reflex save halves this damage. Allies caught within the line are instead healed for <b>${level - 1}</b> hit points.<br>
+				<br>
+				1 Essence: Affect 1 target adjacent to the line, Reflex DC <b>${16 + conMod + 1}</b>.<br>
+				<span class="${level < 6 ? "disabled" : ""}">2 Essence: Affect 2 targets adjacent to the line, Reflex DC <b>${16 + conMod + 2}</b>.</span><br>
+				<span class="${level < 11 ? "disabled" : ""}">3 Essence: Affect 3 targets adjacent to the line, Reflex DC <b>${16 + conMod + 3}</b>.</span><br>
+				<span class="${level < 16 ? "disabled" : ""}">4 Essence: Affect 4 targets adjacent to the line, Reflex DC <b>${16 + conMod + 4}</b>.</span><br>
+			`
+
+	}
+
+	if (element == "shroud-of-water"){
+		
+		document.getElementById("right").innerHTML = `
+
+			<h3>Shroud of Water</h3>
+			<b>Burn 0</b> +${level < 7 ? "4" : level < 11 ? "5" : level < 20 ? "6" : "7"} Armor bonus OR +${level < 7 ? "2" : level < 11 ? "3" : level < 20 ? "4" : "5"} Shield bonus<br>
+			<b>Burn 1</b> +${level < 7 ? "5" : level < 11 ? "6" : level < 20 ? "7" : "8"} Armor bonus OR +${level < 7 ? "3" : level < 11 ? "4" : level < 20 ? "5" : "6"} Shield bonus<br>
+			<span class="${level < 7 ? "disabled" : ""}"><b>Burn 2</b> +${level < 7 ? "6" : level < 11 ? "7" : level < 20 ? "8" : "9"} Armor bonus OR +${level < 7 ? "3" : level < 11 ? "4" : level < 20 ? "6" : "7"} Shield bonus</span><br>
+			<span class="${level < 10 ? "disabled" : ""}"><b>Burn 3</b> +${level < 7 ? "6" : level < 11 ? "7" : level < 20 ? "9" : "10"} Armor bonus OR +${level < 7 ? "3" : level < 11 ? "4" : level < 20 ? "6" : "7"} Shield bonus</span><br>
+			<span class="${level < 18 ? "disabled" : ""}"><b>Burn 4</b> +${level < 7 ? "6" : level < 11 ? "7" : level < 20 ? "9" : "10"} Armor bonus OR +${level < 7 ? "3" : level < 11 ? "4" : level < 20 ? "6" : "7"} Shield bonus</span><br>
+			<br>
+			You surround yourself with a shroud of water, ice, or both that protects you from harm. The shroud can either cover your body, functioning as armor, or float around you and block attacks, functioning as a shield.<br>
+			<button ${shroudOfWaterCoalescenceBonus == 1 ? 'disabled' : 'onclick="this.disabled = true; shroudOfWaterCoalescenceBonus = 1; drawExtraRight()"'}>🔗</button> Whenever you accept Burn while using a Water wild talent (Water Blast, Shroud of Water/Shimmering Mirage), the water coalescing around you allows your shroud to grant both the armor bonus and the shield bonus for 1 round. You can dismiss or restore this effect as an immediate action.<br>
+			<br>
+			Level 11: <span class="standard">Shimmering Mirage</span><br>
+			Burn 1 <button onclick="calculateBurnChanges()">🔥</button><br>
+			Your shroud bends light, creating a shimmering mirage. While your shroud of water is active, attacks against you suffer a 20% miss chance due to concealment until the next time your burn is removed.<br>
+
+		`
+	}
+
+	if (element == "basic-hydrokinesis"){
+		
+		document.getElementById("right").innerHTML = `
+
+			<h3>Basic Hydrokinesis</h3>
+			You can create water as the cantrip <i>Create Water,</i> <i>Purify Water</i> as if using purify food and drink, and dry wet creatures and objects as if using <i>Prestidigitation.</i> While you cannot lift water into the air using this ability, you can create mild currents in a body of water by concentrating. These currents are strong enough to run a water mill as if the mill were being turned manually by a creature with a Strength score equal to your Constitution score.<br>
+			<br>
+
+
+		`
+	}
+
+	if (element == "floating-disk"){
+		
+		document.getElementById("right").innerHTML = `
+
+			<h3>Floating Disk</h3>
+			<i>Spell (V, S, M (A drop of mercury))</i><br>
+			<b>Range</b> 30 ft. <b>Duration</b> ${level < 3 ? "2 hours" : "3 hours"}<br>
+			<b>Spell Resistance</b> No<br>
+			<br>
+			You create a slightly concave, circular plane of force that follows you about and carries loads for you. The disk is 3 feet in diameter and 1 inch deep at its center. It can hold ${level < 3 ? "200" : "300"} pounds of weight. If used to transport a liquid, its capacity is 2 gallons. The disk floats approximately 3 feet above the ground at all times and remains level. It floats along horizontally within spell range and will accompany you at a rate of no more than your normal speed each round. If not otherwise directed, it maintains a constant interval of 5 feet between itself and you. The disk winks out of existence when the spell duration expires. The disk also winks out if you move beyond its range or try to take the disk more than 3 feet away from the surface beneath it. When the disk winks out, whatever it was supporting falls to the surface beneath it.<br>
+			<b>Disk Rider</b> You can ride atop any floating disk you create, so long as it has the capacity to support your weight. This grants you a fly speed of 30 feet (average), but the disk cannot move itself or you more than 5 feet above the ground at any time. If you are on a location within the Astral Plane—including Yulgamot itself—the disk can instead fly to any height, and your fly speed while standing on it increases to 40 feet (good). When you cast floating disk, you can step onto the disk in your space as part of the action required to cast the spell.<br>
+			<b>Spurn Gravity</b> While astride your floating disk, you can fly higher than 5 feet above the ground. However, you must return to a location 5 feet above a stable surface before the end of your turn or fall. If you take damage from this fall, you fall prone atop your floating disk. As a swift action, you can also reduce the remaining duration of your floating disk to 1 round per level. For the remaining duration of the spell, your fly speed increases to 50 feet and your disk ignores all altitude limitations.<br>
+
+
+		`
+	}
+
+	if (element == "bless"){
+		
+		document.getElementById("right").innerHTML = `
+
+			<h3>Bless</h3>
+			<i>Spell (V, S, Divine Focus)</i><br>
+			<b>Range</b> 50 ft. <b>Duration</b> ${level < 3 ? "2 minutes" : "3 minutes"}<br>
+			<b>Spell Resistance</b> Yes (Harmless)<br>
+			<br>
+			<i>Bless</i> fills your allies with courage. Each ally gains a +1 <i>morale</i> bonus on attack rolls and on saving throws against fear effects.<br>
+			<i>Bless</i> counters and dispels <i>Bane.</i><br>
+
+
+		`
+	}
+
+	if (element == "burst-of-adrenaline"){
+		
+		document.getElementById("right").innerHTML = `
+
+			<h3>Burst of Adrenaline</h3>
+			<i>Spell (V, S)</i><br>
+			<b>Range</b> Personal <b>Duration</b> Instantaneous<br>
+			<b>Spell Resistance</b> No<br>
+			<br>
+			You draw upon your body’s inner reserves of strength, leaving you winded. When you are about to make a d20 roll based on Strength, Dexterity, or Constitution, you can cast this spell to gain a +8 enhancement bonus to Strength, Dexterity, or Constitution for that roll, but you are fatigued for 1 round afterward.<br>
+			<hr>
+			<i>Fatigued: A fatigued character can neither run nor charge and takes a –2 penalty to Strength and Dexterity. Doing anything that would normally cause fatigue causes the fatigued character to become exhausted. After 8 hours of complete rest, fatigued characters are no longer fatigued.
+
+</i>
+
+
+		`
+	}
+
+	if (element == "kinetic-cover"){
+		
+		document.getElementById("right").innerHTML = `
+
+			<h3>Kinetic Cover</h3>
+			<b>Hardness</b> 0 <b>Cover HP</b> ${2 * level} <b>Max amount in existence</b> ${level < 4 ? Math.floor(4 + level / 2) : Math.floor(5 - 0.5 + level / 2)}<br>
+			<br>
+			You call up elemental matter to defend yourself and your allies from attacks. As a standard action, you can select one face of a square within 30 feet of you and move elemental matter to block that face, providing total cover from that direction. The face you select must be supported by the ground, and the kinetic cover cannot support more than 5 pounds of weight. Water and ice are translucent. A creature who strikes the cover can easily destroy it.
+
+		`
+	}
+
+	if (element == "kinetic-blade"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Kinetic Blade</h3>
+			<b>Associated Blasts</b> any <b>Saving throw</b> none<br>
+			<br>
+			Create a non-reach, light or one-handed weapon in your hand formed of pure energy or elemental matter. The kinetic blade’s shape is purely cosmetic.<br>
+			<br>
+			You can use this form infusion once as part of an attack action, a charge action, or a full-attack action in order to make melee attacks with your kinetic blade. This doesn’t provoke any additional attacks of opportunity. The kinetic blade deals your kinetic blast damage on each hit. The blade disappears at the end of your turn. The weapon deals the same damage type that your kinetic blast deals, and it interacts with Armor Class and spell resistance as normal for a blast of its type. The kinetic blade doesn’t add the damage bonus from elemental overflow.
+
+			<div class="attack">${calculateBlastDamage()}</div>
+
+		`
+
+	}
+
+	if (element == "maneuver-initiatied"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Maneuver Initiated</h3>
+			You can use Kinetic Blade as part of initiating martial maneuvers that use weapons (including counters that require him to make an attack roll). If you do, reduce its burn cost by 1.<br>
+			<br>
+			If you initiates a maneuver that allows or requires ranged attacks, you can use your kinetic blade to make such attacks as a thrown weapon with a range increment of 30 feet.
+
+			<div class="attack">${calculateBlastDamage()}</div>
+
+		`
+
+	}
+
+	if (element == "extended-range"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Extended Range</h3>
+			<b>Associated Blasts</b> any <b>Saving throw</b> none<br>
+			<br>
+			<div class="attack">Your kinetic blast can strike any target within 120 feet.</div>
+
+		`
+
+	}
+
+
+	if (element == "pushing-infusion"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Pushing Infusion <button onclick="calculateBurnChanges()">+🔥</button></h3>
+			<b>Associated Blasts</b> water <b>Saving throw</b> none<br>
+			<br>
+			<div class="attack">${calculateBlastDamage("water")}</div>
+			On damage:<br>
+			<b>Bull Rush <i>(Special)</i></b><br>
+			<i>This triggers an Attack of Opportunity!</i><br>
+			d20 + BAB + <b>${conMod}</b> vs CMD<br>
+			&nbsp;&nbsp;<b>Success (Burn 1):</b> Push the target back 5 feet.<br>
+			<span class="${level < 7 ? "disabled" : ""}">&nbsp;&nbsp;<b>Success (Burn 2):</b> Push the target back 10 feet.</span><br>
+			<span class="${level < 10 ? "disabled" : ""}">&nbsp;&nbsp;<b>Success (Burn 3):</b> Push the target back 15 feet.</span><br>
+			<span class="${level < 18 ? "disabled" : ""}">&nbsp;&nbsp;<b>Success (Burn 4):</b> Push the target back 20 feet.</span><br>
+			
+
+		`
+
+	}
+
+	if (element == "entangling-infusion"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Entangling Infusion</h3>
+			<b>Associated Blasts</b> cold, ice <b>Saving throw</b> Reflex DC ${level < 13 ? 10 + Math.floor((level - 1)/2) + conMod : level < 19 ? 10 + 6 + conMod : 10 + 7 + conMod} negates<br>
+			<br>
+			Your kinetic blast surrounds your foes in elemental matter. Whenever a blast with this infusion deals damage to a foe, that foe becomes <i>entangled</i> for 1 minute. The foe can remove this condition as a <i>standard action</i> with a successful Escape Artist or Strength check (DC&nbsp;${level < 13 ? 10 + Math.floor((level - 1)/2) + conMod : level < 19 ? 10 + 6 + conMod : 10 + 7 + conMod}) or by dealing <b>${level * 2}</b> damage to the entangling matter (the matter has hardness 0). If the foe was already entangled by this infusion and fails its save against a second instance of this infusion, the increased amount of elemental matter fuses to the ground, causing the foe to be rooted in place as though anchored to an immobile object.
+
+			<div class="attack">${calculateBlastDamage()}</div>
+
+			<i><b>Entangled</b></i><br>
+			<i>You move at half speed, you cannot run or charge,<br>
+			-2 penalty on melee attack rolls<br>
+			-4 penalty to ranged/finesse attack rolls<br>
+			-2 penalty to AC, -2 Reflex saves<br>
+			When you attempt to cast a spell, you must make a concentration check (DC 15 + spell level) or lose the spell.</i>
+
+		`
+
+	}
+
+	if (element == "fight-fire-with-fire"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Fight Fire With Fire</h3>
+			<br>
+			2 Animus: Reduce Burn taken by 1.<br>
+			<span class="${level < 7 ? 'disabled' : ''}">4 Animus: Reduce Burn taken by 2.</span><br>
+			<span class="${level < 10 ? 'disabled' : ''}">6 Animus: Reduce Burn taken by 3.</span><br>
+			<span class="${level < 18 ? 'disabled' : ''}">8 Animus: Reduce Burn taken by 4.</span><br>
+			<br>
+			You can only use this if you have at most <b>Burn ${level < 7 ? 1 : level < 10 ? 2 : level < 18 ? 3 : 4}</b> before using this.
+
+		`
+
+	}
+
+	if (element == "infusion-specialization"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Infusion Specialization</h3>
+			<b>Passive</b><br>
+			Level 6: Whenever a kineticist uses one or more infusions with a blast, she reduces the combined burn cost of the infusions by 1. This can’t reduce the total cost of the infusions used below 0.<br>
+			Level 9: By 2.<br>
+			Level 12: By 3.<br>
+			Level 20: By 4.<br>
+
+			<div class="attack">${calculateBlastDamage()}</div>
+
+		`
+
+	}
+
+
+	if (element == "piercing-spell"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Piercing Spell</h3>
+			Benefit: When you cast a piercing spell against a target with spell resistance, it treats the spell resistance of the target as 5 lower than its actual SR.
+
+			<div class="attack">${calculateBlastDamage()}</div>
+
+		`
+
+	}
+
+	if (element == "empower-spell"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Empower Spell</h3>
+			Benefit: All variable, numeric effects of an empowered spell are increased by half including bonuses to those dice rolls. Saving throws and opposed rolls are not affected, nor are spells without random variables.
+
+			<div class="attack">${calculateBlastDamage()}</div>
+
+		`
+
+	}
+
+
+	if (element == "maximize-spell"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Maximize Spell</h3>
+			Benefit: All variable, numeric effects of a spell modified by this feat are maximized. Saving throws and opposed rolls are not affected, nor are spells without random variables.
+
+			<div class="attack">${calculateBlastDamage()}</div>
+
+		`
+
+	}
+
+	if (element == "gather-power"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Gather Power</h3>
+			<b>Move action</b><br>
+			<br>
+			If you have both hands free, a kineticist can gather energy or elemental matter as a move action. Gathering power creates an extremely loud, visible display in a 20-foot radius centered on the kineticist, as the energy or matter swirls around you.<br>
+			<hr>
+			Gather power as a <i>move action</i>: reduce the total burn cost of a blast wild talent you use in the same round by 1 point.<br>
+			<hr>
+			Gather power as <i>one full round</i>: reduce the total burn cost of a blast wild talent used on your next turn by 2 points (to a minimum of 0 points). When you do, you can also gather power as a <i>move action</i> during your next turn to reduce the burn cost by a total of 3 points.<br>
+			<hr>
+			If you take damage during or after gathering power and before using the kinetic blast that releases it, roll a concentration check (d20 + ${level == 1 ? level : level < 13 ? level - 1 : level < 18 ? 12 : level < 19 ? 13 : level < 20 ? 14 : 15} vs DC&nbsp;${level < 13 ? 10 + Math.floor((level - 1)/2) : level < 19 ? 10 + 6 : 10 + 7} + damage taken) or lose the energy in a wild surge that and accept a number of points of burn equal to the number of points by which you gathered power would have reduced the burn cost.<br>
+			<hr>
+			This ability can never reduce the burn cost of a wild talent below 0 points.
+
+
+		`
+
+	}
+
+	if (element == "gather-might"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Gather Might</h3>
+			<b>Move action</b><br>
+			<hr>
+			Gather Might as a <i>move action</i>: Gain <b>+${level < 12 ? 2 : 4}</b> <i>alchemical</i> bonus to your Strength, Dexterity and Constitution scores until the end of this turn.<br>
+			<hr>
+			Gather Might as a <i>full-round action</i>: Gain <b>+${level < 12 ? 4 : 6}</b> <i>alchemical</i> bonus to your Strength, Dexterity and Constitution scores until the end of your next turn.<br> 
+
+
+
+		`
+
+	}
+
+	if (element == "animus-healing"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Animus Healing</h3>
+			<b>Move action</b><br>
+			<b><i>Special</i></b> Once per encounter<br>
+			<br>
+			1 Animus: heal yourself 2d6.<br>
+			2 Animus: heal yourself 4d6.<br>
+			3 Animus: heal yourself 6d6.<br>
+			<span class="${level < 12 ? "disabled" : ""}">4 Animus: heal yourself 8d6.</span><br>
+			<span class="${level < 16 ? "disabled" : ""}">5 Animus: heal yourself 10d6.</span><br>
+			<span class="${level < 20 ? "disabled" : ""}">6 Animus: heal yourself 12d6.</span><br>
+
+		`
+
+	}
+
+
+	if (element == "elemental-blast"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Elemental Blast</h3>
+			<b>Requires</b> a free hand <b>Range</b> 30 feet<br>
+			<br>
+			<div class="attack">
+				Elemental blasts trigger an attack of opportunity on cast.<br>
+				Elemental blasts trigger another attack of opportunity on attack.<br>
+				<hr>
+				Enemy partial cover: enemy +2 AC, +1 Reflex<br>
+				-4 attack when ally is in melee with target<br>
+				<hr>
+				Kinetic Blade is the exception: these blasts do not trigger an attack of opportunity.<br>
+			</div>
+
+		`
+
+	}
+
+	if (element == "frost"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Cold Blast</h3>
+			<div class="attack">${calculateBlastDamage("frost")}</div>
+
+		`
+
+	}
+
+	if (element == "water"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Water Blast</h3>
+			<div class="attack">${calculateBlastDamage("water")}</div>
+
+		`
+
+	}
+
+	if (element == "ice"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Ice Blast</h3>
+			<div class="attack">${calculateBlastDamage("ice")}</div>
+
+
+
+		`
+
+	}
+
+
+	if (element == "metamorphosis"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Metamorphosis</h3>
+			By meditating for 1 hour, you can trigger a slow, physical metamorphosis that takes 24 hours to complete (during which you do not gain the benefits of this new form).<br>
+			This ability cannot change your type or subtype, grant new abilities or natural weapons, or change your size category, but otherwise allows you to transform your appearance into anything possible for creatures of your type and subtype.<br>
+			You gain a <b>+1</b> <i>enhancement</i> bonus to one physical ability score of your choice (Strength, Dexterity, or Constitution) while in this altered form. Your shape and ability score bonus persist until you assume a new form or your current altered form ends.
+
+
+
+		`
+
+	}
+
+
+	if (element == "glyphs"){
+
+		if (elementalFluxActiveElement == "air-flux"){
+			var glyphElementalFluxResist = "electricity"
+		} else if (elementalFluxActiveElement == "earth-flux"){
+			var glyphElementalFluxResist = "acid"
+		} else if (elementalFluxActiveElement == "fire-flux"){
+			var glyphElementalFluxResist = "fire"
+		} else if (elementalFluxActiveElement == "water-flux"){
+			var glyphElementalFluxResist = "cold"
+		}
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Glyphs</h3>
+			<b>Cost</b> 1 Animus <b>Target</b> One ally<br>
+			<b>= Debuffs =</b><br>
+			<span class="${level < 17 ? "disabled" : ""}"><b>Dispelling Burn</b> - Dispel Magic, +1d4 dmg per spell level dispelled</span><br>
+			<span class="${level < 17 ? "disabled" : ""}"><b>Wraithstrike</b> - Enemy Will DC or 1d3 temp negative levels (-1 per negative level to basically all d20 rolls) until end of encounter</span><br>
+			<span class="${level < 17 ? "disabled" : ""}"><b>Drowning Curse</b> - Enemy Fort DC or <i>nauseated</i>, start of their turn another Fort save, success: take that round normally</span><br>
+			<br>
+			<b>= Offensive buffs =</b><br>
+			<span class="${level < 15 ? "disabled" : ""}"><b>Corpse Strength</b> - +4 STR, +2 saves vs negative energy/negative levels/ability damage/ability drain; heal from negative damage and take damage from cure spells as if undead</span><br>
+			<b>Elemental Weapon</b> - ${level < 19 ? "+2d6" : "+3d6"} ${glyphElementalFluxResist} damage on attack<br>
+			<span class="${level < 14 ? "disabled" : level < 15 ? "" : "disabled"}"><b>Dead Steel</b> - ${level < 19 ? "+2d6" : "+3d6"} negative energy damage on attack | ${level < 19 ? "+2d8" : "+3d8"} to Fey | no damage or heal undead</span><br>
+			<span class="${level < 14 ? "disabled" : ""}"><b>Ghost Eating Blade</b> - Weapon gains Ghost Touch property</span><br>
+			<b>Flowing Blade</b> - Advantage on miss chance (entropic shield, blink, concealment)<br>
+			<span class="${level < 15 ? "disabled" : ""}"><b>Wind Speed</b> - Gains Haste</span><br>
+			<span class="${level < 15 ? "disabled" : ""}"><b>Spirit Stride</b> - Free action teleport ${level < 15 ? "30 ft." : level < 17 ? "35 ft." : level < 19 ? "40 ft." : "45 ft."} once, no line of effect needed</span><br>
+			<br>
+			<b>= Defensive buffs =</b><br>
+			<span class="${level < 16 ? "" : "disabled"}"><b>Elemental Shield</b> - Gain ${level - 1} ${glyphElementalFluxResist} resist</span><br>
+			<span class="${level < 14 ? "disabled" : ""}"><b>Deflective Armor</b> - Natural armor ${level < 19 ? "+4" : "+5"}</span><br>
+			<b>Evasive Armor</b> - Gains Evasion: next time no damage on Reflex success<br>
+			<b>Shadowmeld</b> - Gains +20% concealment against opponents<br>
+			<span class="${level < 16 ? "disabled" : ""}"><b>Elemental Armor</b> - When melee attacked: 2d6 ${glyphElementalFluxResist} damage to attacker</span><br>
+			<span class="${level < 16 ? "disabled" : ""}"><b>Hardened Armor</b> - DR 5/Adamantine</span><br>
+			<span class="${level < 15 ? "disabled" : ""}"><b>Illusionary State</b> - Gains Mirror Image (1d4 + ${level < 16 ? "4" : level < 19 ? "5" : "6"}) images, up to 8 total</span><br>
+			<span class="${level < 17 ? "disabled" : ""}"><b>Incandescent Array</b> - Emits light as if Daylight spell. Attacks on ally have 50% miss chance</span><br>
+			<span class="${level < 16 ? "disabled" : ""}"><b>Death Shield</b> - +${level - 1} negative energy resist</span><br>
+			<span class="${level < 16 ? "disabled" : level < 17 ? "" : "disabled"}"><b>Spiritual Anchor</b> - </span>
+
+
+		`
+
+	}
+
+	if (element == "chain-shirt"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Chain Shirt (item)</h3>
+			<b>Price</b> 100 gp <b>Weight</b> 25 lbs.<br>
+			<b>Armor Bonus</b> +4 <b>Max Dex Bonus</b> +4 <b>Armor Check Penalty</b> -2<br>
+			<b>Arcane Spell Failure Chance</b> 20% <b>Speed</b> 30 ft./20 ft.
+			<br>
+			Covering the torso, this shirt is made up of thousands of interlocking metal rings.
+
+
+		`
+
+	}
+
+	if (element == "wand-of-cure-light-wounds"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Wand (item) of Cure Light Wounds (spell)</h3>
+			<b>Price</b> 750 gp <b>Weight</b> —<br>
+			<b>Charges</b> 50/50<br>
+			<br>
+			A wand is a thin baton that contains a single spell of 4th level or lower. A wand has 50 charges when created—each charge allows the use of the wand’s spell one time. A wand that runs out of charges is just a stick.<br>
+			<b>Activation</b> Spell trigger (Use Magic Device DC 20 if not on your class spell list, auto-success if it is. Fail does not expend charge. Standard action, doesn't trigger attack of opportunity)
+			<div class="attack">
+			<b>Cure Light Wounds</b><br>
+			<b>Range</b> Touch<br>
+			<b>Target</b> Creature touched<br>
+			<b>Saving Throw</b> Will half (harmless)<br>
+			<b>Spell Resistance</b> Yes (harmless) (see text)
+			<br>
+			When laying your hand upon a living creature, you channel positive energy that cures 1d8 + 1 points of damage.<br>
+			Since undead are powered by negative energy, this spell deals damage to them instead of curing their wounds. An undead creature can apply spell resistance, and can attempt a Will save to take half damage.
+			</div>
+
+
+		`
+
+	}
+
+	if (element == "wooden-holy-symbol"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Wooden Holy Symbol (item)</h3>
+			<b>Price</b> 1 gp <b>Weight</b> —<br>
+			<br>
+			A holy symbol focuses positive energy and is used by good clerics and paladins (or by neutral clerics who want to cast good spells or channel positive energy). Each religion has its own holy symbol. The material used to make the holy symbol has no effect on its powers, though a religion may place special significance on a particular material.<br>
+			<br>
+			<i>Used as component for Bless.</i><br>
+
+		`
+
+	}
+
+
+	if (element == "spell-component-pouch"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Spell Component Pouch (item)</h3>
+			<b>Price</b> 5 gp <b>Weight</b> 2 lbs.<br>
+			<b>Category</b> Tools<br>
+			<br>
+			A spellcaster with a spell component pouch is assumed to have all the material components and focuses needed for spellcasting, except for components that have a specific cost, divine focuses, and focuses that wouldn’t fit in a pouch. Most spell component pouches are waterproof and can be strung onto a belt or bandolier.<br>
+			<br>
+			<i>Contains mercury, used as component for Floating Disk.</b><br>
+
+
+		`
+
+	}
+
+	if (element == "belt-pouch"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Belt Pouch (item)</h3>
+			<b>Price</b> 1 gp <b>Weight</b> 1/2 lbs.<br>
+			<b>Category</b> Adventuring Gear<br>
+			A typical leather or cloth belt pouch has a leather cord to cinch it shut and another to tie it to your belt. It is large enough to hold 100–200 coins or two apples.<br>
+
+
+		`
+
+	}
+
+	if (element == "trail-rations"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Trail Rations (item)</h3>
+			<b>Price</b> 5 sp <b>Weight</b> 1 lbs.<br>
+			<b>Category</b> Food/Drink<br>
+			The listed price is for a day’s worth of food. This bland food is usually some kind of hard tack, jerky, and dried fruit, though the contents vary from region to region and the race of those creating it. As long as it stays dry, it can go for months without spoiling.<br>
+
+
+		`
+
+	}
+
+	if (element == "waterskin"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Waterskin (item)</h3>
+			<b>Price</b> 1 gp <b>Weight</b> 4 lbs.<br>
+			<b>Category</b> Adventuring Gear<br>
+			This bag is made of an animal bladder or treated leather. It is watertight and holds about 1/2 gallon of liquid. The listed weight is for a waterskin full of water; empty, it weighs about 2 pounds.<br>
+
+
+		`
+
+	}
+
+	if (element == "land-limbs"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Land Limbs (item)</h3>
+			<b>Price</b> 10 gp <b>Weight</b> 4 lbs.<br>
+			<b>Category</b> Adventuring Gear<br>
+			<br>
+			These two sturdy walking staves are topped with padded cradles that fit under the arm. Aquatic creatures with slow land speeds, such as merfolk or tritons, use land limbs to improve their locomotion while out of the water. Using land limbs increases your base land speed by 15 feet (to a maximum of 20 feet) and requires two free hands. You can remain stationary and balance your weight on land limbs to use your hands normally (such as to draw and hurl a javelin or to open a door), but you cannot move with the land limbs again without freeing your hands.<br>
+			<br>
+			If your race provides immunity to trip attacks, you lose this immunity while moving with or balancing on land limbs.
+
+
+		`
+
+	}
+
+	if (element == "travelers-outfit"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Traveler's Outfit (item)</h3>
+			<b>Price</b> 1 gp <b>Weight</b> 5 lbs.<br>
+			<b>Category</b> Clothing<br>
+			<br>
+			This set of clothes consists of boots, a wool skirt, a sturdy belt, a shirt with a jacket, and an ample cloak with a hood.
+
+		`
+
+	}
+
+	if (element == "bandolier"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Bandolier (item)</h3>
+			<b>Price</b> 5 sp <b>Weight</b> —<br>
+			<b>Category</b> Clothing<br>
+			<br>
+			This leather belt is worn over one shoulder and runs diagonally across the chest and back. It has small loops or pouches for holding eight objects the size of a flask or small dagger. You can use the “retrieve a stored item” action to take an item from a bandolier. You can wear up to two bandoliers at the same time (any more than this and they get in each other’s way and restrict your movement).<br>
+
+		`
+
+	}
+
+	if (element == "acrobatics"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Acrobatics (skill, armor check penalty)</h3>
+			<b>Action</b> None, always part as another action or reaction to a situation<br>
+			<br>
+			<b>Cross narrow surfaces / uneven ground</b><br>
+			<br>
+			<b>Move through threatened squares</b><br>
+			You can move through a threatened square without provoking an attack of opportunity from an enemy by using Acrobatics. When moving in this way, you move at half speed. You can move at full speed by increasing the DC of the check by 10.<br>
+			You cannot use Acrobatics to move past foes if your speed is reduced due to carrying a medium or heavy load or wearing medium or heavy armor. If an ability allows you to move at full speed under such conditions, you can use Acrobatics to move past foes. You can use Acrobatics in this way while prone, but doing so requires a full-round action to move 5 feet, and the DC is increased by 5. If you attempt to move through an enemy’s space and fail the check, you lose the move action and provoke an attack of opportunity.<br>
+			<br>
+			<b>Jumping and falling</b><br>
+			<br>
+			<span class="${level < 3 ? 'disabled' : ''}"><b>Fighting Defensively</b><br>
+			Requires 3 ranks in Acrobatics. Gain -4 attack and +3 AC until the start of your next turn. (Normal: +2 AC)</span><br>
+
+
+		`
+
+	}
+
+	if (element == "appraise"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Appraise (skill)</h3>
+			<b>Action</b> Standard action<br>
+			<br>
+			A DC 20 Appraise check determines the value of a common item. If you succeed by 5 or more, you also determine if the item has magic properties, although this success does not grant knowledge of the magic item’s abilities. If you fail the check by less than 5, you determine the price of that item to within 20% of its actual value. If you fail this check by 5 or more, the price is wildly inaccurate, subject to GM discretion. Particularly rare or exotic items might increase the DC of this check by 5 or more.<br>
+			<br>
+			You can also use this check to determine the most valuable item visible in a treasure hoard. The DC of this check is generally 20 but can increase to as high as 30 for a particularly large hoard.<br>
+			<br>
+			<b>Action</b> Appraising an item takes 1 standard action. Determining the most valuable object in a treasure hoard takes 1 full-round action.<br>
+			<br>
+			<b>Retry?</b> Additional attempts to Appraise an item reveal the same result.<br>
+
+		`
+
+	}
+
+	if (element == "bluff"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Bluff (skill)</h3>
+			<b>Feinting in Combat</b><br>
+			<b>Action</b> Standard action<br>
+			<b>DC</b> 10 + opponent's BAB + opponent's Wisdom modifier; or DC 10 + opponent's Sense Motive, if higher<br>
+			Your next attack against it before end of your next turn hits on Flat-Footed AC <i>(enemy does not count as being flat-footed)</i><br>
+			<hr>
+			<b>Convey Secret Message</b><br>
+			Twice as long as a normal message<br>
+			<br>
+			<b>Deceive or Lie</b><br>
+			<br>
+			<br>
+			<b>Feign Harmlessness</b><br>
+			Full-round action or longer<br>
+			<br>
+			<b>Perform Inconspicious Action</b><br>
+			Twice a long as normal, standard action becomes full-round<br>
+			<br>
+			<b>Suggest Course of Action</b><br>
+			1 minute or more<br>
+			<br>
+
+		`
+
+	}
+
+	if (element == "climb"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Climb (skill) (Armor Check Penalty)</h3>
+			Move action<br>
+			<br>
+			<b>Accelerated Climbing</b><br>
+			<br>
+			<b>Make Your Own Handholds and Footholds</b><br>
+			<br>
+			<b>Catch Yourself When Falling</b><br>
+			<br>
+			<b>Catch a Falling Character While Climbing</b><br>
+			<br>
+			<b>Modifiers</b><br>
+			Rope: Double maximum load<br>
+
+		`
+
+	}
+
+	if (element == "craft"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Craf (skill)</h3>
+			<b>Practice a Trade</b><br>
+			<br>
+			<br>
+			<b>Make Something</b><br>
+			By the day or week<br>
+			<br>
+			<b>Create Masterwork Item</b><br>
+			By the day or week<br>
+			<br>
+			<b>Repair Item</b><br>
+			By the day or week<br>
+			<br>
+
+		`
+
+	}
+
+	if (element == "diplomacy"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Diplomacy (skill)</h3>
+			<b>Gather Information</b><br>
+			1d4 hours of work<br>
+			<br>
+			<b>Influence Attitude</b><br>
+			1 minute<br>
+			<br>
+			<b>Make Request</b><br>
+			1 or more rounds<br>
+			<br>
+			<b>Suggest Course of Action</b><br>
+			1 minute<br>
+			<br>
+
+		`
+
+	}
+
+	if (element == "disable-device"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Disable Device (skill) (Armor Check Penalty)</h3>
+			— Trained only —<br>
+			<b>Action</b> Full-round action (simple device) or 1d4-2d4 rounds (complex device)<br>
+			<br>
+			<b>Disable Trap or Device</b><br>
+			Secret check<br>
+			<br>
+			<b>Sabotage Mechanical Item</b><br>
+			<br>
+			<b>Open a Lock</b><br>
+			Full-round action<br>
+			<br>
+
+		`
+
+	}
+
+	if (element == "disguise"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Disguise (skill)</h3>
+			<b>Action</b> 1d3 x 10 minutes<br>
+			<br>
+
+		`
+
+	}
+
+	if (element == "escape-artist"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Escape: Artist (skill) (Armor Check Penalty)</h3>
+			<b>Escape Ropes</b><br>
+			1 minute<br>
+			<br>
+			<b>Escape: Manacles</b><br>
+			1 minute<br>
+			<br>
+			<b>Escape: Net, Animated Rope, Commanded Plants, Controlled Plants, Entangle</b><br>
+			Full-round action<br>
+			<br>
+			<b>Escape: Grapple</b><br>
+			In place of Combat Maneuver check<br>
+			 • to escape a grapple<br>
+			 • to change being pinned to being grappled<br>
+			<br>
+			<b>Move Through Tight Space</b><br>
+			1 minute or longer<br>
+			<br>
+
+		`
+
+	}
+
+	if (element == "fly"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Fly (skill) (Armor Check Penalty)</h3>
+			<b>Action</b> None, always part as another action or reaction to a situation<br>
+			<b>Modifiers</b> Average maneuverability +0 Fly; Good maneuverability +4 Fly<br>
+			<br>
+			Make a check only when attempting a complex maneuver.<br>
+			<b>Without making a check</b> you must move greater than half your speed, and turn or rise up to 45 degrees by sacrificing 5 feet of movement. You can descent at any angle.<br>
+			Between turns, you can change direction than you did the previous turn.<br>
+			You are not considered flat-footed while flying.<br>
+			<br>
+			<b>Move at less than half speed and remain flying</b> Fly DC 10<br>
+			<b>Hover</b> Fly DC 15<br>
+			<b>Turn greater than 45 degrees by spending 5 feet of movement</b> Fly DC 15<br>
+			<b>Turn 180 degrees by spending 10 feet of movement</b> Fly DC 20<br>
+			<b>Fly up at a greater angle than 45 degrees</b> Fly DC 20<br>
+			<br>
+			<b>Negate Falling Damage</b><br>
+			If you are falling and have the ability to fly, you can make a DC 10 Fly check to negate the damage. You cannot make this check if you are falling due to a failed Fly check or a collision.<br>
+			<br>
+			<b>Modifiers: High Wind Speeds</b><br>
+			Strong wind force (21-30 mph): -2 Fly<br>
+			Severe wind force (31-50 mph): -4 Fly<br>
+			Windstorm (51-74 mph): DC 20 to move at all; -8 Fly<br>
+			Hurricane (75-174 mph): DC 20 to move at all; DC 25 to not be blown away; -12 Fly; Tornado (175+ mph): As above, -16 Fly<br>
+
+		`
+
+	}
+
+	if (element == "handle-animal"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Handle Animal (skill)</h3>
+			— Trained only —
+
+		`
+
+	}
+
+	if (element == "heal"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Heal (skill)</h3>
+			<b>Modifiers</b> Healer's Kit: +2 Heal<br>
+			<br>
+			<b>Provide First Aid</b><br>
+			<b>Action</b> Standard action <b>Retry?</b> Yes<br>
+			<b>Heal</b> DC 15 <b>Attack of Opportunity</b> yes<br>
+			Character has negative hit points and losing hit points: make them stable<br>
+			<br>
+			<b>Provide Long-Term Care</b><br>
+			<b>Action</b> 8 hours, supplies (bandages, salves, etc.)<br>
+			<b>Heal</b> DC 20<br>
+			Up to 6 targets (not you) recover hit points or ability damage at twice normal rate.<br>
+			 • <b>Full 8-hour rest</b> 2 hit points per level or 2 ability score points<br>
+			 • <b>Full day of complete rest</b> 4 ability score points<br>
+			<br>
+			<b>Treat Deadly Wounds</b><br>
+			<b>Action</b> 1 hour, 2 uses of healer's kit; -2 penalty for each use you lack<br>
+			<br>
+			Target creature restores 1 hit point per creature's level.<br>
+			Success by 5 or more: Also add your Wisdom modifier.<br>
+			<br>
+			<b>Treat Disease</b><br>
+			10 minutes<br>
+			<br>
+			<b>Treat Poison</b><br>
+			Standard action<br>
+			<br>
+			<b>Treat Wounds from Caltrops, Spike Growth, Spike Stones</b><br>
+			10 minutes<br>
+			<br>
+
+		`
+
+	}
+
+	if (element == "intimidate"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Intimidate (skill)</h3>
+			<b>Modifiers</b> +4 bonus if larger than opponent, -4 if smaller than opponent<br>
+			<br>
+			<b>Coerce opponent</b><br>
+			1d4 x 10 minutes<br>
+			<br>
+			<b>Demoralize Opponent</b><br>
+			Standard action<br>
+			<br>
+			<b>Influence Opponent's Attitude</b><br>
+			1 minute<br>
+			<br>
+
+		`
+
+	}
+
+	if (element == "knowledge"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Knowledge (skill)</h3>
+			— Trained only —<br>
+			<br>
+			<b>General Knowledge</b><br>
+			<br>
+			<b>Monster Lore</b><br>
+			<b>Action</b> None <b>Retry</b> No<br>
+			<br>
+			Identify monster special powers and vulnerabilities.<br>
+			Usually DC = 10 + monster's CR. Success by 5 or more: recall another piece of useful information.<br>
+			<div class="attack"><b>Arcana</b> Constructs, dragons, magical beasts<br>
+			<b>Nature</b> Animals, fey, monstrous humanoids, plants, vermin<br>
+			<b>Local</b> Humanoids<br>
+			<b>Religion</b> Undead<br>
+			<b>Dungeoneering</b> Aberrations, oozes<br>
+			<b>Planes</b> Outsiders<br></div>
+
+		`
+
+	}
+
+	if (element == "linguistics"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Linguistics (skill)</h3>
+			— Trained only —
+
+		`
+
+	}
+
+	if (element == "perception"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Perception (skill)</h3>
+
+		`
+
+	}
+
+	if (element == "perform"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Perform (Sing) (skill)</h3>
+			<b>Action</b> An evening's work up to a full day <b>Retry?</b> Yes, with a stacking +2&nbsp;DC penalty<br>
+			<br>
+			Perform singing, such as a ballad, chant, melody.<br>
+			<div class="attack">
+				<b>DC 10</b> Routine performance. Trying to earn money by playing in public is akin to begging. You can earn 1d10 cp/day.<br>
+				<br>
+				<b>DC 15</b> Enjoyable performance. In a prosperous city, you can earn 1d10 sp/day.<br>
+				<br>
+				<b>DC 20</b> Great performance. In a prosperous city, you can earn 3d10 sp/day. In time, you may be invited to join a professional troupe and may develop a regional reputation.<br>
+				<br>
+				<b>DC 25</b> Memorable performance. In a prosperous city, you can earn 1d6 gp/day. In time, you may come to the attention of noble patrons and develop a national reputation.<br>
+				<br>
+				<b>DC 30</b> Extraordinary performance. In a prosperous city, you can earn 3d6 gp/day. In time, you may draw attention from distant patrons, or even from extraplanar beings.<br>
+			</div>
+
+
+
+		`
+
+	}
+
+	if (element == "profession"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Profession (skill)</h3>
+			— Trained only —
+
+		`
+
+	}
+
+	if (element == "ride"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Ride (skill) (Armor Check Penalty)</h3>
+			<b>Modifiers</b> Riding a creature unsuited as a mount: -5 penalty to Ride
+			<div class="attack">
+				<b>DC 5</b> Guide with Knees: You can guide your mount with your knees so you can use both hands in combat. Make your Ride check at the start of your turn. If you fail, you can use only one hand this round because you need to use the other to control your mount. This does not take an action.<br>
+				<br>
+				<b>DC 5</b> Stay in Saddle: You can react instantly to try to avoid falling when your mount rears or bolts unexpectedly or when you take damage. This usage does not take an action.<br>
+				<br>
+				<b>DC 10</b> Fight with a Combat-Trained Mount: If you direct your war-trained mount to attack in battle, you can still make your own attack or attacks normally. This usage is a free action.<br>
+				<br>
+				<b>DC 15</b> Cover<br>
+				<b>DC 15</b> Soft Fall<br>
+				<b>DC 15</b> Leap<br>
+				<b>DC 15</b> Spur Mount<br>
+				<b>DC 20</b> Control Mount in Battle<br>
+				<b>DC 20</b> Fast Mount or Dismount<br>
+			</div>
+		`
+
+	}
+
+	if (element == "sense-motive"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Sense Motive (skill)</h3>
+			1 minute up to a whole evening<br>
+			<div class="attack">
+				<b>DC 20</b> Hunch: This use of the skill involves making a gut assessment of the social situation. You can get the feeling from another’s behavior that something is wrong, such as when you’re talking to an impostor. Alternatively, you can get the feeling that someone is trustworthy.<br>
+				<br>
+				<b>DC 15 or 25</b> Sense Enchantment: You can tell that someone’s behavior is being influenced by an enchantment effect even if that person isn’t aware of it. The usual DC is 25, but if the target is dominated, the DC is only 15 because of the limited range of the target’s activities.<br>
+				<br>
+				<b>DC Bluff</b> Discern Secret Message: You may use Sense Motive to detect that a hidden message is being transmitted via the Bluff skill. In this case, your Sense Motive check is opposed by the Bluff check of the character transmitting the message. For each piece of information relating to the message that you are missing, you take a –2 penalty on your Sense Motive check. If you succeed by 4 or less, you know that something hidden is being communicated, but you can’t learn anything specific about its content. If you beat the DC by 5 or more, you intercept and understand the message. If you fail by 4 or less, you don’t detect any hidden communication. If you fail by 5 or more, you might infer false information.
+
+
+			</div>
+
+		`
+
+	}
+
+	if (element == "sleight-of-hand"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Sleight of Hand (skill) (Armor Check Penalty)</h3>
+			— Trained only —
+
+		`
+
+	}
+
+	if (element == "spellcraft"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Spellcraft (skill)</h3>
+			— Trained only —<br>
+			<br>
+			<b>Craft Magic Items</b><br>
+			<br>
+			<b>Determine Properties of Magic Item</b><br>
+			<br>
+			<b>Identify Spell Being Cast</b><br>
+			<br>
+			<b>Learn Spell from Spellbook</b><br>
+			<br>
+			<b>Prepare Spell from Borrowed Spellbook</b><br>
+
+		`
+
+	}
+
+	if (element == "stealth"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Stealth (skill) (Armor Check Penalty)</h3>
+			<b>Hide</b><br>
+			<br>
+			<b>Create a Diversion to Hide</b><br>
+			<br>
+			<b>Hide behind other Creatures</b><br>
+			<br>
+			<b>Sniping</b><br>
+			<br>
+
+		`
+
+	}
+
+	if (element == "survival"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Survival (skill)</h3>
+			<b>Avoid Getting Lost/Avoid Natural Hazards</b><br>
+			<br>
+			<b>Follow Tracks</b><br>
+			<br>
+			<b>Survive in the Wilderness</b><br>
+			<br>
+
+		`
+
+	}
+
+	if (element == "swim"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Swim (skill)</h3>
+			<b><i>Modifiers</b> +8 racial, can always take 10</i>
+		`
+
+	}
+
+	if (element == "use-magic-device"){
+
+		document.getElementById("right").innerHTML = `
+
+			<h3>Use Magic Device (skill)</h3>
+			— Trained only —<br>
+			<br>
+			<b>Cause Mishap</b><br>
+			<br>
+			<b>Read Spell/Activate Magic Item</b><br>
+			<br>
+
+		`
+
+	}
+
+	if (element == "new-this-level"){
+
+			if (level == 1){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+				<b>BAB</b> +0 | <b>Fort</b> +2 | <b>Reflex</b> +2 | <b>Will</b> +0<br>
+				6 Skill Ranks <i>(Acrobatics, Craft, Perception, Stealth, Swim, Use Magic Device)</i><br>
+				<br>
+
+				<b>Class:</b> Kineticist 1<br>
+				- Class Skills: Acrobatics, Craft, Heal, Intimidate, Perception, Profession, Stealth, Use Magic Device<br>
+				- Burn<br>
+				- Gather Power<br>
+				- Infusion <i>(Extended Range)</i><br>
+				- Kinetic Blast<br>
+				<b>Elemental Focus:</b> Water<br>
+				- Bonus Class Skills: Knowledge: Nature, Swim<br>
+				- Basic Hydrokinesis<br>
+				- Cold Blast<br>
+				<b>Archetype:</b> Roil Dancer<br>
+				- Class Skills: Perform, Spellcraft<br>
+				- Bonus Wild Talent: Kinetic Blade<br>
+				- Access to Elemental Flux, Mithral Current, <s>Solar Wind</s>, Thrashing Dragon <i>(A Trait replaces Solar Wind with Radiant Dawn)</i><br>
+				- <i>(This Archetype replaces higher-level infusions and wild talents, and alters Elemental Focus, Gather Power, Kinetic Blast, and higher level Metakinesis)</i><br>
+				<br>
+
+
+			`
+
+
+			}
+
+			if (level == 2){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+				<b>BAB</b> +0 | <b>Fort</b> +0 | <b>Reflex</b> +0 | <b>Will</b> +2<br>
+				4 Skill Ranks <i>(Acrobatics, Heal, Knowledge (Local), Perception)</i><br>
+				<br>
+
+				<b>Class:</b> Psychic 1<br>
+				- Class Skills: Bluff, Diplomacy, Fly, Sense Motive, Linguistics,<br>
+				Kn. (Arcana), Kn. (Local), Kn. (Religion), Kn. (Dungeon.), Kn. (Planes)<br>
+				- <s>Phrenic Amplification</s>, Phrenic Pool (maximum -1)<br>
+				<b><i>Spellcasting</i></b><br>
+				<table border="1" style="width: 98.5%; margin: 0.25em;">
+					<tr>
+						<td><b>Psychic Spells known</b></td>
+						<td><b>Spell Slots</b></td>
+					</tr>
+					<tr>
+						<td>0: Detect Magic, Mage Hand,<br>Prestidigitation, Stabilize</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>1: Burst of Adrenaline, Floating Disk<br>
+						Bonus: Bless</td>
+						<td>3 from class<br>1 from 12+ Intelligence<br>
+						1 Bonus spell slot for Bless only</td>
+					</tr>
+				</table>
+
+				<b>Psychic Discipline:</b> Spirit Channeler<br>
+				- <s>Bonus Spell: Heightened Awareness</s><br>
+				- Agitating Cognizance (+1 phrenic pool point when not in metamorphosis)<br>
+				- Metamorphosis<br>
+				<b>Archetype:</b> Esoteric Starseeker<br>
+				<i>(This archetype replaces Psychic Discipline bonus spell and Phrenic Amplification)</i><br>
+				- Written in the Stars (swappable bonus spell, usually: <i>Bless</i>, and 1 bonus spell slot for that spell only)<br>
+				<br>
+
+			`
+
+
+			}
+
+			if (level == 3){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+				<b>BAB</b> +1 | <b>Fort</b> +1 | <b>Reflex</b> +1 | <b>Will</b> +0<br>
+				6 Skill Ranks <i>(Acrobatics, Fly, Fly, Fly, Perception, Sense Motive)</i><br>
+				<br>
+
+				<b>Class:</b> Kineticist 2<br>
+				- Shroud of Water<br>
+				- Utility Wild Talent: Kinetic Cover<br>
+				<b>Feat:</b><br>
+				- Magic Trick <i>(Disk Rider)</i><br>
+				<br>
+
+			`
+
+
+			}
+
+			if (level == 4){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+				<b>BAB</b> +1 | <b>Fort</b> +0 | <b>Reflex</b> +0 | <b>Will</b> +1<br>
+				6 Skill Ranks <i>(Acrobatics, Knowledge (Arcana), Knowledge (Local), Perception, Perform (Sing), Spellcraft)</i><br>
+				<br>
+
+				<b>Class:</b> Kineticist 3<br>
+				- Elemental Overflow 1<br>
+				- Pushing Invocation<br>
+				<br>
+
+			`
+
+
+			}
+
+			if (level == 5){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 6){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 7){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 8){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 9){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 10){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 11){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 12){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 13){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 14){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 15){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 16){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 17){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 18){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 19){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			if (level == 20){
+
+				document.getElementById("right").innerHTML = `
+
+				<h3>New this level</h3>
+
+
+			`
+
+
+			}
+
+			
+
+	}
+
+
+}
+
+
+
+
+
+
+
+
+
+//drawTop()
+drawLeft()
+drawMiddle()
+drawMiddleLeft()
+drawInfo()
+drawExtraRight()
+drawBottom()
+
+</script>
+
+</body>
+</html>
