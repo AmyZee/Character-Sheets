@@ -49,4 +49,4 @@ https://amyzee.github.io/Character-Sheets/time-travel-point-and-click-dev *(visu
 - *Creepy Intro Music (mp3) by Bezo, from Newgrounds*
 - *Death (mp3) by Evil-dog, from Newgrounds*
 - *Midnight Oil (mp3) by MaestroRage, from Newgrounds*
-- cursors by Humongous Entertainment
+- *mouse pointers by Humongous Entertainment*
