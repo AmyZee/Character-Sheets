@@ -30,6 +30,7 @@ https://amyzee.github.io/Character-Sheets/charsheet-druid/druid.html *(Number ke
 
 https://amyzee.github.io/Character-Sheets/charsheet-druid/druid2024.html *(Number keys to switch between levels 1-10)*
 
+https://amyzee.github.io/Character-Sheets/Water-Witch.html *(a hand at a custom class)*
 
 ### Character builder
 
