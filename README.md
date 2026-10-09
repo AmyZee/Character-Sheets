@@ -1,3 +1,5 @@
+***For all:*** *use number keys on your keyboard to switch between levels 1-8 or 1-9.*
+
 ### Pathfinder 1e
 
 https://amyzee.github.io/Character-Sheets/kineticist1ev2.html
