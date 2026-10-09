@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	#main{
+		top: 6em;
+		position: relative;
+	}
+	.power{
+		border: 1px solid lightgrey;
+		padding: 0.2em;
+		min-width: 320px;
+		max-width: 420px;
+		margin: 1em 0.5em;
+		border-radius: 4px;
+		color: white;
+		font-family: Tahoma;
+		font-weight: bold;
+		text-align: right;
+		position: relative;
+	}
+	.power > h1{
+		margin: 0 0.2em 0.2em 0.2em;
+		font-size: 1em;
+		text-align: initial;
+	}
+	.action{
+		background: crimson;
+	}
+	.action > h1::after{
+		float: right;
+		font-style: italic;
+		content: "Action";
+	}
+	.bonus-action{
+		background: green;
+	}
+	.bonus-action > h1::after{
+		float: right;
+		font-style: italic;
+		content: "Bonus action";
+	}
+	.move{
+		background: goldenrod;
+	}
+	.your-move > h1::after{
+		float: right;
+		font-style: italic;
+		content: "Part of your move";
+	}
+	.target-move > h1::after{
+		float: right;
+		font-style: italic;
+		content: "Target's move";
+	}
+	.reaction{
+		background: royalblue;
+	}
+
+	.reaction > h1::after{
+		float: right;
+		font-style: italic;
+		content: "Reaction";
+	}
+	.free-action{
+		background: darkcyan;
+	}
+	.free-action > h1::after{
+		float: right;
+		font-style: italic;
+		content: "No action";
+	}
+	.resource{
+		background: orangered;
+	}
+	.resource > h1::after{
+		float: right;
+		font-style: italic;
+		content: "Class Resource";
+	}
+	.power > div{
+		background: rgba(255,255,255,0.9);
+		border-radius: 4px;
+		padding: 0.2em;
+		font-weight: initial;
+		color: initial;
+		font-family: initial;
+		text-align: initial;
+	}
+	.level-based{
+		color: green;
+		font-weight: bold;
+	}
+	#opener-container > div{
+		display: inline-block;
+		vertical-align: top;
+	}
+	#follow-up-container > div{
+		display: inline-block;
+		vertical-align: top;
+	}
+	#not-your-turn-container > div{
+		display: inline-block;
+		vertical-align: top;
+	}
+	#cc-container > div{
+		display: inline-block;
+		vertical-align: top;
+	}
+	#out-of-combat-container > div{
+		display: inline-block;
+		vertical-align: top;
+	}
+	.button{
+		border: 2px solid black;
+		background: white;
+		border-radius: 20%;
+		height: 80px;
+		width: 80px;
+		margin-top: 20px;
+		margin-left: 10px;
+		display: inline-block;
+	}
+	.button.switch{
+		background: silver;
+	}
+	.button.out-of-combat{
+		background: goldenrod;
+	}
+	.button.action{
+		background: crimson;
+	}
+	.button.bonus-action{
+		background: green;
+	}
+	.button.reaction{
+		background: royalblue;
+	}
+	.button.free-action{
+		background: darkcyan;
+	}
+	.dock{
+		position: fixed;
+		bottom: 0;
+		left: 0px;
+		width: 100%;
+		height: 120px;
+		background: rgba(0,0,0,0.8);
+	}
+	.dock#combat{
+		border-top: 2px solid goldenrod;
+		outline: 2px solid bisque;
+	}
+	.dock#noncombat{
+		border-top: 2px solid teal;
+		outline: 2px solid springgreen;
+	}
+	.dock.inactive{
+		display: none;
+	}
+	.inactive{
+		display: none;
+	}
+	.disabled{
+		color: grey;
+		opacity: 0.4;
+	}
+	.glow{
+		box-shadow: 0 0 8px darkgoldenrod;
+	}
+	.block{
+		display: block;
+	}
+	#shield-spell-title::before{
+		content: "Swerving Sidestep (Spell slot)";
+	}
+	#shield-spell-title:hover::before{
+		content: "Shield (Spell slot)";
+	}
+	#shield-free-title::before{
+		content: "Swerving Sidestep (1 free use/long rest)";
+	}
+	#shield-free-title:hover::before{
+		content: "Shield (1 free use/long rest)";
+	}
+	#vigilant-guardian-title::before{
+		content: "Water Waltz (4 free uses/long rest)";
+	}
+	#vigilant-guardian-title:hover::before{
+		content: "Vigilant Guardian (4 free uses/long rest)";
+	}
+	#bigbys-hand-ongoing-title::before{
+		content: "Watery Wave (Ongoing spell effect)";
+	}
+	#bigbys-hand-ongoing-title:hover::before{
+		content: "Bigby's Hand (Ongoing spell effect)";
+	}
+	#bigbys-hand-ongoing-description::before{
+		content: "Watery Wave";
+	}
+	#bigbys-hand-ongoing-description:hover::before{
+		content: "Bigby's Hand";
+	}
+	#bigbys-hand-activate-title::before{
+		content: "Watery Wave (Dragonmarked slot)";
+	}
+	#bigbys-hand-activate-title:hover::before{
+		content: "Bigby's Hand (Dragonmarked slot)";
+	}
+	#telekinetic-force-title::before{
+		content: "Water Whip";
+	}
+	#telekinetic-force-title:hover::before{
+		content: "Telekinetic Force";
+	}
+	#unchecked-power-title::before{
+		content: "Hydraulic Glide (1 psi)";
+	}
+	#unchecked-power-title:hover::before{
+		content: "Unchecked Power (1 psi)";
+	}
+</style>
+<script>
+function redrawSkills(){
+	document.getElementById("skill-container").innerHTML = `
+		Initiative +5 +1d4<br>
+		Concentration +3 + Adv.<br>
+		<br>
+		Arcana +9<br>
+		Athletics +9<br>
+		Investigation +9<br>
+		Insight +9 + 1d4<br>
+		Perception +3 + 1d4<br>
+		Tinker's Tools +4<br>
+	`
+}
+
+window.addEventListener("load", function(){redrawSkills()})
+</script>
+</head>
+<body>
+<div id="main">
+	<button onclick="document.getElementById('combat').classList.toggle('inactive'); document.getElementById('noncombat').classList.toggle('inactive');">Combat switcher</button><br>
+	<br>
+	Alara Morningtide<br>
+	Psion 9 Warlock 1<br>
+	
+	<div onclick="document.getElementById('base-stats').classList.toggle('inactive');" style="border-bottom: 1px solid black;">
+		Base stats (Collapsable)
+	</div>
+	<div id="base-stats" class="inactive" style="border-bottom: 1px solid black;">
+	Rolls: 10 14 16 11 15 18<br>
+		<br>
+		STR 12 (+1)<br>
+		DEX 14<br>
+		CON 16<br>
+		INT 20 (+2)<br>
+		WIS 10<br>
+		CHA 15 (+1)<br>
+		<br>
+		Armor Proficiency: Light<br>
+		Weapon Proficiency: Simple<br>
+		Proficiency modifier: +4<br>
+	</div>
+	<br>
+	<div style="float: right;">
+		<div id="skill-container">
+		</div>
+	</div>
+	<br>
+	Armor: Psionic Defenses<br>
+	Weapon: None<br>
+
+	<div style="position: fixed; top: 0; background: white; border-bottom: 1px solid black; width: 100%; z-index: 1;" id="top">
+		<div style="margin: 0 2em; display: inline-block;">1/short rest spell slot <input type="checkbox"></div> |
+		<div style="margin: 0 2em; display: inline-block;">9/rest Psi Points (limit 5 at once) <input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"> (<input type="checkbox">)</div> | 
+		<div style="margin: 0 2em; display: inline-block;">1/round Psi Point (lasts 1 round)</div><br>
+		Rampaging Power
+	
+		<table style="display: inline-block;">
+			<tr>
+				<td>—</td><td>d4</td><td>d6</td><td>d8</td><td>d10</td><td>d12</td>
+			</tr>
+			<tr>
+				<td><input type="radio" name="rampage" onclick="rampagingPower = '—'; redraw()"></td>
+				<td><input type="radio" name="rampage" onclick="rampagingPower = '1d4'; redraw()"></td>
+				<td><input type="radio" name="rampage" onclick="rampagingPower = '1d6'; redraw()"></td>
+				<td><input type="radio" name="rampage" onclick="rampagingPower = '1d8'; redraw()"></td>
+				<td><input type="radio" name="rampage" onclick="rampagingPower = '1d10'; redraw()"></td>
+				<td><input type="radio" name="rampage" onclick="rampagingPower = '1d12'; redraw()"></td>
+			</tr>
+	
+		</table>
+
+		<table style="margin-right: 1em; float: right;">
+			<tr>
+				<td>+1</td>
+				<td>+2</td>
+				<td>+3</td>
+				<td>+5</td>
+				<td>+0</td>
+				<td>+2.</td>
+				<td>AC 18</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>+2</td>
+				<td>+4</td>
+				<td>HP <span contenteditable>69</span> / 69</td>
+			</tr>
+		</table>
+	</div>
+
+	<h1>Cards</h1>
+
+	
+
+	<div class="power resource">
+		<h1>Rampaging Power</h1>
+		<div>
+			You gain a d4 rampage die. Once on each
+			of your turns when making a damage roll, you can add this
+			rampage die to the damage roll. If you dealt damage during
+			your last turn, your rampage die becomes a d6, increasing
+			with each subsequent turn you deal damage by one step, up to
+			a d12; if you did not deal damage during your last turn or
+			become incapacitated, it becomes a d4 once more. If you
+			maintain a continuous d12 rampage die for more than one
+			minute, you gain one level of exhaustion.<br>
+		</div>
+	</div>
+
+	<h1>Opener</h1>
+
+	<div id="opener-container">
+
+		<div class="power bonus-action">
+			<h1>Enhancing Surge (Self)</h1>
+			<div>
+				<i><b>Surging Power</b></i><br>
+				<br>
+				Self, 1 round<br>
+				S<br>
+				<br>
+				On next damage, deal +1d4 + 5 damage to one target.<br>
+				Gain +1d4 temporary hit points.<br>
+				<br>
+				3 psi: +resistance to all damage<br>
+				2 psi: +action (attack, dash, disengage, hide, utilize)<br>
+				<br>
+			</div>
+		</div>
+
+		<div class="power bonus-action disabled" id="bigby-ongoing" onclick="dragonmark(this)">
+		<h1 id="bigbys-hand-ongoing-title"></h1>
+		<div>
+			<div style="float: right">
+				AC 20 HP <span contenteditable>69</span> / 69
+			</div>
+			<b>Requires</b> <span id="bigbys-hand-ongoing-description"></span> (Action)<br>
+			<br>
+			Move the hand up to 60 feet and then cause one of the following effects:<br>
+			<br>
+			<b>Clenched Fist</b> The hand strikes a target within 5 feet of it. Make a <span style="color: green;">+9 vs AC</span> melee spell attack. On a hit, the target takes 5d8 + [Rampage die] Force damage.<br>
+			<br>
+			<b>Forceful Hand</b> The hand attempts to push a Huge or smaller creature within 5 feet of it.
+			The target must succeed on a <span style="color: green;">DC 17</span> Strength saving throw, or the hand pushes the target
+			<span style="color: green";>30 feet</span>.
+			The hand moves with the target, remaining within 5 feet of it.<br>
+			<br>
+			<b>Grasping Hand</b> The hand attempts to grapple a Huge or smaller creature within 5 feet of it.
+			The target must succeed on a <span style="color: green;">DC 17</span> Dexterity saving throw, or the target has the Grappled condition,
+			with an escape DC equal to your <span style="color: green;">DC 17</span> spell save DC. While the hand grapples the target,
+			you can take a Bonus Action to cause the hand to crush it,
+			dealing Bludgeoning damage to the target equal to 4d6 plus your spellcasting ability modifier.<br>
+			<br>
+			<b>Interposing Hand</b> The hand grants you <span style="color: green;">+2 AC, +2 Dex saves</span> Half Cover against attacks and other effects
+			that originate from its space or that pass through it. In addition, its space counts as Difficult Terrain for your enemies.
+		</div>
+	</div>
+
+
+	<div class="block">
+		<div class="power bonus-action" id="faith-spell" style="width: 420px;" onclick="this.classList.contains('glow') ? this.classList.replace('glow', 'disabled') : this.classList.contains('disabled') ? this.classList.remove('disabled') : this.classList.add('glow')	">
+			<h1>Shield of Faith (Spell slot)</h1>
+			<div>
+				60 feet, Conc., up to 10 minutes<br>
+				V, S, M (a prayer scroll)<br>
+				<br>
+				Target creature gains +2 bonus to AC for the duration.<br>
+				<hr>
+				<b>Shares a spell slot with:</b><br>
+				- Shield<br>
+				- Protection from Evil and Good (25 gp)<br>
+				- Detect Magic<br>
+			</div>
+		</div>
+	
+		<div class="power bonus-action" id="faith-dragonmarked" style="width: 420px;" onclick="dragonmark(this)">
+			<h1>Shield of Faith (Dragonmarked slot)</h1>
+			<div>
+				60 feet, Conc., up to 10 minutes<br>
+				V, S, M (a prayer scroll)<br>
+				<br>
+				Target creature gains +2 bonus to AC for the duration.<br>
+				<hr>
+				<b>Shares a dragonmarked slot with:</b><br>
+				- Counterspell<br>
+				- Bigby's Hand
+			</div>
+		</div>
+	</div>
+
+
+	</div>
+
+	<h1>Follow-up</h1>
+
+	<div id="follow-up-container">
+
+		<div class="power action" id="telekinetic-force" style="width: 380px">
+			<h1 id="telekinetic-force-title"></h1>
+			<div>
+				<i>(Use for Prone and/or Restrain)</i><br>
+				60 feet<br>
+				S<br>
+				<br>
+				<b>DC 17</b> Strength save<br>
+				<b>Fail</b> 1d10 + 5 bludgeoning + [rampage die]<br>
+				&nbsp;&nbsp;+ shove 5 ft. in a direction of your choice OR<br>
+				&nbsp;&nbsp;+ prone<br>
+				<b>Success</b> Half dice + 5 + [rampage die], no other effects<br>
+				<br>
+				2 psi: + Restrained<br>
+				1 psi: +1d10 bludgeoning<br>
+				1 psi: + shove +10 ft.<br>
+				1 psi: all creatures in 5 ft. radius<br>
+				2 psi: all creatures in 10 ft. radius<br>
+				3 psi: all creatures in 20 ft. radius<br>
+			</div>
+		</div>
+
+		<div class="power action">
+			<h1>Vortex Blast (3 psi)</h1>
+			<div>
+				Creatures in a 30 ft. Cone<br>
+				S<br>
+				<br>
+				<b>Always</b> 4d6 + [rampage die]<br>
+				<b>DC 17</b> Strength save<br>
+				<b>Fail</b> Be knocked 20 feet backward and 30 feet upward.<br>
+				<hr>
+				+1 psi: +1d6 damage.
+			</div>
+		</div>
+
+		<div class="power action" id="bigby" onclick="dragonmark(this)">
+			<h1 id="bigbys-hand-activate-title"></h1>
+			<div>
+				120 ft., Conc., up to 1 minute<br>
+				V, S, M<br>
+				<br>
+				You create a Large hand of shimmering magical energy in an unoccupied space that you can see within range.
+				The hand lasts for the duration, and it moves at your command, mimicking the movements of your own hand.<br>
+				<br>
+				The hand is an object that has AC 20 and Hit Points equal to your Hit Point maximum.
+				If it drops to 0 Hit Points, the spell ends. The hand doesn’t occupy its space.<br>
+				<br>
+				When you cast the spell and as a Bonus Action on your later turns, you can move the hand up to 60 feet and then cause one of the following effects:<br>
+				<br>
+				<b>Clenched Fist</b> The hand strikes a target within 5 feet of it. Make a <span style="color: green;">+9 vs AC</span> melee spell attack. On a hit, the target takes 5d8 + [Rampage Die] Force damage.<br>
+				<br>
+				<b>Forceful Hand</b> The hand attempts to push a Huge or smaller creature within 5 feet of it.
+				The target must succeed on a <span style="color: green;">DC 17</span> Strength saving throw, or the hand pushes the target
+				up to 5 feet plus a number of feet equal to five times your spellcasting ability modifier.
+				The hand moves with the target, remaining within 5 feet of it.<br>
+				<br>
+				<b>Grasping Hand</b> The hand attempts to grapple a Huge or smaller creature within 5 feet of it.
+				The target must succeed on a <span style="color: green;">DC 17</span> Dexterity saving throw, or the target has the Grappled condition,
+				with an escape DC equal to your <span style="color: green;">DC 17</span> spell save DC. While the hand grapples the target,
+				you can take a Bonus Action to cause the hand to crush it,
+				dealing Bludgeoning damage to the target equal to 4d6 plus your spellcasting ability modifier.<br>
+				<br>
+				<b>Interposing Hand</b> The hand grants you	<span style="color: green;">+2 AC, +2 Dex saves</span> Half Cover against attacks and other effects
+				that originate from its space or that pass through it. In addition, its space counts as Difficult Terrain for your enemies.
+			</div>
+		</div>
+		
+
+	</div>
+
+	<h1>Not your turn</h1>
+
+	<div id="not-your-turn-container">
+
+		<div class="block">
+
+			<div class="power reaction" onclick="this.classList.toggle('disabled')">
+				<h1 id="shield-free-title"></h1>
+				<div>
+					<b>Trigger</b> You are hit by an attack or targeted by <i>Magic Missile</i></b><br>
+					<hr>
+					Self, 1 round<br>
+					V, S<br>
+					<br>
+					Until the start of your next turn, you have a +5 bonus to AC,
+					including against the triggering attack, and you take no damage
+					from Magic Missile.
+				</div>
+			</div>
+	
+			<div class="power reaction" onclick="this.classList.toggle('disabled')">
+				<h1 id="shield-spell-title"></h1>
+				<div>
+					<b>Trigger</b> You are hit by an attack or targeted by <i>Magic Missile</i></b><br>
+					<hr>
+					Self, 1 round<br>
+					V, S<br>
+					<br>
+					Until the start of your next turn, you have a +5 bonus to AC,
+					including against the triggering attack, and you take no damage
+					from Magic Missile.<br>
+					<hr>
+					<b>Shares a spell slot with:</b><br>
+					- Protection from Evil and Good (25 gp)<br>
+					- Detect Magic<br>
+					- Shield of Faith
+				</div>
+			</div>
+		</div>
+
+
+		<div class="block">
+			<div class="power reaction" onclick="vigilant(event)" id="vigilant-container">
+				<h1 id="vigilant-guardian-title"></h1>
+				<input type="checkbox" id="vigilant-4"><input type="checkbox" id="vigilant-3"><input type="checkbox" id="vigilant-2"><input type="checkbox" id="vigilant-1">
+				<div>
+					<b>Trigger</b> A creature you can see within 5 feet of you is hit by an attack roll<br>
+					<br>
+					Swap places with that creature, and you are hit by the attack instead.
+				</div>
+			</div>
+	
+			<div class="power reaction" id="counterspell" onclick="dragonmark(this)">
+				<h1>Counterspell (Dragonmarked slot)</h1>
+				<div>
+					<b>Trigger</b> You see a creature within 60 feet of yourself casting a spell with Verbal, Somatic, or Material components<br>
+					<br>
+					60 feet<br>
+					S<br>
+					<br>
+					You attempt to interrupt a creature in the process of casting a spell.
+					The creature makes a Constitution saving throw.
+					On a failed save, the spell dissipates with no effect, and the action, Bonus Action, or Reaction used to cast it is wasted.
+					If that spell was cast with a spell slot, the slot isn’t expended.
+				</div>
+			</div>
+		</div>
+	
+			<div class="power reaction">
+				<h1 id="unchecked-power-title"></h1>
+				<div>
+					<b>Trigger</b> You are being melee attacked.<br>
+					<br>
+					<b><span style="color: green">DC 17</span></b> Strength saving throw.<br>
+					<b>Fail</b> They are knocked back 10 ft. If this puts the attack out of reach, the attack automatically misses.
+				</div>
+			</div>
+
+		
+
+	</div>
+
+	<h1>CC</h1>
+
+	<div id="cc-container">
+
+
+		<div class="power action">
+			<h1>Levitate (2 psi)</h1>
+			<div>
+				60 feet, Conc., up to 10 minutes<br>
+				S<br>
+				<br>
+				<b>Target</b> One creature or one object up to 500 pounds.<br>
+				<b>DC 17</b> Constitution save, may fail willingly<br>
+				<b>Fail</b> Rise vertically up to 20 ft. and remain there for the duration.
+				<br>
+				The target can move only by pushing or pulling against a fixed object or surface within reach (such as a wall or a ceiling), which allows it to move as if it were climbing.<br>
+				<div class="power action">
+					<h1>Other target</h1>
+					<div>
+						Change the target's altitude up to 20 ft. in either direction.<br>
+						The target must stay in 60 ft. range<br>
+					</div>
+				</div>
+				<div class="power move your-move">
+					<h1>You are the target</h1>
+					<div>
+						Change your altitude up to 20 ft. in either direction.
+					</div>
+				</div>
+				<br>
+				When the spell ends, the target floats gently to the ground if it is still aloft.
+			</div>
+		</div>
+
+
+
+
+
+		
+
+		<div class="power action">
+			<h1>Resilient Sphere (4 psi points)</h1>
+			<div>
+				30 ft., Conc., up to 1 minute<br>
+				S<br>
+				<br>
+				<b>Target</b> One Large or smaller creature or object<br>
+				<b>DC 17</b> Dexterity save, may fail willingly<br>
+				<b>Fail</b> Be enclosed in a sphere for the duration.<br>
+				<br>
+				Nothing can pass through the sphere. The sphere and its contents cannot be harmed. Its contents cannot harm anyone outside the sphere.<br>
+				<br>
+				Your enclosed target gains:
+				<div class="power action">
+					<h1>&nbsp;</h1>
+					<div>Move at half speed.</div>
+				</div>
+				The sphere is weightless and just large enough to contain the creature or object inside. The globe can be picked up and moved by other creatures.<br>
+				<br>
+				A Disintegrate spell targeting the globe destroys it without harming anything inside.
+			</div>
+		</div>
+	
+		<div class="power action">
+			<h1>Wall of Force (5 psi points)</h1>
+			<div>
+				120 ft., Conc., up to 10 minutes<br>
+				S<br>
+				<br>
+				An Invisible wall of force springs into existence at a point you choose within range.<br>
+				<br>
+				<b>Creation</b> 
+				The wall appears in any orientation you choose, as a horizontal or vertical barrier or at an angle.
+				It can be free floating or resting on a solid surface.<br>
+				<br>
+				Choose one for the wall to be:<br>
+				- <b>Dome or Sphere</b> with Radius of up to 10 feet.<br>
+				- <b>Flat surface</b> made up of ten 10-foot-by-10-foot panels. Each panel must be contiguous with another panel.<br>
+				<br>
+				If the wall cuts through a creature’s space when it appears, the creature is pushed to one side of the wall (you choose which side).<br>
+				<br>
+				<b>Properties</b> The wall is 1/4 inch thick and lasts for the duration. Nothing can physically pass through the wall. It is immune to all damage and can’t be dispelled by Dispel Magic.
+				A Disintegrate spell destroys the wall instantly, however.
+				The wall also extends into the Ethereal Plane and blocks ethereal travel through the wall.
+			</div>
+		</div>
+
+		<div class="power action">
+			<h1>Protection from Evil and Good (Spell slot)</h1>
+			<div>
+				Touch, Conc., up to 10 minutes<br>
+				V, M (Holy water worth 25+ gp)<br>
+				<br>
+				Until the spell ends, one willing creature you touch is protected against creatures that are:<br>
+				<br>
+				- Aberrations<br>
+				- <span class="disabled">Beast</span><br>
+				- Celestials<br>
+				- <span class="disabled">Construct</span><br>
+				- Elementals<br>
+				- Fey<br>
+				- Fiends<br>
+				- <span class="disabled">Humanoid</span><br>
+				- <span class="disabled">Giant</span><br>
+				- <span class="disabled">Monstrosity (harpy, medusa, owlbear)</span><br>
+				- <span class="disabled">Ooze</span><br>
+				- <span class="disabled">Plant</span><br>
+				- Undead<br>
+				<br>
+				Creatures of those types have Disadvantage on attack rolls against the target.<br>
+				<br>
+				The target also can’t be possessed by or gain the Charmed or Frightened conditions from them.<br>
+				<br>
+				If the target is already possessed, Charmed, or Frightened by such a creature, the target has Advantage on any new saving throw against the relevant effect.
+			</div>
+		</div>
+
+	</div>
+
+
+	<h1>Other</h1>
+
+		<div class="power action">
+			<h1>Thaumaturgy (Combat)</h1>
+			<div>
+				30 feet, up to 1 minute<br>
+				V<br>
+				<br>
+				You can force all targets within 5 feet to make a <b>DC 17</b> Strength saving throw, or be pushed 5 feet away from you.<br>
+				<br>
+			</div>
+		</div>
+	
+
+		
+
+		
+
+		
+
+
+	</div>
+
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+
+	<h1>Out of Combat</h1>
+
+	<div id="out-of-combat-container">	
+	
+		<div class="power action">
+			<h1>Thaumaturgy (Non-combat)</h1>
+			<div>
+				30 feet, up to 1 minute<br>
+				V<br>
+				<br>
+				<b>Altered Eyes</b> You alter the appearance of your eyes for 1 minute.<br>
+				<br>
+				<b>Booming Voice</b> Your voice booms up to three times as loud as normal for 1 minute. For the duration, you have Advantage on Charisma (Intimidation) checks.<br>
+				<br>
+				<b>Fire Play</b> You cause flames to flicker, brighten, dim, or change color for 1 minute.<br>
+				<br>
+				<b>Invisible Hand</b> You instantaneously cause an unlocked door or window to fly open or slam shut.<br>
+				<br>
+				<b>Phantom Sound</b> You create an instantaneous sound that originates from a point of your choice within range, such as a rumble of thunder, the cry of a raven, or ominous whispers.<br>
+				<br>
+				<b>Tremors</b> You cause harmless tremors in the ground for 1 minute.<br>
+				<br>
+				<b>Overwhelming Power</b> You cause up to 10 pounds of loose objects within 10 feet of you to start floating for 1 minute.<br>
+				<br>
+			</div>
+		</div>
+	
+		<div class="power action">
+			<h1>Prestidigitation</h1>
+			<div>
+				10 feet, up to 1 hour<br>
+				V, S<br>
+				<br>
+				You create a magical effect within range. Choose the effect from the options below. If you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time.<br>
+				<br>
+				<b>Sensory Effect</b> You create an instantaneous, harmless sensory effect, such as a shower of sparks, a puff of wind, faint musical notes, or an odd odor.<br>
+				<br>
+				<b>Fire Play</b> You instantaneously light or snuff out a candle, a torch, or a small campfire.<br>
+				<br>
+				<b>Clean or Soil</b> You instantaneously clean or soil an object no larger than 1 cubic foot.<br>
+				<br>
+				<b>Minor Sensation</b> You chill, warm, or flavor up to 1 cubic foot of nonliving material for 1 hour.<br>
+				<br>
+				<b>Magic Mark</b> You make a color, a small mark, or a symbol appear on an object or a surface for 1 hour.<br>
+				<br>
+				<b>Minor Creation</b> You create a nonmagical trinket or an illusory image that can fit in your hand. It lasts until the end of your next turn. A trinket can deal no damage and has no monetary worth.<br>
+				<br>
+			</div>
+		</div>
+	
+		<div class="block">
+			<div class="power action">
+				<h1>Mage Hand</h1>
+				<div>
+					
+				</div>
+			</div>
+		
+	
+			<div class="power bonus-action">
+				<h1>Jump (1 psi point)</h1>
+				<div>
+					Touch, 1 minute<br>
+					S<br>
+					<br>
+					You touch a willing creature. Once on each of its turns until the spell ends,
+					that creature can jump up to 30 feet by spending 10 feet of movement.<br>
+					<br>
+					<b>2 psi</b> 2 creatures<br>
+					<b>3 psi</b> 3 creatures<br>
+					<br>
+				</div>
+			</div>
+		
+			
+			<div class="power action">
+				<h1>Fly (3 psi points)</h1>
+				<div>
+					Touch, Conc., up to 10 minutes<br>
+					S<br>
+					<br>
+					You touch a willing creature. For the duration, the target gains a Fly Speed of
+					60 feet and can hover. When the spell ends, the target falls if it is still aloft
+					unless it can stop the fall.
+				</div>
+			</div>
+		</div>
+	
+		
+	
+		<div class="power action">
+			<h1>Detect Magic (Spell slot)</h1>
+			<div>
+				Action or Ritual<br>
+				<br>
+				V, S<br>
+				<br>
+				For the duration, you sense the presence of magical effects within 30 feet of yourself.
+				If you sense such effects, you can take the Magic action to see a faint aura around any visible creature
+				or object in the area that bears the magic, and if an effect was created by a spell, you learn the spell's school of magic.<br>
+				<br>
+				The spell is blocked by 1 foot of stone, dirt, or wood; 1 inch of metal; or a thin sheet of lead.
+			</div>
+		</div>
+	
+		
+	
+		
+	
+		<div class="power action">
+			<h1>Musician — Encouraging Song</h1>
+			<div>
+				<b>After each rest</b><br>
+				<br>
+				You can play a song on a Musical Instrument with which you have proficiency and give Heroic Inspiration to allies who hear the song. The number of allies you can affect in this way equals your Proficiency Bonus.
+			</div>
+		</div>
+
+	</div>
+
+
+	<h1>Warlock</h1>
+	Hit Point Dice: d8<br>
+	Saves: Wis, Cha<br>
+	Skills: Arcana, Investigation<br>
+
+	<h1>Psion</h1>
+
+	Hit Point Dice: d6<br>
+	<br>
+	Feat: Psionic Mind (Propelled Bound), Potent Dragonmark<br>
+	Talents: Surging Power, Potent Psionics, Psionic Defenses, Propelled Bound, Unchecked Power<br>
+
+	<h1>Species</h1>
+	Human<br>
+	Heroic Inspiration after long rest<br>
+	+1 skill proficiency: Athletics<br>
+	Bonus feat: Musician
+
+	<h1>Background</h1>
+	House Agent<br>
+	- Insight, Perception<br>
+	- Tinker's Tools proficiency<br>
+	Mark of Sentinel<br>
+	- +1d4 to Insight and Perception<br>
+	- Shield 1/long rest<br>
+	- Swap positions with ally in 5 ft. and take a hit<br>
+	- Always prepared: Compelled Duel, <b>Shield of Faith,</b> Warding Bond, Zone of Truth, <b>Counterspell,</b> Protection from Energy, Death Ward, Guardian of Faith, <b>Bigby's Hand</b>
+
+	<h1>Sources</h1>
+
+	<a href="https://static1.squarespace.com/static/5e7eab9fcc76e2321541f8b3/t/62d709d380489f6b1a28754b/1658259926628/Psion+1.5.3+Compressed.pdf">Psion</a><br>
+	<br>
+
+
+</div>
+
+<div class="dock inactive" id="combat">
+
+	<div class="button bonus-action"></div>
+
+	<div class="button bonus-action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button free-action"></div>
+
+	<div class="button reaction"></div>
+
+	<div class="button free-action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+</div>
+
+<div class="dock inactive" id="noncombat">
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button bonus-action"></div>
+
+	<div class="button reaction"></div>
+
+	<div class="button bonus-action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+	<div class="button action"></div>
+
+</div>
+
+<script>
+
+	var rampagingPower = "1d4"
+	var mousedown = false
+
+	// document.getElementById("psionic-weapon").addEventListener("click", function(event){
+	// 	document.getElementById("psionic-weapon").classList.toggle("glow")
+	// 	psionicWeapon == 1 ? psionicWeapon = 0 : psionicWeapon = 1
+	// 	redraw()
+	// })
+
+	function redraw(){
+			document.getElementById("telekinetic-force").innerHTML = `
+				<h1 id="telekinetic-force-title">Telekinetic Force</h1>
+				<div>
+					<i>(Use for Prone and/or Restrain)</i><br>
+					60 feet<br>
+					S<br>
+					<br>
+					<b>DC 17</b> Strength save<br>
+					<b>Fail</b> 1d10 + 5 bludgeoning + ${rampagingPower != "—" ? rampagingPower : "[rampage die]"}<br>
+					&nbsp;&nbsp;+ shove 5 ft. in a direction of your choice OR<br>
+					&nbsp;&nbsp;+ prone<br>
+					<b>Success</b> Half dice + 5 + ${rampagingPower != "—" ? rampagingPower : "[rampage die]"}, no other effects<br>
+					<br>
+					2 psi: + Restrained<br>
+					1 psi: +1d10 bludgeoning<br>
+					1 psi: + shove +10 ft.<br>
+					1 psi: all creatures in 5 ft. radius<br>
+					2 psi: all creatures in 10 ft. radius<br>
+					3 psi: all creatures in 20 ft. radius<br>
+				</div>
+			`
+	}
+
+	function dragonmark(input){
+		if (input.classList.contains("disabled")){
+			document.getElementById("bigby-ongoing").classList.add("disabled")
+			document.getElementById("bigby-ongoing").classList.remove("glow")
+			document.getElementById("bigby").classList.remove("disabled")
+			document.getElementById("faith-dragonmarked").classList.remove("glow")
+			document.getElementById("faith-dragonmarked").classList.remove("disabled")
+			document.getElementById("counterspell").classList.remove("disabled")
+		}
+		else if (input.id == "counterspell"){
+			document.getElementById("faith-dragonmarked").classList.add("disabled")
+			document.getElementById("bigby-ongoing").classList.add("disabled")
+			document.getElementById("bigby-ongoing").classList.remove("glow")
+			document.getElementById("bigby").classList.add("disabled")
+			document.getElementById("counterspell").classList.add("disabled")
+		}
+		else if (input.id == "faith-dragonmarked" && !input.classList.contains("glow")){
+			input.classList.add("glow")
+			document.getElementById("bigby-ongoing").classList.add("disabled")
+			document.getElementById("bigby").classList.add("disabled")
+			document.getElementById("counterspell").classList.add("disabled")
+		}
+		else if (input.classList.contains("glow")){
+			input.classList.replace("glow", "disabled")
+		}
+		else if (input.id == "bigby"){
+			document.getElementById("bigby-ongoing").classList.add("glow")
+			document.getElementById("bigby-ongoing").classList.remove("disabled")
+			document.getElementById("faith-dragonmarked").classList.add("disabled")
+			document.getElementById("faith-dragonmarked").classList.remove("glow")
+			document.getElementById("bigby").classList.toggle("disabled")
+			document.getElementById("counterspell").classList.toggle("disabled")
+		}
+	}
+
+	function vigilant(input){
+		document.getElementById("vigilant-container").classList.contains("disabled") ? (document.getElementById("vigilant-container").classList.remove("disabled"), document.getElementById("vigilant-1").checked = false, document.getElementById("vigilant-2").checked = false, document.getElementById("vigilant-3").checked = false, document.getElementById("vigilant-4").checked = false) :
+		document.getElementById("vigilant-1").checked == false ? document.getElementById("vigilant-1").checked = true :
+		document.getElementById("vigilant-2").checked == false ? document.getElementById("vigilant-2").checked = true :
+		document.getElementById("vigilant-3").checked == false ? document.getElementById("vigilant-3").checked = true :
+		(document.getElementById("vigilant-container").classList.add("disabled"), document.getElementById("vigilant-4").checked = true)
+	}
+
+	
+	document.getElementById("top").addEventListener("mousedown", function(event){mousedown = true})
+	
+	
+	document.getElementById("top").addEventListener("mouseup", function(event){mousedown = false})
+	
+
+
+	for (element of document.getElementsByTagName("input")){
+		element.addEventListener("mouseover", function(event){
+			if (mousedown){
+				event.target.checked ? event.target.checked = false : event.target.checked = true
+			}
+		})
+	}
+</script>
+
+</body>
+</html>
