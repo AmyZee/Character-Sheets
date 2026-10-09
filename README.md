@@ -44,9 +44,9 @@ https://amyzee.github.io/Character-Sheets/lyori *(Mix between Pyoro and a turn-b
 https://amyzee.github.io/Character-Sheets/time-travel-point-and-click-dev *(visual novel/adventure game demo)* *(controls: mouse)*
 
 - ***Licenses & Credits:***
-- *Narbacular Down (mp3) by Jeep Banneret, from the Narbacular Drop game soundtrack*
+- *Narbacular Down (mp3) by Jeep Banneret, from the Narbacular Drop game soundtrack (unused)*
 - *Ambient Evening (mp3) by Blazing Dragon, from Newgrounds*
-- *Creepy Intro Music (mp3) by Bezo, from Newgrounds*
+- *Creepy Intro Music (mp3) by Bezo, from Newgrounds (unused)*
 - *Death (mp3) by Evil-dog, from Newgrounds*
-- *Midnight Oil (mp3) by MaestroRage, from Newgrounds*
+- *Midnight Oil (mp3) by MaestroRage, from Newgrounds (unused)*
 - *mouse pointers by Humongous Entertainment*
