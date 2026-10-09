@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Water Witch</title>
+<style>
+	#content{
+		width: 297mm;
+		height: 210mm;
+		background: #f9f9f9;
+		position: relative;
+		font-size: 11pt;
+	}
+
+		#noncombat{
+			position: absolute;
+			left: 0%;
+			width: 49%;
+			padding: 0.2em;
+		}
+		#combat{
+			background: #eee;
+			height: 80%;
+			width: 30%;
+			position: absolute;
+			left: 50%;
+			padding: 0.2em;
+		}
+		#initiative{
+			position: absolute;
+			left: 82%;
+			padding: 0.2em;
+		}
+		#leveltrack{
+			position: absolute;
+			bottom: 0;
+			width: 99.5%;
+			height: 8.2em;
+			background: #eee;
+			padding: 0.2em;
+		}
+			#leveltrack > h2{
+				margin-bottom: 0;
+				padding-bottom: 0.2em;
+				font-style: italic;
+				background: #ddd;
+				margin-top: 0;
+			}
+			#leveltrack table{
+				position: absolute;
+				margin-left: 3.5em;
+				border-right: 1px solid black;
+				padding-right: 0.5em;
+				table-layout: fixed;
+			    text-overflow: ellipsis;
+
+			}
+			#leveltrack table td{
+				width: 4em;
+				overflow: hidden;
+			}
+			#leveltrackproficiency2{
+				position: absolute;
+				left: 0;
+			}
+			#leveltrackproficiency3{
+				position: absolute;
+				left: 20%;
+			}
+			#leveltrackproficiency4{
+				position: absolute;
+				left: 40%;
+			}
+			#leveltrackproficiency5{
+				position: absolute;
+				left: 60%;
+			}
+			#leveltrackproficiency6{
+				position: absolute;
+				left: 80%;
+			}
+			.leveltrackproficiency{
+				font-style: italic;
+				font-size: 2.4em;
+				font-weight: bold;
+				font-family: Arial;
+				color: #f5f5f5;
+				text-shadow: -0.5px -0.5px 1px #999;
+				position: absolute;
+				margin-left: 0.35em;
+				transform: scale(2,1);
+
+			}
+			.leveltrackcharacterlevel{
+				font-weight: bold;
+
+			}
+			.leveltrackinfo{
+				position: absolute;
+				top: 2.8em;
+				width: 14em;
+				margin-left: 3.5em;
+
+			}
+
+	h1, h2{
+		border-bottom: 1px solid black;
+	}
+	h1, h2, h3{
+		margin-bottom: 0.2em;
+		margin-top: 0.5em;
+	}
+	p{
+		margin: 0;
+	}
+</style>
+</head>
+<body>
+<div id="content">
+	<div id="noncombat">
+		<h1 id="noncombatheader">Lady of the Sea</h1>
+		Name:<br>
+		Background:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Level:<br>
+		<hr>
+		<table>
+			<tr>
+				<th></th>
+				<th>Strength</th>
+				<th>Dexterity</th>
+				<th>Constitution</th>
+				<th>Intelligence</th>
+				<th>Wisdom</th>
+				<th>Charisma</th>
+			</tr>
+			<tr>
+				<td>Score</td>
+				<td>9</td>
+				<td>14</td>
+				<td>15</td>
+				<td>10</td>
+				<td>11</td>
+				<td>16</td>
+			</tr>
+			<tr>
+				<td>Modifier</td>
+				<td>-1</td>
+				<td>+2</td>
+				<td>+2</td>
+				<td>+0</td>
+				<td>+0</td>
+				<td>+3</td>
+			</tr>
+			<tr>
+				<td>Saving throw</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>+2</td>
+				<td>+5</td>
+			</tr>
+		</table>
+
+		<hr>
+		Hit Points at level 1: 8 - Hit Die: d6<br>
+		Walking speed: 10 ft.
+		Swimming speed: 40 ft.<br>
+		Senses: Amphibious, Darkvision 60 ft.<br>
+		Proficiencies: Athletics, Persusasion, light weapons, light armor, <input type="text" size="10">, <input type="text" size="10"><br>
+		Natural armor AC: 15<br>
+		<hr>
+		<b>Stress:</b><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><span id="corruptionexplanation"><b>Corrupted by the Sea Witch:</b> When all stress is marked, flip over your character sheet.</span>
+		<hr>
+		Hit points: <input type="number" style="width:40px"> / <input type="number" style="width:40px"> Hit Dice: <input type="number" style="width:30px">d6<br>
+		<hr>
+
+
+		<div id="noncombatexplanation">
+		</div>
+	</div>
+	<div id="combat">
+		<i>On level-up, mark one box. As long as the ability has marked one box, your character can use that ability.</i><br>
+		1+&nbsp;&nbsp;5+&nbsp;9+&nbsp;13+<br>
+		<b><input type="checkbox" checked disabled><input type="checkbox"><input type="checkbox"><input type="checkbox">Throw Lightning</b><br>
+		<b><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox">Water Trap / Toxin Trap</b><br>
+		<b><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox">Healing Totem / Amplify Totem</b><br>
+		<b><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox">Propelled Bound / Trail Bound</b><br>
+		<b><input type="checkbox" style="margin-left: 24px"><input type="checkbox" style="margin-left: 24px">Detonate</b><br>
+		<b><input type="checkbox" style="margin-left: 24px">Armor of the Sea</b><br>
+		<b><input type="checkbox" style="margin-left: 24px">Stance of the Eel</b><br>
+		<b><input type="checkbox" style="margin-left: 24px">Stance of the Dolphin</b><br>
+		<b><input type="checkbox" style="margin-left: 24px">Stance of the Sahuagin</b><br>
+		<b><input type="checkbox" style="margin-left: 24px">Stance of the Purple Sea Urchin</b><br>
+		<hr>
+		<b><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox">Ability Score Increase</b>
+		<hr>
+		<div id="abilityexplanation">
+		</div>
+
+	</div>
+	<div id="initiative">
+	</div>
+	<div id="leveltrack">
+		<h2>Level track</h2>
+		<div id="leveltrackproficiency2"><span class="leveltrackproficiency">2</span>
+			<table>
+				<tr>
+					<td class="leveltrackcharacterlevel">1</td>
+					<td class="leveltrackcharacterlevel">2</td>
+					<td class="leveltrackcharacterlevel">3</td>
+					<td class="leveltrackcharacterlevel">4</td>
+				</tr>
+				<tr>
+					<td>Ability</td>
+					<td>Ability</td>
+					<td>Ability</td>
+					<td>ASI</td>
+				</tr>
+				<tr>
+					<td></td>
+				</tr>
+			</table>
+			<div class="leveltrackinfo"><i>You can now mark abilities<br>in the first column.</i></div>
+		</div>
+		<div id="leveltrackproficiency3"><span class="leveltrackproficiency">3</span>
+			<table>
+				<tr>
+					<td class="leveltrackcharacterlevel">5</td>
+					<td class="leveltrackcharacterlevel">6</td>
+					<td class="leveltrackcharacterlevel">7</td>
+					<td class="leveltrackcharacterlevel">8</td>
+				</tr>
+				<tr>
+					<td>Ability</td>
+					<td>Ability</td>
+					<td>Ability</td>
+					<td>ASI</td>
+				</tr>
+			</table>
+			<div class="leveltrackinfo"><i>You can now mark abilities<br>in the second column.</i></div>
+		</div>
+		<div id="leveltrackproficiency4"><span class="leveltrackproficiency">4</span>
+			<table>
+				<tr>
+					<td class="leveltrackcharacterlevel">9</td>
+					<td class="leveltrackcharacterlevel">10</td>
+					<td class="leveltrackcharacterlevel">11</td>
+					<td class="leveltrackcharacterlevel">12</td>
+				</tr>
+				<tr>
+					<td>Ability</td>
+					<td>Ability</td>
+					<td>Ability</td>
+					<td>ASI</td>
+				</tr>
+			</table>
+			<div class="leveltrackinfo"><i>You can now mark abilities<br>in the third column.</i></div>
+		</div>
+		<div id="leveltrackproficiency5"><span class="leveltrackproficiency">5</span>
+			<table>
+				<tr>
+					<td class="leveltrackcharacterlevel">13</td>
+					<td class="leveltrackcharacterlevel">14</td>
+					<td class="leveltrackcharacterlevel">15</td>
+					<td class="leveltrackcharacterlevel">16</td>
+				</tr>
+				<tr>
+					<td>Ability</td>
+					<td>Ability</td>
+					<td>Ability</td>
+					<td>ASI</td>
+				</tr>
+			</table>
+			<div class="leveltrackinfo"><i>You can now mark abilities<br>in the fourth column.</i></div>
+		</div>
+		<div id="leveltrackproficiency6"><span class="leveltrackproficiency">6</span>
+			<table>
+				<tr>
+					<td class="leveltrackcharacterlevel">17</td>
+					<td class="leveltrackcharacterlevel">18</td>
+					<td class="leveltrackcharacterlevel">19</td>
+					<td class="leveltrackcharacterlevel">20</td>
+				</tr>
+				<tr>
+					<td>Ability</td>
+					<td>Ability</td>
+					<td>ASI</td>
+					<td>Ability</td>
+				</tr>
+				<tr>
+					<td></td>
+				</tr>
+			</table>
+	</div>
+</div>
+<script>
+
+	var characterCorruption = "dark"
+
+	function toggleSheet(){
+		if(characterCorruption == "dark"){
+			document.getElementById("content").style.background = "#eee"
+
+			document.getElementById("noncombatheader").innerHTML = "Lady of the Sea"
+
+			document.getElementById("corruptionexplanation").innerHTML = `
+				<b>Corrupted by the Sea Witch:</b> When all stress is marked, flip over your character sheet.
+			`
+
+			document.getElementById("noncombatexplanation").innerHTML = `
+				<b>Throw Lightning:</b> As an action, make a Charisma spell attack against a creature within 30 ft. On a hit, it deals 1d6 lightning damage for each mark in this ability.<br>
+				<b>Amulet of the Sea Witch:</b> You have an amulet which contains an amount of Orbs of Water equal to your Proficiency Bonus.<br>
+				Orbs of Water not in your amulet grant half cover (+2 AC, +2 Dexterity saving throw) and are considered difficult terrain.<br>
+				<b>Sea Lady Legs:</b> As long as there is at least one orb in your amulet, you can use your swimming speed as your walking speed.<br>
+				<b>Witch's Tempt:</b> When you roll a 6 on a d6, you may take 1 Stress to roll another die and add it to the result. Whenever you spend a Hit Die, reduce your Stress by 1.<br>
+				<b>Control Orb of Water:</b> As an action, summon an Orb of Water from your amulet or select an existing orb within 60 ft. and move it to a space within 60 ft. Then activate its triggered ability, if any. You may move an Orb of Water less than 5 ft., but it cannot pass through a creature.<br>
+				<b>Recenter Yourself:</b> As a bonus action, return all Orbs of Water within 60 ft. to your amulet.
+			`
+
+			document.getElementById("abilityexplanation").innerHTML = `
+				<p><b>Water Trap</b> Trigger: An orb enters a space containing a creature. That creature makes a Dexterity saving throw. On a fail, they take 1d6 bludgeoning damage for every mark in this ability, and they are restrained for as long as they are within the space of the Orb of Water.</p>
+				<p><b>Healing Totem</b> Trigger: An Orb of Water ends its movement in an empty space next to an ally. Roll a d6 for each mark in this ability, and heal that ally for the total rolled.</p>
+				<p><b>Propelled Bound</b> When a creature enters into the space of an Orb of Water in a empty space, you may catapult the target up to 30 feet for each mark in this ability in a straight line in any direction. This ends the movement of the character, and does not cost an action or reaction to activate.</p>
+				<p><b>Detonate</b> Action. Once per short rest for each mark in this ability. Until the end of your next turn, creatures within 5 ft. reach of all Orbs of Water become vulnerable to lightning as long as they are in reach of an Orb of Water. Allies moving in this area does not cost them movement.</p>
+			`
+
+			document.getElementById("initiative").innerHTML = `
+				<button id="togglesheet" onclick="toggleSheet()">Let the monster out</button>
+				<h2>Armors</h2>
+				<h3>Armor of the Sea</h3>
+				<p><b>Action</b> – Your AC becomes 13 + your proficiency bonus for 8 hours.<p>
+				<h2>Stances</h2>
+				<i>When rolling initiative, choose one marked stance. It is active until combat ends.</i>
+				<h3>Of the Eel</h3>
+				<p>Your Water Trap makes creatures in the location of an Orb of Water have vulnerability to lightning.</p>
+				<h3>Of the Dolphin</h3>
+				<p>You gain one additional Orb of Water.</p>
+				<h3>Of the Sahuagin</h3>
+				<p>Your initiative increases by +4.</p>
+				<h3>Of the Purple Sea Urchin</h3>
+				<p>During initiative, use the action "Control Orb of Water" for free and move it to an empty space. Then take 1 Stress.</p>
+			`
+
+
+
+			characterCorruption = "light"
+		} else {
+			document.getElementById("content").style.background = "#ddd"
+
+			document.getElementById("noncombatheader").innerHTML = "Witch of the Sea"
+
+			document.getElementById("corruptionexplanation").innerHTML = `
+				<b>Saved from the Sea Witch:</b> When all stress is cleared, flip over your character sheet.
+			`
+
+			document.getElementById("noncombatexplanation").innerHTML = `
+				<b>Throw Tentacle:</b> As an action, make a Charisma spell attack against a creature within 30 ft. On a hit, it deals 1d6 force damage for every point of Stress you have.<br>
+				<b>Amulet of the Sea Witch:</b> You have an amulet which contains an amount of Orbs of Toxins equal to your Proficiency Bonus.<br>
+				Orbs of Toxins not in your amulet grant negative half cover (-2 AC, -2 Dexterity saving throw) and are considered difficult terrain.<br>
+				<b>Sea Witch Legs:</b> You can always use your swimming speed as your walking speed, and you must move at least 5 ft. per turn whenever possible.<br>
+				<b>Blood Magic:</b> When you roll a 6 on a d6, you may spend a hit die to roll another die and add it to the result.<br>
+				<b>Control Orb of Toxins:</b> As an action, summon an Orb of Toxins from your amulet or select an existing orb within 60 ft. and move it to a space within 60 ft. Then activate its triggered ability, if any. You may move an Orb of Toxins less than 5 ft., but it cannot pass through a creature.<br>
+				<b>Recenter Yourself:</b> As a bonus action, return all Orbs of Toxins within 60 ft. to your amulet.
+			`
+
+			document.getElementById("abilityexplanation").innerHTML = `
+				<p><b>Toxin Trap</b> Trigger: An orb enters a space containing a creature. That creature makes a Dexterity saving throw. On a fail, they take 2d6 acid damage for every mark in this ability, and as long as it stays in that space, it takes that amount of damage at the start of its turn.</p>
+				<p><b>Amplifying Totem</b> Trigger: An Orb of Toxins ends its movement in an empty space next to an enemy. When a ranged attack is shot through this space, it is duplicated for every mark in this ability.</p>
+				<p><b>Trail Bound</b> When a creature enters into the space of an Orb of Toxins in a empty space, you must catapult the target 10 feet for each mark in this ability in a straight line in any direction, dealing them 2d6 damage for every 5 feet moved. This ends the movement of the character, and does not cost an action or reaction to activate.</p>
+				<p><b>Magnetize</b> Action. Once per short rest. Move all Orbs of Toxins to the nearest creature of the orb within 10 ft. (including you) and activate Toxin Trap once for each Stress you have.</p>
+			`
+
+			document.getElementById("initiative").innerHTML = `
+				<button id="togglesheet" onclick="toggleSheet()">Return the monster back</button>
+				<h2>Stances</h2>
+				<i>When rolling initiative or becoming</i> Corrupted by the Sea Witch, <i>choose Stance of the Sea Witch. It is active until combat ends.</i>
+				<h3><input type="checkbox" checked disabled>Of the Sea Witch</h3>
+				<p>At the start of your turn, spend 1 Stress or use a Throw Tentacle attack against the nearest other creature within range.</p>
+			`
+
+			characterCorruption = "dark"
+		}
+	}
+
+
+	toggleSheet()
+</script>
+</body>
+</html>
