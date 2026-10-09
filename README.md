@@ -2,6 +2,8 @@
 
 ### Pathfinder 1e
 
+*(Arrow keys left/right to switch between levels)*
+
 https://amyzee.github.io/Character-Sheets/kineticist1ev2.html
 
 ### Pathfinder 2e
