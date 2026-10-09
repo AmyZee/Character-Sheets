@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Time travel RPG v0.2</title>
+<link rel="icon" href="char-amy.png">
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'">
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+<div id="game">
+</div>
+
+<div id="textbox">
+	<div id="portrait"></div>
+	<div id="textboxtext"></div>
+	<div id="textboxprevbutton">^</div>
+	<div id="textboxnextbutton">&gt;</div>
+</div>
+
+<div id="inventory">
+	<div id="options">
+		<img src="options-linedivider.png">
+		<img src="options-noshowinteractables.png" id="showinteractables" title="Toggle background visibility of all clickable areas.">
+		<img src="options-sound.png" id="soundbutton">
+		<img src="options-music.png" id="musicbutton">
+		<img src="options-dialogskip.png" id="dialogskipbutton">
+	</div>
+</div>
+
+
+
+
+<audio id="musicplayer" loop></audio> <!-- For background music, accessed through playMusic() -->
+<audio id="soundplayer"></audio> <!-- For individual sound effects layered ontop of the music tracks -->
+
+<script src="textbox.js"></script> <!--Call a set with: textbox(introtext1, introtext2, introtext3, ...), text variable names: see textlibrary.js-->
+<script src="textlibrary.js"></script> 
+<script src="cursorstodefault.js"></script>
+<script src="locationslibrary.js"></script>
+<script src="objectslibrary.js"></script>
+<script src="musiclibrary.js"></script>
+<script src="playeroptions.js"></script>
+<script src="index.js"></script>
+</html>

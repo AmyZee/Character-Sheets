@@ -1,0 +1,108 @@
+/*Dev presets, remove background to make objects transparent*/
+	.interactable{
+		/*background: red;*/
+	}
+
+	.arrowright, .arrowleft, .arrowupleft, .arrowupright, .arrowupforward, .arrowdownleft, .arrowdownright{
+		/*background: pink;*/
+	}
+	/*End dev presets*/
+
+	html, body{
+		background: black;
+		margin: 0;
+		cursor: url(normal.png), auto;
+	}
+	body{
+		min-height: 868px;
+	}
+	@font-face{
+		font-family: Renogare;
+		src: url(renogare.otf);
+	}
+
+	#textbox{
+		background: #539335;
+		padding: 1em;
+		padding-right: 2.1em;
+		color: white;
+		position: absolute;
+		height: 6em;
+		width: 600px;
+		bottom: 100px;
+		font-family: Renogare;
+		cursor: url(normal.png), auto;
+		font-size: 1.5em;
+		display: none;
+		border: 6px solid white;
+		border-radius: 4px;
+		box-shadow: 0 0 10px -5px black;
+		left: calc(50% - 300px - 1.9em);
+	}
+		#textboxtext{
+			white-space: pre-wrap;
+			margin-right: 1em;
+		}
+		#textboxprevbutton{
+			background: blue;
+			width: 1.5em;
+			height: 1.5em;
+			position: absolute;
+			right: 1em;
+			top: 1em;
+			display: none;
+			text-align: center;
+			line-height: 1.5em;
+			cursor: url(pointer.png), auto;
+			user-select: none;
+			border-radius: 4px;
+			border: 2px solid white;
+			box-shadow: 0 0 5px -2px black;
+		}
+		#textboxnextbutton{
+			background: orange;
+			width: 1.5em;
+			height: 1.5em;
+			position: absolute;
+			right: 1em;
+			bottom: 1em;
+			display: none;
+			text-align: center;
+			line-height: 1.5em;
+			cursor: url(pointer.png), auto;
+			user-select: none;
+			border-radius: 4px;
+			border: 2px solid white;
+			box-shadow: 0 0 5px -2px black;
+		}
+	#game{
+		cursor: url(normal.png), auto;
+		height: 768px;
+		width: 1024px;
+		margin: 0 auto;
+		position: relative;
+	}
+	#game img{
+		position: absolute;
+	}
+	#inventory{
+		position: fixed;
+		bottom: 0;
+		height: 100px;
+		width: 1024px;
+		margin: 0 auto;
+		left: calc(50% - 512px);
+		background: #3d7e3d;
+		opacity: 0.8;
+		padding: 0 32px;
+		box-sizing: border-box;
+	}
+	#portrait{
+		position: absolute;
+		top: -283px; /*Works for char-man.png; TODO: use consinstent image sizes!*/
+	}
+	#options{
+		position: absolute;
+		top: 18px;
+		right: 18px;
+	}
