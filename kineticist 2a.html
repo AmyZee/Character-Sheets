@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<style>
+	body{
+		line-height: 1.1em;
+	}
+	#bodycontent{
+		border: 1px solid black;
+		border-radius: 1em;
+		border-top-right-radius: 4em;
+		margin-top: 3em;
+		padding: 1em;
+		outline: 1px solid black;
+		outline-offset: -0.4em;
+		font-family: "Souvenir"
+	}
+	#info{
+		position: absolute;
+		left: 54%;
+		top: 15%;
+		width: 41%;
+		height: 38.5em;
+		background: #ffd;
+		padding: 0.5em;
+		border: 4px solid #bdb;
+		border-radius: 0.5em;
+	}
+	table{
+		border-collapse: collapse;
+		margin: 0.5em auto;
+	}
+	th, td{
+		border: 1px solid black; margin: 0 auto; text-align: center;
+	}
+	h1{
+		font-size: 1em;
+		font-weight: 500;
+		margin: 0.5em 0;
+	}
+	h3{
+		margin-top: 0.5em;
+		margin-bottom: 0.2em;
+	}
+	.actions{
+		font-family: "action_icons", "Pathfinder Action Icons";
+		width: 3em;
+		height: 1.6em;
+	}
+	#resources{
+		/*background: #555;*/
+		width: 520px;
+		color: #ddd;
+		height: 6em;
+		position: absolute;
+		top: 0.5em;
+		left: calc(50% - 260px);
+	}
+	#resources > div{
+		background: #fff;
+		display: inline-block;
+		border: 4px solid #bdb;
+		border-radius: 2em;
+		height: 2em;
+		width: 2em;
+		line-height: 2em;
+		font-size: 2em;
+		text-align: center;
+		/*box-shadow: 0 0 8px black;*/
+		margin: 0.2em;
+		cursor: default;
+		outline: 1px solid #880;
+		transition: all 0.1s ease;
+	}
+	#resources > .active{
+		border: 4px solid #aca;
+		background: #bdb;
+		color: #fff;
+		/*box-shadow: 0 0 8px #880;*/
+	}
+		#resources > #stance.steamknight-active{
+			border: 4px solid #ddd;
+			background: #eee;
+			color: #fff;
+		}
+		#resources > #stance.thermalnimbus-active-cold{
+			border: 4px solid #bbd;
+			background: #ccf;
+			color: #fff;
+		}
+		#resources > #stance.thermalnimbus-active-fire{
+			border: 4px solid #dbb;
+			background: #fcc;
+			color: #fff;
+		}
+	#feats{
+		position: absolute;
+		top: 420px;
+		left: 272px;
+		height: 360px;
+		background: #fff;
+		border: 2px solid #bbb;
+		outline: 1px solid #000;
+		outline-offset: 0px;
+		border-radius: 4px;
+		padding: 0.5em;
+		overflow-y: scroll;
+	}
+	#inventory{
+		position: absolute;
+		top: 680px;
+		left: calc(54% + 8px);
+		border: 1px solid #000;
+		width: 550px;
+		padding: 100px 0.25em 0.25em;
+		border-radius: 4px;
+		background: #ddc;
+	}
+	#skills, #skill-actions{
+		position: absolute;
+		top: 234px;
+		left: 280px;
+		columns: 2;
+		width: 440px;
+	}
+	.skills-disabled{
+		color: #bbd;
+	}
+	.amp-active{
+		color: orange;
+	}
+
+</style>
+<button id="togglecombat" style="position: absolute; top: 0.2em;" onclick="toggleCombat()">Combat OFF</button>
+<div id="bodycontent">
+<h1>Sylph Merfolk Deckhand Kineticist</h1>
+<h2>Level <span id="level">1</span></h2>
+
+<div id="basic-attributes">STR +2 | DEX +0 | CON +4 | INT +1 | WIS +0 | CHA +2 | HP 20</div>
+<div id="basic-defenses">Class DC 17 ●◦◦◦ | AC 14 ◦◦◦◦ | Fort +9 ●●◦◦ | Reflex +5 ●●◦◦ | Will +3 ●◦◦◦</div>
+<div id="inventory">
+Adventurer's Pack, Land-Dweller's Chair, Scale Mail, Steel Shield<br>
+Bulk 3 | Encumbered: 7 | Maximum: 12 | CP 0 | SP 5 | GP 2 | PP 0<br>
+swim Speed 25 ft., [Amphibious] | Common, Thallasic, Fey
+</div>
+
+<div id="resources">
+	<div class="actions" id="action1" onclick="this.classList.toggle('active')">á</div><div class="actions" id="action2" onclick="this.classList.toggle('active')">á</div><div class="actions" id="action3" onclick="this.classList.toggle('active')">á</div><div class="actions" id="action4" onclick="this.classList.toggle('active')">ä</div>
+	<!--<div id="kineticaura" onmouseover="kineticAura()" onclick="this.classList.toggle('active')">☼</div>-->
+	<div id="stance" onmouseover="thermalNimbus()" onclick="this.classList.remove('steamknight-active'); this.classList.remove('thermalnimbus-active-cold'); this.classList.remove('thermalnimbus-active-fire');"><span style="display: inline-block; width: 24px; height: 24px; text-align:center; line-height: 22px; border: 1px solid #bba; border-radius: 50%;">⋅</span></div>
+</div>
+
+
+<div id="class-abilies">
+
+	<br><br>
+	<span onmouseover="battleCryInitiative()" class="level-8 skills-disabled">Battle Cry (Initiative)</span><br>
+	<br>
+	<span onmouseover="kineticAura()" onclick="activateActions(1)"><span class="actions">á</span> ☼ Channel Elements</span><br>
+	<span onmouseover="thermalNimbus()" onclick="activateActions(1); thermalNimbusElement == 'cold' ? (document.getElementById('stance').classList.toggle('thermalnimbus-active-cold'), document.getElementById('stance').classList.remove('thermalnimbus-active-fire')) : (document.getElementById('stance').classList.toggle('thermalnimbus-active-fire'), document.getElementById('stance').classList.remove('thermalnimbus-active-cold'))" class="level-5 skills-disabled"><span class="actions">á</span> ⨀ Thermal Nimbus</span><br>
+	<span onmouseover="driftingPollen()" onclick="activateActions(1)" class="level-9 skills-disabled"><span class="actions">á</span> ⨀ Drifting Pollen</span><br>
+
+	<br>
+	<span onmouseover="deflectingWave()"><span class="actions">ä</span> Deflecting Wave</span><br>
+	<span onmouseover="shieldSpellBlock()" class="level-2 skills-disabled"><span class="actions">ä</span> Shield Block (Spell)</span><br>
+	<span onmouseover="battleCryCrit()" class="level-15 skills-disabled"><span class="actions">ä</span> Battle Cry (Critical)</span><br>
+	<br>
+
+
+	<span onmouseover="basicDamage1()" onclick="activateActions(1)"><span class="actions">á</span> Elemental Blast 1</span><br>
+
+
+	<span onmouseover="oceansBalm()" onclick="activateActions(1)"><span class="actions">á</span> <span style="font-family: 'D&D 4e icons'">m</span> Ocean's Balm</span><br>
+	<span onmouseover="extractElement()" onclick="activateActions(1)" class="level-3 skills-disabled"><span class="actions">á</span> Extract Element</span><br>
+	<span onmouseover="shieldSpell()" onclick="raiseShield == 0 ? raiseShield = 1 : raiseShield = 0; basicDefenses(); activateActions(1)" class="level-2 skills-disabled"><span class="actions">á</span> Shield (Spell)</span><br>
+	<span onmouseover="raiseAShield()" onclick="raiseShield == 0 ? raiseShield = 2 : raiseShield = 0; basicDefenses(); activateActions(1)"><span class="actions">á</span> Raise a Shield</span><br>
+	<br>
+	<span onmouseover="upliftingOverture()" onclick="activateActions(1)" class="level-6 skills-disabled"><span class="actions">á</span> Uplifting Overture</span><br>
+	<span onmouseover="courageousAnthem()" onclick="activateActions(1)" class="level-8 skills-disabled"><span class="actions">á</span> Courageous Anthem</span><br>
+	<span onmouseover="dirgeOfDoom()" onclick="activateActions(1)" class="level-12 skills-disabled"><span class="actions">á</span> Dirge of Doom</span><br>
+	<span onmouseover="lingeringComposition()" class="level-6 skills-disabled"><span class="actions">à</span> Lingering Composition</span><br>
+	<span onmouseover="fortissimoComposition()" class="level-16 skills-disabled"><span class="actions">à</span> Fortissimo Composition</span><br>
+	<br>
+	<span onmouseover="basicDamage2()" onclick="activateActions(2)"><span class="actions">â</span> Elemental Blast 2</span><br>
+	<span onmouseover="flyingFlame()" onclick="activateActions(2)" class="level-2 skills-disabled"><span class="actions">â</span> Flying Flame</span><br>
+	<span onmouseover="timberSentinel()" onclick="activateActions(2)" class="level-9 skills-disabled"><span class="actions">â</span> Timber Sentinel</span><br>
+	
+	<!--<span onmouseover="callTheHurricane()" onclick="activateActions(2)" class="level-8 skills-disabled"><span class="actions">â</span> <span style="font-family: 'D&D 4e icons'">A</span> Call the Hurricane</span><br>-->
+
+	<br>
+
+	<span onmouseover="stride()" onclick="activateActions(1)"><span class="actions">á</span> Stride</span><br>
+	<span onmouseover="strideChair()" onclick="activateActions(1)"><span class="actions">á</span> Stride (Chair)</span><br>
+	<!--<span onmouseover="warpStep()" onclick="activateActions(2)" class="level-2 skills-disabled"><span class="actions">â</span> Warp Step</span><br>-->
+	<!--<span onmouseover="unboundStep1()" onclick="activateActions(1); ; classList.contains('amp-active')?classList.remove('amp-active'):classList.add('amp-active')" class="level-2 skills-disabled"><span class="actions">á</span> Unbound Step</span><br>
+	<span onmouseover="unboundStep2()" onclick="activateActions(2)" class="level-2 skills-disabled"><span class="actions">â</span> Unbound Step</span><br>-->
+	<span onmouseover="burningJet()" onclick="activateActions(2)"><span class="actions">â</span> Burning Jet</span><br>
+
+	<br>
+
+	<span onmouseover="baseKinesis()" onclick="activateActions(2)"><span class="actions">â</span> Base Kinesis</span><br>
+	<span onmouseover="musicalAccompaniment()" onclick="activateActions(2)" class="level-2 skills-disabled"><span class="actions">â</span> Musical Accompaniment</span><br>
+	<span onmouseover="ambushBladderwort()" onclick="activateActions(2)" class="level-10 skills-disabled"><span class="actions">ã</span> Ambush Bladderwort</span><br>
+	<!--<span onmouseover="prestidigitation()" onclick="activateActions(2)" class="level-6 skills-disabled"><span class="actions">â</span> Prestidigitation</span><br>-->
+
+
+</div>
+
+
+<div id="skills">
+	Perception | +3 ●◦◦◦<br>
+	Acrobatics | +0 ◦◦◦◦<br>
+	Arcana | +1 ◦◦◦◦<br>
+	Athletics | +5 ●◦◦◦<br>
+	Crafting | +4 ●◦◦◦<br>
+	Deception | +2 ◦◦◦◦<br>
+	Diplomacy | +2 ◦◦◦◦<br>
+	Intimidation | +2 ◦◦◦◦<br>
+	<span style="font-size: 0.9em;">Lore: Farming | +4 ●◦◦◦<br></span>
+	<br>
+	Medicine | +3 ●◦◦◦<br>
+	Nature | +3 ●◦◦◦<br>
+	Occultism | +1 ◦◦◦◦<br>
+	Performance | +5 ●◦◦◦<br>
+	&nbsp;&nbsp;(Singing) | +5 ●◦◦◦<br>
+	Religion | +0 ◦◦◦◦<br>
+	Society | +1 ◦◦◦◦<br>
+	Stealth | +0 ◦◦◦◦<br>
+	Survival | +0 ◦◦◦◦<br>
+	Thievery | +0 ◦◦◦◦<br>
+</div>
+
+<div id="skill-actions" style="display: none;">
+	Athletics:<br>
+	<span onmouseover="disarm()" onclick="activateActions(1)"><span class="actions">á</span> <span style="font-family: 'D&D 4e icons'">m</span> Disarm</span><br>
+	<span onmouseover="grapple()" onclick="activateActions(1)"><span class="actions">á</span> <span style="font-family: 'D&D 4e icons'">m</span> Grapple</span><br>
+	<span onmouseover="shove()" onclick="activateActions(1)"><span class="actions">á</span> <span style="font-family: 'D&D 4e icons'">m</span> Shove</span><br>
+	<span onmouseover="reposition()" onclick="activateActions(1)"><span class="actions">á</span> <span style="font-family: 'D&D 4e icons'">m</span> Reposition</span><br>
+	<span onmouseover="trip()" onclick="activateActions(1)"><span class="actions">á</span> <span style="font-family: 'D&D 4e icons'">m</span> Trip</span><br>
+	<span onmouseover="leap()" onclick="activateActions(1)"><span class="actions">á</span> <span style="font-family: 'D&D 4e icons'">m</span> Leap</span><br>
+	Acrobatics:<br>
+	<span onmouseover="tumbleThrough()" onclick="activateActions(1)"><span class="actions">á</span> Tumble Through</span><br>
+	<span onmouseover="grabAnEdge()"><span class="actions">ä</span> Grab an Edge</span><br>
+	<br>
+	No skill:<br>
+	<span onmouseover="takeCover()" onclick="activateActions(1)"><span class="actions">á</span> Take Cover</span><br>
+	Stealth:<br>
+	<span onmouseover="hide()" onclick="activateActions(1)"><span class="actions">á</span> Hide</span><br>
+	<span onmouseover="sneak()" onclick="activateActions(1)"><span class="actions">á</span> Sneak</span><br>
+	Skill:<br>
+	<span onmouseover="recallKnowledge()" onclick="activateActions(1)"><span class="actions">á</span> Recall Knowledge</span><br>
+	Perception:<br>
+	<span onmouseover="pointOut()" onclick="activateActions(1)"><span class="actions">á</span> Point Out</span><br>
+	<br>
+	<span onmouseover="demoralize()" onclick="activateActions(1)"><span class="actions">á</span> Demoralize</span><br>
+</div>
+
+
+<div id="feats" style="padding: 0 1em">
+	<h3>Feats &amp; Skill Increases</h3>
+	Ancestry: Swift<br>
+	Background: Rostlander (Str, Con, Hefty Hauler, Farming Lore)<br>
+	<hr>
+	Class 1: Ocean's Balm<br>
+	Bonus: Burning Jet + Deflecting Wave<br>
+	●◦◦◦ Athletics, Crafting, Medicine, Performance<br>
+	<hr>
+	Class 2: Flying Flame<br>
+	Free Archetype: Bard Dedication<br>
+	&nbsp;&nbsp;(Musical Accompaniment, Shield, Polymath muse)<br>
+	●◦◦◦ Occultism, <span style="color: blue">FREE</span><br>
+	Skill 2: Virtuosic Performer<br>
+	<hr>
+	General 3: Armor Proficiency (Medium)<br>
+	Skill Increase (Athletics to ●●◦◦)<br>
+	<hr>
+	Class 4: Safe Elements | Skill 4: Trick Magic Item<br>
+	Free Archetype: Basic Muse's Whispers (Versatile Performance)<br>
+	<hr>
+	Class 5: Thermal Nimbus, Fire Aura Junction<br>
+	Ancestry 5: Strong Tail<br>
+	ASI: Con Str Dex Cha | Skill Increase (Performance to ●●◦◦)<br>
+	<hr>
+	Class 6: Advanced Muse's Whispers (Uplifting Overture)<br>
+	Skill 6: Impressive Performance<br>
+	Free Archetype: Advanced Muse's Whispers<br>
+	&nbsp;&nbsp;(Multifarious Muse > Lingering Composition)<br>
+	<hr>
+	General 7: Adopted Ancestry (Human)<br>
+	Skill Increases (Performance to ●●●◦)<br>
+	<hr>
+	Class 8: Psychic Dedication (Cha > Tanglible Dream > Shield)<br>
+	Skill 8: Battle Cry<br>
+	Free Archetype: Anthemic Performance<br>
+	<hr>
+	Class 9: Fork the Path (Wood, Drifting Pollen)<br>
+	Ancestry 9: Natural Ambition (Timber Sentinel)<br>
+	Skill Increases (Athletics to ●●●◦)<br>
+	<hr>
+	Class 10: Ambush Bladderwort | Skill 10: <span style="color: blue">FREE</span><br>
+	Free Archetype: <span style="color: blue">FREE</span><br>
+	ASI: Con Str Dex Cha<br>
+	<hr>
+	General 11: <span style="color: lightskyblue">FREE</span> | Skill Increase 11: <span style="color: lightskyblue">FREE</span><br>
+	<hr>
+	Class 12: <span style="color: lightskyblue">FREE</span> | Skill 12: <span style="color: lightskyblue">FREE</span><br>
+	Free Archetype: Advanced Muse's Whispers (Dirge of Doom)<br>
+	<hr>
+	Ancestry 13: <span style="color: lightskyblue">FREE</span> | Skill Increase 13: <span style="color: lightskyblue">FREE</span><br>
+	Gate Threshold: Expand the Portal (Water Skill Junction)<br>
+	<hr>
+	Class 14: <span style="color: lightskyblue">FREE</span> | Skill 14: <span style="color: lightskyblue">FREE</span><br>
+	Free Archetype: <span style="color: lightskyblue">FREE</span><br>
+	<hr>
+	General 15: <span style="color: lightskyblue">FREE</span> | Skill Increase 15 (Performance to ●●●●)<br>
+	ASI: Con Str Wis Cha<br>
+	<hr>
+	Class 16: <span style="color: lightblue">FREE</span> | Skill 16: <span style="color: lightblue">FREE</span><br>
+	Free Archetype: Advanced Muse's Whispers<br>
+	&nbsp;&nbsp;(Fortissimo Composition)<br>
+	<hr>
+	Ancestry 17: <span style="color: lightblue">FREE</span> | Skill Increase 17 (Athletics to ●●●●)<br>
+	<hr>
+	Class 18: <span style="color: lightblue">FREE</span> | Skill 18: <span style="color: lightblue">FREE</span><br>
+	Free Archetype:<span style="color: lightblue">FREE</span> <br>
+	<hr>
+	General 19: <span style="color: lightblue">FREE</span> | Skill Increase 19: <span style="color: lightblue">FREE</span><br>
+	<hr>
+	Class 20: <span style="color: lightblue">FREE</span> | Skill 20: <span style="color: lightblue">FREE</span><br>
+	Free Archetype: <span style="color: lightblue">FREE</span><br>
+	ASI: Con Str Int Cha<br>
+	<hr>
+</div>
+
+
+<div id="info"></div>
+</div>
+
+
+<script>
+
+var level = 1
+var strength = 2
+var dexterity = 0
+var constitution = 4
+var intelligence = 1
+var wisdom = 0
+var charisma = 2
+var raiseShield = 0
+
+document.addEventListener("keydown", function(e){
+	if(e.key == "ArrowRight"){
+		level++
+	}
+	if(e.key == "ArrowLeft"){
+		level--
+	}
+	document.getElementById("level").innerHTML = level
+
+	if(level == 5){
+		strength = 3; dexterity = 1; constitution = 4; intelligence = 1; wisdom = 0; charisma = 3
+	} else if (level == 4){
+		strength = 2; dexterity = 0; constitution = 4; intelligence = 1; wisdom = 0; charisma = 2
+	}
+	else if(level == 10){
+		strength = 4; dexterity = 2; constitution = 5; intelligence = 1; wisdom = 0; charisma = 4
+	} else if(level == 9){
+		strength = 3; dexterity = 1; constitution = 4; intelligence = 1; wisdom = 0; charisma = 3
+	}
+	else if(level == 15){
+		strength = 4; dexterity = 2; constitution = 5; intelligence = 1; wisdom = 1; charisma = 4
+	} else if(level == 14){
+		strength = 4; dexterity = 2; constitution = 5; intelligence = 1; wisdom = 0; charisma = 4
+	}
+	else if(level == 20){
+		strength = 5; dexterity = 2; constitution = 6; intelligence = 2; wisdom = 1; charisma = 5
+	} else if(level == 19){
+		strength = 4; dexterity = 2; constitution = 5; intelligence = 1; wisdom = 1; charisma = 4
+	}
+
+
+	if(combat == 0){
+		document.getElementById("basic-attributes").innerHTML = `
+			STR +${level > 19? strength :level > 14? strength + "." :strength} | DEX +${dexterity} | CON +${level > 19? constitution :level > 14? constitution + "." :level>9? constitution :level>4 ? constitution + "." : constitution} | INT +${intelligence} | WIS +${wisdom} | CHA +${level > 19? charisma :level > 14? charisma + "." :charisma} | HP ${8 + (8 + constitution) * level}
+		`
+	} else {
+		document.getElementById("basic-attributes").innerHTML = `
+			HP ${8 + (8 + constitution) * level}
+		`
+	}
+
+
+	basicDefenses()	
+	
+	skills()
+
+})
+
+function basicDefenses(){
+	document.getElementById("basic-defenses").innerHTML = `
+		Class DC ${level>18? 10 + constitution + level + 8 : level>14? 10 + constitution + level + 6 : level>6 ? 10 + constitution + level + 4 : 10 + constitution + level + 2} ${level>18?"●●●●":level>14?"●●●◦":level>6 ? "●●◦◦" : "●◦◦◦"}
+
+		| AC ${raiseShield > 0 ? "<b>" : ""}${level>12?19+level+raiseShield:level>4?17+level+raiseShield:level>2?16+level+raiseShield:14+raiseShield}${raiseShield > 0 ? "</b>" : ""} ${level>12?"●●◦◦":level>2?"●◦◦◦":"◦◦◦◦"}
+
+		| Fort +${level>14 ? constitution + level + 8 : level>6 ? constitution + level + 6 : constitution + level + 4} ${level>14? "●●●●" : level>6 ? "●●●◦" : "●●◦◦"}
+
+		| Reflex +${level>10? dexterity + level + 6 : dexterity + level + 4} ${level>10 ? "●●●◦" : "●●◦◦"}
+
+		| Will +${level>2 ? wisdom + level + 4 : wisdom + level + 2} ${level>2 ? "●●◦◦" : "●◦◦◦"}
+	`
+
+	for(var i = 0; i < document.getElementsByClassName("level-"+level).length; i++){
+		document.getElementsByClassName("level-"+level)[i].classList.remove("skills-disabled")
+	}
+	for(var i = 0; i < document.getElementsByClassName("level-"+(level+1)).length; i++){
+		document.getElementsByClassName("level-"+(level+1))[i].classList.add("skills-disabled")
+	}
+}
+
+
+
+
+
+function toggleCombat(){
+
+	if (combat == 1){
+
+		combat = 0
+		document.getElementById("togglecombat").innerHTML = "Combat OFF"
+		document.getElementById("skills").style.display = "block"
+		document.getElementById("feats").style.display = "block"; skills()
+		document.getElementById("skill-actions").style.display = "none"
+
+	} else {
+
+		combat = 1
+		document.getElementById("togglecombat").innerHTML = "Combat ON"
+		document.getElementById("skills").style.display = "none"
+		document.getElementById("feats").style.display = "none"
+		document.getElementById("skill-actions").style.display = "block"
+
+	}
+
+
+	if(combat == 0){
+		document.getElementById("basic-attributes").innerHTML = `
+			STR +${strength} | DEX +${dexterity} | CON +${level>4 ? constitution + "." : constitution} | INT +${intelligence} | WIS +${wisdom} | CHA +${charisma} | HP ${8 + (8 + constitution) * level}
+		`
+	} else {
+		document.getElementById("basic-attributes").innerHTML = `
+			HP ${8 + (8 + constitution) * level}
+		`
+	}
+
+}
+
+
+var combat = 0
+var basicDamageDice = "d6"
+var basicDamageRange = "60 ft"
+var basicDamageMelee = false //Toggles between ranged and melee
+var basicDamageTwoActions = true //Toggles between one and two actions
+var element = "fire"
+var thermalNimbusElement = "fire"
+
+function skills(){
+
+	document.getElementById("skills").innerHTML = `
+
+		Perception | +${level>8?level+wisdom+4:level+wisdom+2} ●${level>8?'●':'◦'}◦◦<br>
+		Acrobatics | +${dexterity} ◦◦◦◦<br>
+		Arcana | +${intelligence} ◦◦◦◦<br>
+		Athletics | +${level>19?level+13:level>16?level+12:level>9?level+10:level>8?level+9:level>4?level+7:level>2?level+6:level+4} ●${level>2?'●':'◦'}${level>8?'●':'◦'}${level>16?'●':'◦'}<br>
+		Crafting | +${intelligence + level + 2} ●◦◦◦<br>
+		Deception | +${charisma} ◦◦◦◦<br>
+		Diplomacy | +${charisma} ◦◦◦◦<br>
+		Intimidation | +${charisma} ◦◦◦◦<br>
+		<span style="font-size: 0.9em;">Lore: Farming | +${intelligence + level + 2} ●◦◦◦<br></span>
+		Medicine | +${wisdom + level + 2} ${level>9?"●◦◦◦":"●◦◦◦"}<br>
+		Nature | +${wisdom + level + 2} ●◦◦◦<br>
+		Occultism | +${level > 1 ? intelligence + level + 2 : intelligence} ${level>1?"●◦◦◦":"◦◦◦◦"}<br>
+		Performance | +${level > 14 ? charisma + level + 8 : level > 6 ? charisma + level + 6 : level > 4 ? charisma + level + 4 : charisma + level + 2} ●${level>4?'●':'◦'}${level>6?'●':'◦'}${level>14?'●':'◦'}<br>
+		&nbsp;&nbsp;(Singing) | +${level > 14 ? charisma + level + 8 + 2 : level > 6 ? charisma + level + 6 + 2 : level > 4 ? charisma + level + 4 + 1 : level > 1 ? charisma + level + 2 + 1 : charisma + level + 2} ●${level>4?'●':'◦'}${level>6?'●':'◦'}${level>14?'●':'◦'}<br>
+		Religion | +${wisdom} ◦◦◦◦<br>
+		Society | +${intelligence} ◦◦◦◦<br>
+		Stealth | +${dexterity} ◦◦◦◦<br>
+		Survival | +${wisdom} ◦◦◦◦<br>
+		Thievery | +${dexterity} ◦◦◦◦<br>
+
+	`
+
+}
+
+function activateActions(amount){
+	for(var i = 0; i < amount; i++){
+		if(document.getElementById("action3").classList.contains("active")){
+			document.getElementById("action3").classList.remove("active")
+			document.getElementById("action2").classList.remove("active")
+			document.getElementById("action1").classList.remove("active")
+			i = amount
+		} else if(document.getElementById("action2").classList.contains("active")){
+			//Active 3
+			document.getElementById("action3").classList.add("active")
+		} else if(document.getElementById("action1").classList.contains("active")){
+			//Active 2
+			document.getElementById("action2").classList.add("active")
+		} else {
+			//Active 1
+			document.getElementById("action1").classList.add("active")
+		}
+	}
+	
+	
+}
+
+function stride(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Stride</h2>
+		[Move]<br>
+		<br>
+		Move <b>${level>4?"20 ft.":"10 ft."}</b>
+	`
+}
+
+function strideChair(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Stride (Chair)</h2>
+		[Move]<br>
+		<br>
+		Move <b>${level>4?"25 ft.":"20 ft."}</b>
+	`
+}
+
+function warpStep(){
+	//Bard only
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">â</span> Warp Step</h2>
+		[Cantrip] [Conjuration]
+
+		<br>
+		Gain a +5-foot status bonus to your Speed until the end of your turn. Then Stride <b>${level>4?"25 ft.":"15 ft."}</b> twice. You can use warp step to Burrow, Climb, Fly, or Swim instead of Stride if you have the corresponding movement type.
+	`
+}
+
+function unboundStep1(){
+	//Psychic only
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Unbound Step</h2>
+		[Cantrip] [Conjuration] <b>1 Focus point</b><br>
+
+		<br>
+		Gain a +10-foot status bonus to your Speed until the end of your turn. Then Stride <b>${level>4?"30 ft.":"20 ft."}</b> twice. You can use warp step to Burrow, Climb, Fly, or Swim instead of Stride if you have the corresponding movement type.
+	`
+
+}
+
+function unboundStep2(){
+	//Psychic only
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">â</span> Unbound Step</h2>
+		[Cantrip] [Conjuration]<br>
+		<br>
+		Gain a +10-foot status bonus to your Speed until the end of your turn. Then Stride <b>${level>4?"30 ft.":"20 ft."}</b> twice. You can use warp step to Burrow, Climb, Fly, or Swim instead of Stride if you have the corresponding movement type.
+	`
+}
+
+function kineticAura(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Kinetic Aura | Channel Elements</h2>
+		[Air] [Aura] [Kineticist] [Primal] [Water]<br>
+		<b>Requirements:</b> Your kinetic gate isn't active.<br>
+		<br>
+		Your kinetic aura activates, and as part of this action, you can use<br>
+		<b>Elemental Blast 1</b> or <b>Thermal Nimbus</b>.<br>
+		<hr>
+		Your kinetic aura is a 10-foot emanation where pieces of your all your kinetic elements flow around you.<br>
+		It automatically deactivates if you're knocked out, you use an impulse with the [Overflow] trait, or your Dismiss the aura.<br>
+		Though you can't use new impulses while your kinetic aura is deactivated, you can Sustain any that can be sustained.<br>
+		Stance impulses are connected to your kinetic aura and end when the aura deactivates.<br>
+		<hr>
+		${level>4 ? "<b>Level 5:</b> Enemies in your kinetic aura gain weakness to fire from your fire impulses. The weakness is equal to half your level (minimum weakness 1).<br><hr>" : ""}
+		<p style="text-align: center; font-family: monospace">
+
+			- o o o -<br>
+			o o o o o<br>
+			o o x o o<br>
+			o o o o o<br>
+			- o o o -
+
+		</p>
+		<br>
+	`
+}
+
+function basicDamage1(){
+
+	document.getElementById("info").innerHTML = `
+
+		<h2><span class="actions">á</span> ${basicDamageMelee ? "Melee" : "Ranged"} One-Action ${element=="bludgeoning" ? " Bludgeoning" : element=="cold" ? " Cold" : element=="fire" ? " Fire" : ""} Elemental Blast</h2>
+		[Attack] [Impulse] [Kineticist] [Primal]<br>
+		<br>
+		<span onclick="basicDamageMelee = true; basicDamage1()"><u>Melee</u></span> <span onclick="basicDamageMelee = false; basicDamage1()"><u>Range</u></span>
+| <span onclick="element = 'bludgeoning'; basicDamageDice = 'd8'; basicDamageRange = '30 ft'; basicDamage1()"><u>Bludgeoning</u></span> <span onclick="element = 'cold'; basicDamageDice = 'd8'; basicDamageRange = '30 ft'; basicDamage1()"><u>Cold</u></span> <span onclick="element = 'fire'; basicDamageDice = 'd6'; basicDamageRange = '60 ft'; basicDamage1()"><u>Fire</u></span></span><br>
+		<br>
+		<b>Attack:</b> +${level>18? constitution + level + 8 : level>14? constitution + level + 6 : level>6? constitution + level + 4 : constitution + level + 2} vs AC (${basicDamageRange})<br>
+		&nbsp;&nbsp;<b>Crit success:</b> The target takes double damage.<br>
+		&nbsp;&nbsp;<b>Success:</b> ${Math.ceil(level/4)}${basicDamageDice} + ${basicDamageMelee ? strength : "0"}<br>
+	`
+}
+
+function basicDamage2(){
+
+	document.getElementById("info").innerHTML = `
+
+		<h2><span class="actions">â</span> ${basicDamageMelee ? "Melee" : "Ranged"} Two-Action ${element=="bludgeoning" ? " Bludgeoning" : element=="cold" ? " Cold" : element=="fire" ? " Fire" : ""} Elemental Blast</h2>
+		[Attack] [Impulse] [Kineticist] [Primal]<br>
+		<br>
+		<span onclick="basicDamageMelee = true; basicDamage2()"><u>Melee</u></span> <span onclick="basicDamageMelee = false; basicDamage2()"><u>Range</u></span>
+| <span onclick="element = 'bludgeoning'; basicDamageDice = 'd8'; basicDamageRange = '30 ft'; basicDamage2()"><u>Bludgeoning</u></span> <span onclick="element = 'cold'; basicDamageDice = 'd8'; basicDamageRange = '30 ft'; basicDamage2()"><u>Cold</u></span> <span onclick="element = 'fire'; basicDamageDice = 'd6'; basicDamageRange = '60 ft'; basicDamage2()"><u>Fire</u></span></span><br>
+		<br>
+		<b>Attack:</b> +${level>18? constitution + level + 8 : level>14? constitution + level + 6 : level>6? constitution + level + 4 : constitution + level + 2} vs AC (${basicDamageRange} vs AC (${basicDamageRange})<br>
+		&nbsp;&nbsp;<b>Crit success:</b> The target takes double damage.<br>
+		&nbsp;&nbsp;<b>Success:</b> ${Math.ceil(level/4)}${basicDamageDice} + ${basicDamageMelee ? strength + constitution : constitution}<br>
+	`
+}
+
+function deflectingWave(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">ä</span> Deflecting Wave</h2>
+		[Impulse] [Kineticist] [Primal] [Water]<br>
+		<br>
+		<b>Trigger:</b> You would take acid, bludgeoning, fire, or slashing damage from an enemy's attack, spell, or other hostile effect.<br>
+		<b>Requirements:</b> You are aware of the hostile effect, and you aren't off-guard against it.<br>
+		<b>Effect:</b><br>
+		&nbsp;&nbsp;Bludgeoning: You gain <b>${level}</b> resistance to it.<br>
+		&nbsp;&nbsp;Slashing: You gain <b>${level}</b> resistance to it.<br>
+		&nbsp;&nbsp;Acid: You gain <b>${level*2}</b> resistance to it.<br>
+		&nbsp;&nbsp;Fire: You gain <b>${level*2}</b> resistance to it.<br>
+		<hr>
+		<i>Bludgeoning or Slashing: Resistance equal to your level.<br>
+		Acid or Fire: Resistance equal to double your level.<br>
+		If the effect deals more than one applicable type of damage, apply the highest resistance, but apply it only once.</i>
+	`
+}
+
+function shieldSpellBlock(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>1 ? '#000' : '#bba'}"><h2><span class="actions">ä</span> Shield Block (Spell)</h2>
+		[Cantrip] [Concentrate] [Force]<br>
+		<br>
+		<b>Trigger:</b> While the Shield spell is active, you would take damage from a physical or magical attack.<br>
+		<b>Effect:</b><br>
+		You snap your shield in place to ward off a blow. Your shield prevents you from taking <b>${level>16?"25":level>12?"20":level>8?"15":level>4?"10":"5"}</b> magical or physical damage. After you use Shield Block, the spell ends and you can't cast it again for 10 minutes.<br></span>
+		<hr>
+	`
+}
+
+function raiseAShield(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Raise a Shield</h2>
+		<b>Requirements:</b> You are wielding a shield.<br>
+		<b>Duration:</b> Until the start of your next turn.<br>
+		<b>Effect:</b><br>
+		Yu gain <b>+2</b> circumstance bonus to AC.
+	`
+}
+
+function shieldSpell(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>1 ? '#000' : '#bba'}"><h2><span class="actions">á</span> Shield (Spell)</h2>
+		[Cantrip] [Concentrate] [Force]<br>
+		<br>
+		<b>Duration:</b> until the start of your next turn<br>
+		You raise a magical shield of force. This counts as using the Raise a Shield action, giving you a +1 circumstance bonus to AC until the start of your next turn, but it doesn't require a hand to use.<br>
+		<hr></span>
+		<span style="color:${level>7 ? '#000' : '#bba'}">
+		<b>Level 8</b> Your shield spell can be deployed on behalf of others. When you cast shield, you can choose a target ally within 30 feet to gain the benefits of the spell instead of you. The option to Shield Block with the spell is up to you and uses your reaction, not the target's. Your shield also gains the following amp.<br>
+		<br>
+		<b>Amp</b> You create a layered barrier of three shields to improve your defenses. The duration increases to sustained up to 1 minute. The shield still lowers at the start of each of your turns, but you can raise it again when you Sustain the Spell.<br>
+		<br>
+		When you Shield Block with this spell, one of the three layers breaks and you cease to gain the bonus to AC, but the spell doesn't end. You can keep using the spell until the final layer breaks; once it does, the spell ends and you can't cast shield or amped shield again for 10 minutes. You can choose to break additional layers when you Shield Block with this spell to improve your defenses. If you break two layers instead of one, increase the Hardness to 1-1/2 × the normal amount (7 at 1st level, 15 at 3rd level, 22 at 5th level, 30 at 7th level, and 37 at 9th level). If you break all three layers, increase the Hardness to double the normal amount.<br></span>
+	`
+}
+
+function burningJet(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">â</span> Burning Jet</h2>
+		[Fire] [Impulse] [Kineticist] [Primal]<br>
+		<br>
+		<i>A condensed burst of flame shoots behind you, propelling you with sheer force.</i><br>
+		<br>
+		Stride up to <b>${level>5 ? "60" : "40"}</b> feet in a straight line. Movement from this impulse ignores difficult terrain and doesn't trigger reactions.<br>
+		<span style="color:${level>5 ? "#000" : "#bba"}">${level>5 ? "" : "Level 6:"}You can choose to Leap up to 40 feet in any direction instead of Striding. If you're in the air at the end of the Leap, you fall normally.</span><br>
+		<span style="color:${level>9 ? "#000" : "#bba"}">Level 10: As 6th level, but you hover briefly after leaping into the air. If you Leap, you don't fall until the end of your next turn. If you use Burning Jet again on a subsequent turn, you remain airborne.</span><br>
+		<hr>
+		<i>Level 6: The maximum distance of the Stride is 60 feet.</i>
+
+	`
+}
+
+function flyingFlame(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">â</span> Flying Flame</h2>
+		[Fire] [Impulse] [Kineticist] [Primal]<br>
+		<br>
+		A Tiny shape of flame appears, taking a form of your choice—such as a bird, an arrow, or a simple sphere.<br>
+		It Flies from you up to 30 feet in a path you choose.<br>
+		Each creature it passes through takes <b>${level>8 ? "5d6" : level>6 ? "4d6" : level>4 ? "3d6" : level>2 ? "2d6" : "1d6"}</b> fire damage with a basic Reflex save against your class DC.<br>
+		A creature attempts only one save, even if the flame passes through it multiple times.<br>
+		<br>
+		<hr>
+		<i>Level 1: 1d6<br>
+		Level +2: The damage increases by 1d6.</i>
+
+	`
+}
+
+function timberSentinel(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">â</span> Timber Sentinel</h2>
+		[Impulse] [Kineticist] [Plant] [Primal] [Wood]<br>
+		<br>
+		A slim, symmetrical tree travels from the Plane of Wood. You conjure a tree within 30 feet, as a protector tree spell of a rank equal to half your level rounded up. If you use this impulse again, any previous one ends, and an ordinary tree remains.<br>
+		<hr>
+		<b>Protector Tree</b><br>
+		<b>Duration</b> 1 minute<br>
+		<br>
+		A Medium tree suddenly grows in an unoccupied square within range. The tree has AC 10 and <b>${level > 18 ? 100 : level > 16 ? 90 : level > 14 ? 80 : level > 12 ? 70 : level > 10 ? 60 : level > 8 ? 50 : level > 6 ? 40 : level > 4 ? 30 : level > 2 ? 20 : 10}</b> Hit Points. Whenever an ally adjacent to the tree is hit by a Strike, the tree interposes its branches and takes the damage first. Any additional damage beyond what it takes to reduce the tree to 0 Hit Points is dealt to the original target. The tree isn't large enough to impede movement through its square.<br>
+		<br>
+		If the tree is in soil and survives to the end of the spell's duration, it remains as an ordinary, non-magical tree, and continues to grow and thrive. The GM might determine that the tree disappears immediately in certain inhospitable situations.<br>
+		<hr>
+		<b>Level +2</b> +10 HP<br>
+	`
+}
+
+function baseKinesis(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">â</span> Base Kinesis</h2>
+		[Impulse] [Kineticist] [Primal]<br>
+		<br>
+		It's trivial for you to create some of your element or alter a portion of it that already exists.<br>
+		Choose one of your kinetic elements to affect.<br>
+		This impulse has a range of <b>${level>8 ? "60" : level>4 ? "45" : "30"}</b> feet, and the Bulk of the target must be <b>${level>8 ? "up to Bulk 2" : level>4 ? "up to Bulk 1" : "neglectible or light"}.</b> The GM decides what Bulk the element is.<br>
+		You can't affect an element that's magical, secured in place (like a stone mortared in a wall), or attended by a creature unwilling to let you.<br>
+		<br>
+		Choose one of the following options, though the GM might allow you to make similar small alterations.<br>
+		Base Kinesis can't deal damage or cause conditions unless otherwise noted.<br>
+		<ul>
+		<li><b>Generate</b> You bring an ordinary, non-magical piece of the chosen element from its elemental plane.<br>
+		The element can be used for any of its normal uses. For example, air can be breathed by an air-breathing creature, and fire casts light and can ignite flammable substances.
+		<li><b>Move</b> Move an existing piece of the element up to 20 feet in any direction. If you bring it in your space, you can catch it in an open hand.<br>
+		You can Sustain the impulse to keep moving the element.
+		<li><b>Suppress</b> You destroy an existing piece of element, such as snuffing out a flame or evaporating water from a cup.<br>
+		This affects only natural forms of the element, not durable, crafted goods like a stone statue, metal lock, or wooden door.
+		</ul>
+		<i>Level 1: 30 feet, neglectible or light | Level +4: The range increases by 15 feet, and the maximum Bulk increases by 1 (allowing Bulk 1 at 5th level).</i>
+	`
+}
+
+function prestidigitation(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">â</span> Prestidigitation</h2>
+		[Cantrip] [Concentrate] [Manipulate]<br>
+		<br>
+		<b>Range</b> 10 feet <b>Target</b> 1 object (cook, lift, or tidy only)<br>
+		<b>Duration</b> Sustained<br>
+		<br>
+		The simplest magic does your bidding. You can perform simple magical effects for as long as you Sustain the spell. Each time you Sustain the spell, you can choose one of four options.<br>
+		<br>
+		<li><b>Cook</b> Cool, warm, or flavor 1 pound of nonliving material.
+		<li><b>Lift</b> Slowly lift an unattended object of light Bulk or less 1 foot off the ground.
+		<li><b>Make</b> Create a temporary object of negligible Bulk, made of congealed magical substance. The object looks crude and artificial and is extremely fragile - it can't be used as a tool, weapon, or locus or cost for a spell.
+		<li><b>Tidy</b> Color, clean, or soil an object of light Bulk or less. You can affect an object of 1 Bulk with 10 rounds of concentration, and a larger object a 1 minute per Bulk.<br>
+		<br>
+		Prestidigitation can't deal damage or cause adverse conditions. Any actual change to an object (beyond what is noted above) persists only as long as you Sustain the spell.
+	`
+}
+
+function oceansBalm(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Ocean's Balm</h2>
+		[Healing] [Impulse] [Kineticist] [Manipulate] [Primal] [Vitality] [Water]<br>
+		<br>
+		<i>A blessing of the living sea salves wounds and douses flames.</i><br>
+		Touch a willing living creature. It regains <b>${level>8 ? "5d8" : level>6 ? "4d8" : level>4 ? "3d8" : level>2 ? "2d8" : "1d8"}</b> Hit Points and gains <b>${level>8 ? "resistance 6" : level>6 ? "resistance 5" : level>4 ? "resistance 4" : level>2 ? "resistance 3" : "resistance 2"}</b> to fire for 1 minute.<br>
+		If it has persistent fire damage, it can attempt a flat check to remove it with appropiate help.<br>
+		The target is temporarily immunte to healing from Ocean's Balm for 10 minutes.<br>
+		<br>
+		<hr>
+		<i>Level 1: 1d8, resistance 2<br>
+		Level +2: The healing increases by 1d8, and the resistance increases by 1.</i>
+	`
+}
+
+function extractElement(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>2 ? '#000' : '#bba'}"><h2><span class="actions">á</span> Extract Element</h2>
+		[Impulse] [Kineticist] [Primal]<br>
+		<br>
+		You extract elemental matter from a creature's body to weaken it and take its power for your own.<br>
+		Target a creature within 30 feet that has a trait matching one of your kinetic elements or is made of one of your kinetic elements.<br>
+		The target takes <b>${level>8 ? "6d4" : level>6 ? "5d4" : level>4 ? "4d4" : level>2 ? "3d4" : "2d4"}</b> damage (with no damage type) and becomes susceptible to your impulses, depending on its Fortitude save against your class DC.<br>
+		<br>
+		<b>Critical Success</b> The creature is unaffected.<br>
+		<b>Success</b> The creature takes half damage, and you add some of its elemental matter to your kinetic aura.<br>
+		&nbsp;&nbsp;Your impulses bypass any immunity the creature has to their elemental trait or traits, and the target takes a -1 circumstance penalty to its saves and AC against your impulses.<br>
+		&nbsp;&nbsp;If the target normally has a resistance that would apply to damage from one of your impulses, ignore that resistance;<br>
+		&nbsp;&nbsp;if it normally would be immune to that damage type, it instead has resistance equal to its level to damage from the impulse.<br>
+		&nbsp;&nbsp;You can't target a creature with Extract Element if elemental matter you extracted from it is already in your kinetic aura.<br>
+		&nbsp;&nbsp;These effects lasts for 5 minutes or until your kinetic aura ends, whichever comes first.<br>
+		<b>Failure</b> As success, but the creature takes full damage.<br>
+		<b>Critical Failure</b> As failure, but the creature takes double damage.<br>
+		<br>
+		<hr>
+		<i>Level 1: 2d4<br>
+		Level +2: The damage increases by 1d4.</i></span>
+	`
+}
+
+function returnToTheSea(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>3 ? '#000' : '#bba'}"><h2><span class="actions">â</span> Return to the Sea</h2>
+		[Impulse] [Kineticist] [Morph] [Primal] [Water]<br>
+		<br>
+		Target <b>${level>5 ? "up to 5 willing creatures" : "a willing creature"}</b> within 30 ft.<br>
+		For 10 minutes, it gains the effects of the <i>feet to fins</i> spell, can breathe water, and gets a +1 status bonus to AC and saves against any creatures with the Amphibious, Aquatic, or Water trait.<br>
+		In addition, its attacks ignore the effects water normally has on bludgeoning and slashing attacks.<br>
+		If you use <i>Return to the Sea</i> again, any existing one ends.<br>
+		<br>
+		<hr>
+		<i>Level 1: One willing creature<br>
+		<i>Level 6: Up to 5 willing creatures.</i>
+		<br>
+		<br>
+		<h2>Feet to Fins</h2>
+		The target's feet transform into fins, improving mobility in the water but reducing it on land.<br>
+		The target gains a swim Speed equal to its normal land Speed, but its land Speed becomes 5 feet.</span>
+
+
+	`
+}
+
+function battleCryInitiative(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>7 ? '#000' : '#bba'}"><h2>Battle Cry (Initiative)</h2>
+		When you roll initiative, you can yell a mighty battle cry and Demoralize an observed foe as a free action.<br>
+
+	`
+}
+
+function battleCryCrit(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>7 ? '#000' : '#bba'}"><h2><span class="actions">ä</span> Battle Cry (Critical)</h2>
+		<b>Trigger:</b> You critically succeed at an attack roll against a target<br>
+		<b>Effect:</b> Attempt to Demoralize your target.<br>
+
+	`
+}
+
+function thermalNimbus(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>4 ? '#000' : '#bba'}"><h2><span class="actions">á</span> <span style="display: inline-block; width: 24px; height: 24px; text-align:center; line-height: 22px; border: 1px solid ${level>4 ? '#000' : '#bba'}; border-radius: 50%;">⋅</span> Thermal ${thermalNimbusElement == 'cold' ? 'Cold' : 'Fire'} Nimbus</h2>
+		[Fire] [Impulse] [Kineticist] [Primal] [Stance]<br>
+		<br>
+		<span onclick="thermalNimbusElement='cold'; document.getElementById('stance').classList.toggle('thermalnimbus-active-cold'), document.getElementById('stance').classList.remove('thermalnimbus-active-fire'); thermalNimbus()"><u>Cold</u></span>
+		<span onclick="thermalNimbusElement='fire'; document.getElementById('stance').classList.toggle('thermalnimbus-active-fire'), document.getElementById('stance').classList.remove('thermalnimbus-active-cold'); thermalNimbus()"><u>Fire</u></span>
+		<br>
+		<br>
+		<i>You direct waves of warmth into or out of your kinetic gate to drastically shift the temperature around you.</i><br>
+		<br>
+		Choose cold or fire. You and allies in your kinetic aura gain Resist ${thermalNimbusElement == 'cold' ? 'Cold' : 'Fire'} <b>${level}</b>.<br>
+		Any creature that starts its turn in your kinetic aura or moves into your aura during its turn takes <b>${Math.floor(level/2)}</b> damage ${thermalNimbusElement == 'cold' ? '' : '<i>(+<b>'+Math.floor(level/2)+'</b> fire weakness)</i>'} of the chosen type. Elemental resistance from a gate junction is cumulative with resistance from Thermal Nimbus.<br>
+		<hr>
+		<i>Resistance: Equal to your level.</i><br>
+		<i>Damage: Equal to half your level.</i><br>
+	`
+
+}
+
+function driftingPollen(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>8 ? '#000' : '#bba'}"><h2><span class="actions">á</span> <span style="display: inline-block; width: 24px; height: 24px; text-align:center; line-height: 22px; border: 1px solid ${level>4 ? '#000' : '#bba'}; border-radius: 50%;">⋅</span> Drifting Pollen</h2>
+		[Impulse] [Kineticist] [Plant] [Primal] [Stance] [Wood]<br>
+		<br>
+		A haze of pollen floats around you. A creature in your kinetic aura when you enter the stance, or who later enters the aura or ends its turn in the aura, attempts at a Fortitude save against your class DC. On a failure, it's sickened 1 (sickened 2 on a critical failure) and dazzled until it's no longer sickened. A creature attempts this save no more than once per round and doesn't attempt a new save if already affected.<br>
+		<hr>
+		<i><b>Safe Elements</b> Allies are not affected.</i><br>
+		<i><b>Sickened</b> You take a status penalty to all their checks and DC. You cannot willingly ingest anything while sickened. You can spend a single action to make a new Fortitude save against your class DC.</i><br>
+		<i><b>Dazzled</b> If vision is your only precise sense, all creatures and objects are concealed to you.</i><br>
+		</span>
+	`
+}
+
+function steamKnight(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>4 ? '#000' : '#bba'}"><h2><span class="actions">á</span> <span style="display: inline-block; width: 24px; height: 24px; text-align:center; line-height: 22px; border: 1px solid ${level>4 ? '#000' : '#bba'}; border-radius: 50%;">⋅</span> Steam Knight Stance</h2>
+		[Composite] [Fire] [Impulse] [Kineticist] [Primal] [Stance] [Water]<br>
+		<br>
+		<i>You shape your kinetic aura into swirling armor of steam that scalds your enemies and propels you on super-heated jet streams.</i><br>
+		A creature can take damage from Steam Knight only once per round. Your steam armor has the following effects.<br>
+		<ul>
+		<li>You gain a +10-foot status bonus to your Speed.
+		<li>When you Leap, you can jump up to your Speed. You don't immediately fall at the end of the jump, provided you Leap again with your next action.<br>
+		If you Leap over a creature and come within 10 feet, that creature takes <b>2d6</b> fire damage with a basic Reflex save against your class DC.
+		<li>At the start of each of your turns, you can emit steam as a free action.<br>
+		It deals <b>2d6</b> fire damage to each creature in your kinetic aura with a basic Reflex save against your class DC. A creature that fails is also pushed 5 feet.
+		</ul>
+		<br>
+		<hr>
+		<i>Level +5: The fire damage from a jump or blast of steam increases by 1d6.</i></span>
+	`
+}
+
+function upliftingOverture(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>5 ? '#000' : '#bba'}"><h2><span class="actions">á</span> Uplifting Overture</h2>
+		[Uncommon] [Bard] [Cantrip] [Composition] [Concentrate] [Emotion] [Mental]<br>
+		<br>
+		<b>Range</b> 60 ft. <b>Target</b> 1 ally<br>
+		<b>Duration</b> 1 round<br>
+		<hr>
+		Your performance makes allies feel they can succeed at anything. This counts as having prepared to Aid your ally on a skill check of your choice. When you later use the Aid reaction, you can roll Performance instead of the normal skill check, and if you roll a failure, you get a success instead. If you are legendary in Performance, you automatically critically succeed. The GM might rule that you can't use this ability if the act of encouraging your ally would interfere with the skill check (such as a check to Sneak quietly or maintain a disguise).<br>
+	`
+}
+
+function lingeringComposition(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>5 ? '#000' : '#bba'}"><h2><span class="actions">à</span> Lingering Overture</h2>
+		[Uncommon] [Bard] [Concentrate] [Focus] [Spellshape]<br>
+		<br>
+		You add a flourish to your composition to extend its benefits. If your next action is to cast a cantrip composition with a duration of 1 round, attempt a <b>Performance check.</b> The DC is usually a standard-difficulty DC of a level equal to the highest-level target of your composition, but the GM can assign a different DC based on the circumstances. The effect depends on the result of your check.<br>
+		<hr>
+		<b>Crit success</b> The composition lasts 4 rounds.<br>
+		<b>Success</b> The composition lasts 3 rounds.<br>
+		<b>Failure</b> The composition lasts 1 round, but you don't spend the Focus Point for casting this spell.<br>
+	`
+}
+
+function courageousAnthem(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>7 ? '#000' : '#bba'}"><h2><span class="actions">á</span> Courageous Anthem</h2>
+		[Uncommon] [Bard] [Cantrip] [Composition] [Concentrate] [Emotion] [Mental]<br>
+		<br>
+		<b>Area</b> 60 ft. emanation<br>
+		<b>Duration</b> 1 round<br>
+		<hr>
+		You inspire yourself and your allies with words or tunes of encouragement. You and all allies in the area gain a +1 status bonus to attack rolls, damage rolls, and saves against fear effects.<br>
+	`
+}
+
+function dirgeOfDoom(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>5 ? '#000' : '#bba'}"><h2><span class="actions">á</span> Dirge of Doom</h2>
+		[Uncommon] [Bard] [Cantrip] [Composition] [Concentrate] [Emotion] [Fear] [Mental]<br>
+		<br>
+		<b>Area</b> 30 ft. emanation<br>
+		<b>Duration</b> 1 round<br>
+		<br>
+		Enemies within the area are frightened 1. They can't reduce their frightened value below 1 while they remain in the area.<br>
+	`
+}
+
+function fortissimoComposition(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>5 ? '#000' : '#bba'}"><h2><span class="actions">à</span> Fortissimo Composition</h2>
+		[Uncommon] [Bard] [Concentrate] [Focus] [Spellshape]<br>
+		<br>
+		You call upon your muse to greatly increase the benefits you provide with your courageous anthem, rallying anthem, or song of strength composition. If your next action is to cast one of these compositions, attempt a Performance check. The DC is usually the highest Will DC of the composition's targets, but the GM can assign a different DC based on the circumstances. The effect of your composition depends on the result of your check.<br>
+		<br>
+		<b>Crit success</b> The status bonus from your composition increases to +3.<br>
+		<b>Success</b> The status bonus from your composition increases to +2.<br>
+		<b>Failure</b> Your composition provides only its normal bonus of +1, but you don't spend the Focus Point for casting this spell.<br>
+	`
+}
+
+
+
+function callTheHurricane(){
+	document.getElementById("info").innerHTML = `
+		<span style="color:${level>7 ? '#000' : '#bba'}"><h2><span class="actions">â</span> Call the Hurricane</h2>
+		[Impulse] [Kineticist] [Overflow] [Primal] [Water]<br>
+		<br>
+		<i>Massive waves spiral around you, with you as the eye of the hurricane.</i><br>
+		The waves appear in a 20-foot emanation, or a 30-foot emanation if you're in a body of water.<br>
+		Each creature in the area takes <b>6d8</b> bludgeoning damage with a basic Reflex save against your class DC.<br>
+		A creature that fails its save is battered by the waves and pushed 10 feet (or 20 feet on a critical failure.)<br>
+		<br>
+		<hr>
+		Level +2: The damage increases by 1d8.</span>
+	`
+}
+
+function musicalAccompaniment(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">â</span> Musical Accompaniment</h2>
+		[Auditory] [Cantrip] [Illusion] [Verbal:Concentrate]<br>
+		<br>
+		<b>Duration</b> ${level > 2 ? "10 minutes" : "1 minute"}<br>
+		<hr>
+		You're surrounded by orchestral music that shifts and changes to match your behavior. This music provides a <b>+1 status bonus to Performance</b> checks. At the GM's discretion, it provides this bonus to Deception, Diplomacy, and Intimidation checks as the music changes to support you in social situations, though some creatures are unaffected by such obvious attempts to use music to illicit specific emotions. This music moves with you and has a maximum volume equal to four humans shouting. You take a <b>–4 penalty to Stealth</b> checks while the music is playing. You can't control the exact music this spell creates. The music doesn't create intelligible words or singing. You can Dismiss this spell.<br>
+		<hr>
+		Level 3: Duration increases to 10 minutes<br>
+	`
+}
+
+function ambushBladderwort(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">ã</span> Ambush Bladderwort</h2>
+		[Composite] [Impulse] [Kineticist] [Plant] [Primal] [Water] [Wood]<br>
+		<br>
+		You plant the seed of a giant bladderwort in an unoccupied square of ground or water within 30 feet. It lasts for 10 minutes. Using this impulse again ends any previous one. If a creature enters its square, the seed erupts into a voluminous, translucent plant that seals tight around the triggering creature and fills with water. Unless the creature succeeds at a Reflex save against your class DC, it's immobilized within the bladderwort and must hold its breath or begin drowning. The Escape DC is also your class DC. The plant has AC 10 and <b>${level > 19 ? 150 : level > 15 ? 125 : level > 11 ? 100 : level > 7 ? 75 : 50}</b> Hit Points.<br>
+		If a creature dies inside it, the plant shrinks down, converting itself and the remains into a watery fruit. A creature can eat this consumable to regain <b>${level > 19 ? "5d8+20" : level > 15 ? "4d8+16" : level > 11 ? "3d8+12" : level > 7 ? "2d8+8" : "1d8+4"}</b> HP, after which that creature is temporarily immune for 10 minutes. This fruit rots after 1 hour.<br>
+		<hr>
+		Level +4: +25 HP, +1d8+4 healing
+	`
+}
+
+function disarm(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Disarm</h2>
+		[Attack]<br>
+		<b>Requirements:</b> You have at least one hand free. The target can't be more than one size larger than you.<br>
+		<br>
+		<b>+${level>19?level+13:level>16?level+12:level>9?level+10:level>8?level+9:level>4?level+7:level>2?level+6:level+4}</b> vs Reflex DC<br>
+		<br>
+		You try to knock an item out of a creature's grasp.<br>
+		<br>
+		<b>Crit success:</b> You knock the item out of the target's grasp. It falls to the ground in the target's space.<br>
+		<b>Success:</b> You weaken your target's grasp on the item. Further attempts to Disarm the target of that item gain a +2 circumstance bonus, and the target takes a –2 circumstance penalty to attacks with the item or other checks requiring a firm grasp on the item. The creature can end the effect by Interacting to change its grip on the item; otherwise, it lasts as long as the creature holds the item.<br>
+		<b>Fail:</b> —<br>
+		<b>Crit fail:</b> You lose your balance and become off-guard until the start of your next turn.<br>
+		<br>
+	`
+}
+
+function grapple(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Grapple</h2>
+		[Attack]<br>
+		<b>Requirements:</b> You have at least one hand free. The target can't be more than one size larger than you.<br>
+		<br>
+		<b>+${level>19?level+13:level>16?level+12:level>9?level+10:level>8?level+9:level>4?level+7:level>2?level+6:level+4}</b> vs Fort DC. You can Grapple a target you already have grabbed or restrained without having a hand free.<br>
+		<br>
+		<b>Crit success:</b> Your target is restrained until the end of your next turn unless you move or your target Escapes.<br>
+		<b>Success:</b> Your target is grabbed until the end of your next turn unless you move or your target Escapes.<br>
+		<b>Fail:</b> You fail to grab your target. If you already had the target grabbed or restrained using a Grapple, those conditions on the target end.<br>
+		<b>Crit fail:</b> If you already had the target grabbed or restrained, it breaks free. Your target can either grab you, as if it succeeded at using the Grapple action against you, or force you to fall and land prone.<br>
+		<br>
+		<hr>
+		<i><b>Restrained</b><br>
+		You have the </i>off-guard (-2 penalty to AC)<i> and </i>immobilized<i> conditions.<br>
+		You can't use any </i>attack<i> or </i>manipulate<i> actions except to attempt to Escape or Force Open your bonds.<br>
+		Restrained overrides grabbed.</i><br>
+		<br>
+		<i><b>Grabbed</b><br>
+		You have the </i>off-guard (-2 penalty to AC)<i> and </i>immobilized<i> conditions.<br>
+		If you attempt a </i>manipulate<i> action while grabbed, you must succeed at a DC 5 flat check or it is lost; roll the check after spending the action, but before any effects are applied.</i><br>
+		<br>
+		<i><b>Immobilized</b> You are incapable of movement. You can't use any actions that have the move trait. If you're immobilized by something holding you in place and an external force would move you out of your space, the force must succeed at a check against either the DC of the effect holding you in place or the relevant defense (usually Fortitude DC) of the monster holding you in place.</i><br>
+	`
+}
+
+function shove(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Shove</h2>
+		[Attack]<br>
+		<b>Requirements:</b> You have at least one hand free. The target can't be more than one size larger than you.<br>
+		<br>
+		<b>+${level>19?level+13:level>16?level+12:level>9?level+10:level>8?level+9:level>4?level+7:level>2?level+6:level+4}</b> vs Fort DC<br>
+		<br>
+		You push a creature away from you.<br>
+		<br>
+		<b>Crit success:</b> You push your target up to 10 feet away from you. You can Stride after it, but you must move the same distance and in the same direction.<br>
+		<b>Success:</b> You push your target back 5 feet. You can Stride after it, but you must move the same distance and in the same direction.<br>
+		<b>Fail:</b> —<br>
+		<b>Crit fail:</b> You lose your balance, fall, and land prone.<br>
+		<br>
+	`
+}
+
+function reposition(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Reposition</h2>
+		[Attack]<br>
+		<b>Requirements:</b> You either have at least one hand free, or you're grabbing or restraining the target. The target can't be more than one size larger than you<br>
+		<br>
+		<b>+${level>19?level+13:level>16?level+12:level>9?level+10:level>8?level+9:level>4?level+7:level>2?level+6:level+4}</b> vs Fort DC<br>
+		<br>
+		You muscle a creature or object around.<br>
+		<br>
+		<b>Crit success:</b> You move the creature up to 10 feet. It must remain within your reach during this movement, and you can't move it into or through obstacles.<br>
+		<b>Success:</b> You move the target up to 5 feet. It must remain within your reach during this movement, and you can't move it into or through obstacles.<br>
+		<b>Fail:</b> —<br>
+		<b>Crit fail:</b> The target can move you up to 5 feet as though it successfully Repositioned you.<br>
+		<br>
+	`
+}
+
+function trip(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Trip</h2>
+		[Attack]<br>
+		<b>Requirements:</b> You have at least one hand free. The target can't be more than one size larger than you.<br>
+		<br>
+		<b>+${level>19?level+13:level>16?level+12:level>9?level+10:level>8?level+9:level>4?level+7:level>2?level+6:level+4}</b> vs Reflex DC<br>
+		<br>
+		You try to knock a creature to the ground.<br>
+		<br>
+		<b>Crit success:</b> The target falls, lands prone, and takes 1d6 bludgeoning damage.<br>
+		<b>Success:</b> The target falls and lands prone.<br>
+		<b>Fail:</b> —<br>
+		<b>Crit fail:</b> You lose your balance, fall, and land prone.<br>
+		<br>
+		<hr>
+		<i><b>Prone</b> You are </i>off-guard (-2 circumstance penalty to AC)<i> and take a –2 circumstance penalty to attack rolls.<br>
+		The only move actions you can use while you're prone are Crawl and Stand. Standing up ends the prone condition.<br>
+		You can </i>Take Cover<i> while prone to hunker down and gain greater cover against ranged attacks, even if you don't have an object to get behind, which grants you a +4 circumstance bonus to AC against ranged attacks (but you remain off-guard).<br>
+		If you would be knocked prone while you're Climbing or Flying, you fall. You can't be knocked prone when Swimming.</i><br>
+	`
+}
+
+function leap(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Leap</h2>
+		[Move]<br>
+		<b>Requirements:</b> You have at least one hand free. The target can't be more than one size larger than you.<br>
+		<br>
+		You take a short horizontal or vertical jump.
+		<br>
+		<br>
+		<b>Horizontal Jump:</b> up to 10 feet horizontally if your Speed is at least 15 feet, or up to 15 feet horizontally if your Speed is at least 30 feet. You land in the space where your Leap ends (meaning you can typically clear a 5-foot gap, or a 10-foot gap if your Speed is 30 feet or more). You can't make a horizontal Leap if your Speed is less than 15 feet.<br>
+		<b>Vertical Jump:</b> up to 3 feet vertically and 5 feet horizontally onto an elevated surface.<br>
+		<br>
+	`
+}
+
+function tumbleThrough(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Tumble Through</h2>
+		[Move]<br>
+		<b>Requirements:</b> You have at least one hand free. The target can't be more than one size larger than you.<br>
+		<br>
+		<b>+${dexterity}</b> vs Reflex DC<br>
+		<br>
+		You Stride up to your Speed. During this movement, you can try to move through the space of one enemy. Attempt an Acrobatics check against the enemy's Reflex DC as soon as you try to enter its space. You can Tumble Through using Climb, Fly, Swim, or another action instead of Stride in the appropriate environment.<br>
+		<br>
+		<b>Crit success:</b> You knock the item out of the target's grasp. It falls to the ground in the target's space.<br>
+		<b>Success:</b> You move through the enemy's space, treating the squares in its space as difficult terrain (every 5 feet costs 10 feet of movement). If you don't have enough Speed to move all the way through its space, you get the same effect as a failure.<br>
+		<b>Fail:</b> Your movement ends, and you trigger reactions as if you had moved out of the square you started in.<br>
+		<br>
+	`
+}
+
+function grabAnEdge(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">ä</span> Grab an Edge</h2>
+		[Manipulate]<br>
+		<b>Trigger:</b> You fall from or past an edge or handhold.<br>
+		<b>Requirements:</b> Your hands are not tied behind your back or otherwise restrained.<br>
+		<br>
+		<b>+${dexterity}</b> vs Reflex DC<br>
+		<br>
+		When you fall off or past an edge or other handhold, you can try to grab it, potentially stopping your fall. You must succeed at your choice of an Acrobatics check or a Reflex save, usually at the Climb DC. If you grab the edge or handhold, you can then Climb up using Athletics.<br>
+		<br>
+		<b>Crit success:</b> You grab the edge or handhold, whether or not you have a hand free, typically by using a suitable held item to catch yourself (catching a battle axe on a ledge, for example). You still take damage from the distance fallen so far, but you treat the fall as though it were 30 feet shorter.<br>
+		<b>Success:</b> If you have at least one hand free, you grab the edge or handhold, stopping your fall. You still take damage from the distance fallen so far, but you treat the fall as though it were 20 feet shorter. If you have no hands free, you continue to fall as if you had failed the check.<br>
+		<b>Fail:</b> —<br>
+		<b>Crit fail:</b> You continue to fall, and if you've fallen 20 feet or more before you use this reaction, you take 10 bludgeoning damage from the impact for every 20 feet fallen.<br>
+		<br>
+	`
+}
+
+function takeCover(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Take Cover</h2>
+		<b>Requirements:</b> You are benefiting from cover, are near a feature that allows you to take cover, or are prone.<br>
+		<br>
+		You press yourself against a wall or duck behind an obstacle to take better advantage of cover. If you would have standard cover, you instead gain greater cover, which provides a +4 circumstance bonus to AC; to Reflex saves against area effects; and to Stealth checks to Hide, Sneak, or otherwise avoid detection. Otherwise, you gain the benefits of standard cover (a +2 circumstance bonus instead). This lasts until you move from your current space, use an attack action, become unconscious, or end this effect as a free action.<br>
+		<br>
+	`
+}
+
+function hide(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Hide</h2>
+		[Secret]<br>
+		<b>+${dexterity}</b> vs Perception DC<br>
+		<br>
+		You huddle behind cover or greater cover or deeper into concealment to become hidden, rather than observed. The GM rolls your Stealth check in secret and compares the result to the Perception DC of each creature you're observed by but that you have cover or greater cover against or are concealed from. You get a +2 circumstance bonus to your check if you have standard cover (or +4 from greater cover).<br>
+		<br>
+		<b>Success:</b> If the creature could see you, you're now hidden from it instead of observed. If you were hidden from or undetected by the creature, you retain that condition.<br>
+		<br>
+		If you successfully become hidden to a creature but then cease to have cover or greater cover against it or be concealed from it, you become observed again. You cease being hidden if you do anything except Hide, Sneak, or Step. If you attempt to Strike a creature, the creature remains off-guard against that attack, and you then become observed. If you do anything else, you become observed just before you act unless the GM determines otherwise. The GM might allow you to perform a particularly unobtrusive action without being noticed, possibly requiring another Stealth check.<br>
+		<br>
+		If a creature uses Seek to make you observed by it, you must successfully Hide to become hidden from it again.<br>
+		<br>
+	`
+}
+
+function sneak(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Sneak</h2>
+		[Move][Secret]<br>
+		<b>+${dexterity}</b> vs Perception DC<br>
+		<br>
+		You attempt to move to another place while becoming or staying undetected. Stride up to half your Speed. (You can use Sneak while Burrowing, Climbing, Flying, or Swimming instead of Striding if you have the corresponding movement type; you must move at half that Speed.)<br>
+		<br>
+		At the end of your movement, the GM rolls your Stealth check in secret and compares the result to the Perception DC of each creature you were hidden from or undetected by at the start of your movement. If you have cover or greater cover from the creature throughout your Stride, you gain the +2 circumstance bonus from cover (or +4 from greater cover) to your Stealth check. Because you're moving, the bonus increase from Taking Cover doesn't apply. You don't get to roll against a creature if, at the end of your movement, you neither are concealed from it nor have cover or greater cover against it. You automatically become observed by such a creature.<br>
+		<br>
+		<b>Success:</b> You're undetected by the creature during your movement and remain undetected by the creature at the end of it.<br>
+		You become observed as soon as you do anything other than Hide, Sneak, or Step. If you attempt to Strike a creature, the creature remains off-guard against that attack, and you then become observed. If you do anything else, you become observed just before you act unless the GM determines otherwise. The GM might allow you to perform a particularly unobtrusive action without being noticed, possibly requiring another Stealth check. If you speak or make a deliberate loud noise, you become hidden instead of undetected.<br>
+		If a creature uses Seek and you become hidden to it as a result, you must Sneak if you want to become undetected by that creature again.<br>
+		<br>
+		<b>Fail:</b> A telltale sound or other sign gives your position away, though you still remain unseen. You're hidden from the creature throughout your movement and remain so.<br>
+		<b>Crit fail:</b> You're spotted! You're observed by the creature throughout your movement and remain so. If you're invisible and were hidden from the creature, instead of being observed you're hidden throughout your movement and remain so.<br>
+		<br>
+	`
+}
+
+function recallKnowledge(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Recall Knowledge</h2>
+		[Concentrate][Secret]<br>
+		<b>Crafting</b> +${intelligence + level + 2} vs DC<br>
+		<b>Lore (Farming)</b> +${intelligence + level + 2} vs DC<br>
+		<b>Occultism</b> +${level > 1 ? intelligence + level + 2 : intelligence} vs DC<br>
+		<br>
+		<b>Medicine</b> +${wisdom + level + 2} vs DC<br>
+		<b>Nature</b> +${wisdom + level + 2} vs DC<br>
+		<br>
+		<b>Arcana</b> +${intelligence} vs DC<br>
+		<b>Religion</b> +${wisdom} vs DC<br>
+		<b>Society</b> +${intelligence}vs DC<br>
+		<br>
+		You attempt a skill check to try to remember a bit of knowledge regarding a topic related to that skill. Suggest which skill you'd like to use and ask the GM one question. The GM determines the DC. You might need to collaborate with the GM to narrow down the question or skills, and you can decide not to Recall Knowledge before committing to the action if you can't don't like your options.<br>
+		<br>
+		<b>Crit success:</b> You recall the knowledge accurately. The GM answers your question truthfully and either tells you additional information or context, or answers one followup question.<br>
+		<b>Success:</b> You recall the knowledge accurately. The GM answers your question truthfully.<br>
+		<b>Fail:</b> —<br>
+		<b>Crit fail:</b> You recall incorrect information. The GM answers your question falsely (or decides to give you no information, as on a failure).<br>
+		<br>
+	`
+}
+
+function pointOut(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Point Out</h2>
+		[Auditory][Manipulate][Visual]<br>
+		<b>Requirements:</b> A creature is undetected by one or more of your allies but isn't undetected by you.<br>
+		<br>
+		You indicate a creature that you can see to one or more allies, gesturing in a direction and describing the distance verbally. That creature is hidden to your allies, rather than undetected. This works only for allies who can see you and are in a position where they could potentially detect the target. If your allies can't hear or understand you, they must succeed at a Perception check against the creature's Stealth DC or they misunderstand and believe the target is in a different location.<br>
+		<br>
+	`
+}
+
+function demoralize(){
+	document.getElementById("info").innerHTML = `
+		<h2><span class="actions">á</span> Demoralize</h2>
+		[Auditory][Concentrate][Emotion][Fear][Mental]<br>
+		<b>Range:</b> 30 feet<br>
+		<br>
+		<b>+${level > 14 ? charisma + level + 8 : level > 6 ? charisma + level + 6 : level > 4 ? charisma + level + 4 : level > 3 ? charisma + level + 2 : charisma}</b> vs Will DC<br>
+		<br>
+		With a sudden shout, a well-timed taunt, or a cutting put-down, you can shake an enemy's resolve. Choose a creature within 30 feet of you who you're aware of. Attempt an Intimidation check against that target's Will DC. If the target doesn't understand the language you are speaking, or you're not speaking a language, you take a –4 circumstance penalty to the check. Regardless of your result, the target is temporarily immune to your attempts to Demoralize it for 10 minutes.<br>
+		<br>
+		<b>Critical success:</b> The target becomes frightened 2.<br>
+		<b>Success:</b> The target becomes frightened 1.<br>
+		<br>
+		<hr>
+		Level 6: Intimidation or Performance<br>
+		<br>
+		<i><b>Frightened</b> You take a status penalty equal to this value to all your checks and DCs.<br>
+		Unless specified otherwise, at the end of each of your turns, the value of your frightened condition decreases by 1.</i><br>
+
+	`
+}
+
+</script>
+
+<style>
+
+@font-face{
+	font-family: "Pathfinder Action Icons";
+	src: url(data:font/otf;charset=utf-8;base64,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);
+}
+
+</style>
+
+</body>
+
+</html>

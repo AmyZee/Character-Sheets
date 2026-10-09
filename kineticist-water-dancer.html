@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Merfolk Water Dancer</title>
+<style>
+	.mechanic{
+		color: cornflowerblue;
+		font-weight: bold;
+	}
+	.action{
+		display: inline-block;
+		font-family: "action_icons";
+		width: 1.6em;
+		padding-right: 0.2em;
+		text-align: right;
+	}
+	div:has(> .action){
+		cursor: context-menu;
+	}
+	html, body{
+		margin: 0;
+	}
+	.current{
+		color: green;
+		font-weight: bold;
+	}
+	.locked{
+		color: silver;
+		font-size: 0.98em;
+	}
+	.locked-level{
+		filter: blur(1px) grayscale(0.8);
+	}
+	#container{
+		width: 1200px;
+		position: relative;
+	}
+	#left{
+		position: absolute;
+		width: 480px;
+		left: 40px;
+		height: calc(100vh - 48px);
+		overflow-y: scroll;
+		margin-top: 48px;
+		padding-top: 6px;
+	}
+	#top{
+		display: block;
+		z-index: 1;
+		background: antiquewhite;
+		border-bottom: 1px solid darkred;
+		padding: 0.4em 1.2em;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 480px;
+		height: 34px;
+	}
+	#top > div{
+		display: none;
+		justify-content: space-between;
+		width: 480px;
+	}
+	#top > div > div{
+		border: 2px solid rgba(125, 125, 125, 0.2);
+		border-radius: 4px;
+		padding: 0.4em 0.6em 0.2em 0.6em;
+		margin: 0em;
+	}
+	#middle{
+		position: absolute;
+		left: 540px;
+		width: 320px;
+		height: 100vh;
+		overflow-y: scroll;
+	}
+	#right{
+		position: absolute;
+		left: 880px;
+		width: 480px;
+		height: calc(100vh);
+		overflow-y: scroll;
+	}
+	.level-based{
+		color: green;
+		font-weight: bold;
+	}
+	.bonus{
+		color: darkgoldenrod;
+		font-weight: bold;
+		white-space: nowrap;
+	}
+	.char-level{
+		background: crimson;
+		padding: 0.4em;
+		border-top: 2px solid darkred;
+		border-left: 2px solid darkred;
+		border-right: 2px solid darkred;
+		font-weight: medium;
+		border-radius: 4px 4px 0 0;
+		margin-right: 2px;
+		color: rgba(254, 255, 255, 1);
+		font-family: sans-serif;
+		margin-top: 1em;
+	}
+	.hp{
+		float: right;
+	}
+	.powers{
+		background: antiquewhite;
+		padding: 0.4em;
+		border-left: 2px solid darkred;
+		border-right: 2px solid darkred;
+		margin-right: 2px;
+	}
+		.powers > div{
+			border: 2px solid rgba(125, 125, 125, 0.2);
+			border-radius: 4px;
+			padding: 0.6em;
+			margin: 0.4em;
+		}
+	.upgrades{
+		background: burlywood;
+		padding: 0.4em;
+		border-left: 2px solid darkred;
+		border-right: 2px solid darkred;
+		border-bottom: 2px solid darkred;
+		margin-right: 2px;
+	}
+	.tag-active{
+		display: inline-block;
+		padding: 0.4em;
+		margin-bottom: 1em;
+		border: 2px solid darkgoldenrod;
+		background: goldenrod;
+		color: white;
+	}
+	.tag-passive{
+		display: inline-block;
+		padding: 0.4em;
+		margin-bottom: 1em;
+		border: 2px solid crimson;
+		background: darkred;
+		color: white;
+	}
+	.powers div:not(.feat-action){
+		transition: 0.2s all ease-in-out;
+		cursor: context-menu;
+	}
+	.powers div:not(.feat-action):hover{
+		transform: scale(1.05);
+		transition: 0.2s all ease-in-out;
+	}
+	.feat-action::before{
+		content: "";
+		position: absolute;
+		display: block;
+		height: 30px;
+		width: 30px;
+		right: -16px;
+		top: 4px;
+		background: rgba(255, 160, 122, 1);
+		transform: rotate(45deg);
+	}
+	.powers > .feat-action{
+		position: relative;
+		margin-right: 1.2em;
+		background: linear-gradient(90deg, rgba(0, 0, 0, 0) 50%, rgba(255, 160, 122, 1) 90%);
+	}
+	.attack-description{
+		display: none;
+	}
+	.auditory-description{
+		display: none;
+	}
+	.bravado-description{
+		display: none;
+	}
+	.manipulate-description{
+		display: none;
+	}
+	.visual-description{
+		display: none;
+	}
+	#right:has(.attack:hover) .attack-description{
+		display: block;
+	}
+	#right:has(.auditory:hover) .auditory-description{
+		display: block;
+	}
+	#right:has(.bravado:hover) .bravado-description{
+		display: block;
+	}
+	#right:has(.manipulate:hover) .manipulate-description{
+		display: block;
+	}
+	#right:has(.visual:hover) .visual-description{
+		display: block;
+	}
+	h2{
+		font-size: 0.9em;
+		margin: 0.1em 0;
+		font-weight: normal;
+	}
+	h2:before{
+		content: "–";
+	}
+	h2:after{
+		content: "–";
+	}
+	.content{
+		border: 1px solid black;
+		border-radius: 8px;
+		padding: 8px;
+	}
+</style>
+</head>
+<body>
+<div id="container">
+	<div id="left">
+		<div id="top">
+			<div id="level-1-defenses"><div>Level 1</div><div>HP 20</div><div>AC 16</div><div>Reflex +7</div><div>Fort +9</div><div>Will +3</div></div>
+			<div id="level-2-defenses"><div>Level 2</div><div>HP 32</div><div>AC 17</div><div>Reflex +8</div><div>Fort +10</div><div>Will +4</div></div>
+			<div id="level-3-defenses"><div>Level 3</div><div>HP 44</div><div>AC 18</div><div>Reflex +9</div><div>Fort +11</div><div>Will +7</div></div>
+			<div id="level-4-defenses"><div>Level 4</div><div>HP 56</div><div>AC 19</div><div>Reflex +10</div><div>Fort +12</div><div>Will +8</div></div>
+			<div id="level-5-defenses"><div>Level 5</div><div>HP 68</div><div>AC 22</div><div>Reflex +12</div><div>Fort +13</div><div>Will +9</div></div>
+			<div id="level-6-defenses"><div>Level 6</div><div>HP 80</div><div>AC 23</div><div>Reflex +13</div><div>Fort +14</div><div>Will +10</div></div>
+			<div id="level-7-defenses"><div>Level 7</div><div>HP 92</div><div>AC 24</div><div>Reflex +14</div><div>Fort +17</div><div>Will +11</div></div>
+			<div id="level-8-defenses"><div>Level 8</div><div>HP 104</div><div>AC 25</div><div>Reflex +15</div><div>Fort +18</div><div>Will +12</div></div>
+			<div id="level-9-defenses"><div>Level 9</div><div>HP 116</div><div>AC 26</div><div>Reflex +16</div><div>Fort +19</div><div>Will +13</div></div>
+			<div id="level-10-defenses"><div>Level 10</div><div>HP 138</div><div>AC 27</div><div>Reflex +17</div><div>Fort +21</div><div>Will +14</div></div>
+		</div>
+		<div id="level-0">
+		<div>
+			<b>AC bonuses:</b><br>
+			Base 10 +<br>
+			<input type="checkbox" checked disabled>+2 (Dexterity)<br>
+			<input type="checkbox" checked disabled>+2 (Trained)<br>
+			<input type="checkbox" checked disabled>+1 (Scaly Hide)<br>
+			<input type="checkbox">+2 (Level 5)<br>
+			<input type="checkbox">+1 Item bonus (Armor potency rune)<br>
+			<input type="checkbox">+1 Circumstance bonus (Shield cantrip)<br>
+			<input type="checkbox">+2 Circumstance bonus (Standard cover)<br>
+			+level<br>
+		</div>
+		<br>
+		Gear: 13 gp 1 sp 6 cp<br>
+		Dagger, Backpack, Bedroll, Flint and Steel, Rope, Hammer, 4x Piton,<br>
+		5x Torch, 10x Chalk, 2x Rations, Soap, Waterskin<br>
+		Bulk: 1 / 5<br>
+		<br>
+		<div class="char-level">Attributes<div class="hp">At level 1</div></div>
+		<div class="powers" style="border-bottom: 2px solid darkred;">
+			<div style="display: inline-block;">+0</div>
+			<div style="display: inline-block;">+2</div>
+			<div style="display: inline-block;">+4</div>
+			<div style="display: inline-block;">+1</div>
+			<div style="display: inline-block;">+0</div>
+			<div style="display: inline-block;">+2</div>
+		</div>
+
+		<div class="char-level">Defenses<div class="hp">At level 1</div></div>
+		<div class="powers" style="border-bottom: 2px solid darkred;">
+			<div style="display: inline-block;">HP 20</div>
+			<div style="display: inline-block;">AC 16</div>
+			<div style="display: inline-block;">Reflex +7</div>
+			<div style="display: inline-block;">Fort +9</div>
+			<div style="display: inline-block;">Will +3</div>
+		</div>
+
+		<div class="char-level">Ancestry<div class="hp">Merfolk</div></div>
+		<div class="powers" style="border-bottom: 2px solid darkred;">
+			<div id="scaly-hide">Ancestry: Scaly Hide</div>
+		Heritage: Dragonblood (Versatile)<br>
+		Vision: Low-light<br>
+		Speed: 5 ft.<br>
+		</div>
+
+		<div class="char-level">Background<div class="hp">Zodiac Bound: The Swallow</div></div>
+		<div class="powers" style="border-bottom: 2px solid darkred;">
+			<div class="feat-action">Free: Jump (1/day)</div>
+		</div>
+
+		<div class="char-level">Class<div class="hp">Kineticist</div></div>
+		<div class="powers" style="border-bottom: 2px solid darkred;">
+			<div>Dual Gate: Fire + Water</div>
+			Fortitude ●●○○<br>
+			Reflex  ●●○○<br>
+			Will ●○○○<br>
+			Kineticist Class DC ●○○○<br>
+			Simple Weapons ●○○○<br>
+			Unarmed Attacks ●○○○<br>
+			Unarmored Defense ●○○○<br>
+			Light Armor ●○○○<br>
+		</div>
+		<div class="char-level">Skills<div class="hp"></div></div>
+		<div class="powers" style="border-bottom: 2px solid darkred;">
+			Perception ●○○○<br>
+			Nature ●○○○<br>
+			Acrobatics ●○○○<br>
+			Athletics ●○○○<br>
+			Crafting ●○○○<br>
+			Lore: Astrology ●○○○<br>
+			Performance ●○○○<br>
+		</div>
+		</div>
+
+		<div id="level-1">
+			<div class="char-level">Level 1 Powers<div class="hp">HP: 20</div></div>
+			<div class="powers" style="border-bottom: 2px solid darkred;">
+				<div class="feat-action">Class: Ocean's Balm</div>
+				<div class="feat-action">Class: Flying Flame</div>
+				<div class="feat-action">Class: Water Dance</div>
+			Feature: Channel Elements<br>
+			<div id="base-kinesis">Feature: Base Kinesis</div>
+			Feature: Elemental Blast<br></div>
+		</div>
+
+		<div id="level-2">
+			<div class="char-level">Level 2 Powers<div class="hp">HP: +12</div></div>
+			<div class="powers" style="border-bottom: 2px solid darkred;">
+				<div id="swashbuckler-dedication">Class: Swashbuckler Dedication</div>
+					<div id="panache" style="margin-left: 2em;">Panache</div>
+					<div id="stylish-combatant" style="margin-left: 2em;">Stylish Combatant</div>
+					<div id="swashbuckler-style" style="margin-left: 2em;">Style: Braggart</div>
+				<div id="bard-dedication">Archetype: Bard Dedication</div>
+					<div style="margin-left: 2em" class="feat-action">Cantrip: Glamorize</div>
+					<div style="margin-left: 2em" class="feat-action">Cantrip: Shield</div>
+					<div style="margin-left: 2em" id="muse-polymath">Muse: Polymath</div>
+				<div id="intimidating-glare">Skill: Intimidating Glare</div>
+			Skill Training: Intimidation ●○○○<br>
+			Skill Training: Occultism ●○○○<br>
+			Skill Training: Stealth ●○○○<br></div>
+		</div>
+
+		<div id="level-3">
+			<div class="char-level">Level 3 Powers<div class="hp">HP: +12</div></div>
+			<div class="powers">
+				<div id="fleet">General: Fleet</div>
+			Feature: Extract Element<br>
+			Skill Increase: Performance ●●○○<br></div>
+			<div class="upgrades">
+			Upgrade: Flying Flame<br>
+			Upgrade: Ocean's Balm<br>
+			Upgrade: Will ●●○○<br>
+			Upgrade: Speed to 10 ft.<br></div>
+		</div>
+
+		<div id="level-4">
+			<div class="char-level">Level 4 Powers<div class="hp">HP: +12</div></div>
+			<div class="powers">
+				<div id="basic-muses-whispers">Class: Basic Muse's Whispers</div>
+					<div style="margin-left: 2em" id="versatile-performance">Bard: Versatile Performance</div>
+				<div id="basic-flair">Archetype: Basic Flair</div>
+					<div class="feat-action" style="margin-left: 2em">Swashbuckler: Enjoy the Show</div>
+				<div id="virtuosic-performer">Skill: Virtuosic Performer</div></div>
+			<div class="upgrades">Upgrade: Water Dance<br>
+			</div>
+		</div>
+
+		<div id="level-5">
+			<div class="char-level">Level 5 Powers<div class="hp">HP: +12</div></div>
+			<div class="powers">
+			<b>Ability Boosts:</b> STR, CON., DEX, CHA<br>
+				<div id="strong-tail">Ancestry: Strong Tail</div>
+				<div class="feat-action">Expand the Portal: Thermal Nimbus</div>
+				<div id="fire-aura-junction">Fire Gate Junction: Aura Junction</div>
+			Skill Increase: Athletics ●●○○<br></div>
+			<div class="upgrades">
+			Upgrade: Flying Flame<br>
+			Upgrade: Ocean's Balm<br>
+			Upgrade: Speed to 20 ft.<br>
+			Upgrade: +2 AC (+1 from Dex, +1 from Scaly Hide)<br></div>
+		</div>
+
+		<div id="level-6">
+			<div class="char-level">Level 6 Powers<div class="hp">HP: +12</div></div>
+			<div class="powers" style="border-bottom: 2px solid darkred;">
+			<div class="feat-action">Class: Steam Knight</div>
+			<div id="advanced-flair">Archetype: Advanced Flair</div>
+				<div style="margin-left: 2em" id="antagonize">Swashbuckler: Antagonize</div>
+			<div id="cat-fall">Skill: Cat Fall</div>
+		</div>
+		</div>
+
+		<div id="level-7">
+			<div class="char-level">Level 7 Powers<div class="hp">HP: +12</div></div>
+			<div class="powers">
+			<div id="battle-cry">General: Battle Cry</div>
+			Skill Increase: Performance ●●●○<br></div>
+			<div class="upgrades">
+			Upgrade: Virtuosic Performer (Dance) +2 circumstance bonus<br>
+			Upgrade: Water Dance<br>
+			Upgrade: Flying Flame<br>
+			Upgrade: Ocean's Balm<br>
+			Upgrade: Fortitude ●●●○<br>
+			Upgrade: Class DC ●●○○<br>
+			When you roll a success on a Fortitude save, you get a critical success instead.<br>
+			</div>
+		</div>
+
+		<div id="level-8">
+			<div class="char-level">Level 8 Powers<div class="hp">HP: +12</div></div>
+			<div class="powers" style="border-bottom: 2px solid darkred;">
+			<div class="feat-action">Bard: Anthemic Performance</div>
+			<div>Bard: Advanced Muse's Whispers</div>
+			<div style="margin-left: 2em";>Bard: Multifarious Muse (Maestro)</div>
+			<div class="feat-action" style="margin-left: 4em;">Free: Lingering Composition</div>
+			<div id="terrified-retreat">Skill: Terrified Retreat</div></div>
+		</div>
+
+		<div id="level-9">
+			<div class="char-level">Level 9 Powers<div class="hp">HP: +12</div></div>
+			<div class="powers">
+			<div class="feat-action">Ancestry: Tears of Pearl</div>
+			<div class="feat-action">Expand the Portal: Volcanic Escape</div>
+			<div id="water-skill-junction">Water Skill Junction</div>
+			<div id="underwater-marauder" style="margin-left: 2em;">Skill: Underwater Marauder</div>
+			Skill Training: Society ●○○○<br>
+			Skill Increase: Athletics ●●●○<br></div>
+			<div class="upgrades">
+			Upgrade: Flying Flame<br>
+			Upgrade: Ocean's Balm<br>
+			Upgrade: Perception ●●○○<br>
+			Upgrade: Kinetic Aura: Athletics +1 Status bonus<br></div>
+		</div>
+
+		<div id="level-10">
+			<div class="char-level">Level 10 Powers<div class="hp">HP: +22</div></div>
+			<div class="powers">
+			<b>Ability Boosts:</b> STR, CON, INT, CHA<br>
+			<div id="aura-shaping">Class: Aura Shaping</div>
+			<div id="fan-dancer-dedication">Archetype: Fan Dancer Dedication</div>
+			<div id="solo-dancer">Skill: Solo Dancer</div>
+			Skill Training: Survival ●○○○<br></div>
+			<div class="upgrades">
+			Upgrade: Water Dance<br>
+			Upgrade: Volcanic Escape<br>
+			Upgrade: Kinetic Aura: Athletics +2 Status bonus<br></div>
+		</div>
+
+		<br>
+	</div>
+	<div id="middle">
+		<div id="initiative"><b>Initiative</b></div>
+		<h2>Movement</h2>
+		<div><span class="action">á</span><span id="stride">Stride</span></div>
+		<div class="level-3-power"><span class="action">á</span><span id="step">Step</span></div>
+		<div><span class="action">â</span><span id="water-dance">Water Dance</span></div>
+		<div><span class="action">á</span><span id="jump-spell">Jump</span></div>
+		<div><span class="action">á</span><span id="leap">Leap</span></div>
+		<br>
+		
+		<div><span class="action">á</span><span id="extract-element">Extract Element</span></div>
+		<br>
+		<h2>Start</h2>
+		<div><span class="action">á</span><span id="channel-elements">Channel Elements</span></div>
+		<br>
+		<h2 class="level-5-power">Stances</h2>
+		<div class="level-5-power"><span class="action">á</span><span id="thermal-nimbus">Thermal Nimbus</span></div>
+		<div class="level-6-power"><span class="action">á</span><span id="steam-knight">Steam Knight</span></div>
+		<br>
+
+		<h2>Damage</h2>
+		<div><span class="action">á</span><span id="elemental-blast">Elemental Blast</span></div>
+		<div><span class="action">â</span><span id="flying-flame">Flying Flame</span></div>
+		<br>
+		<h2>Heal</h2>
+		<div><span class="action">á</span><span id="oceans-balm">Ocean's Balm</span></div>
+		<br>
+		<h2 class="level-8-power">CC</h2>
+		<!-- <div class="level-8-power"><span class="action">á</span><span id="leading-dance">Leading Dance</span></div> -->
+		<div class="level-9-power"><span class="action">â</span><span id="tears-of-pearl">Tears of Pearl</span></div>
+		<br>
+		<h2 class="level-2-power">Defense</h2>
+		<div class="level-2-power"><span class="action">á</span><span id="shield-spell">Shield</span></div>
+		<br>
+		<h2 class="level-6-power">Out of turn</h2>
+		<div class="level-2-power"><span class="action">ä</span><span id="shield-block">Shield Block</span></div>
+		<div class="level-9-power"><span class="action">ä</span><span id="volcanic-escape">Volcanic Escape</span></div>
+		<!-- <div class="level-6-power"><span class="action">ä</span><span id="charmed-life">Charmed Life</span></div> -->
+		<br>
+		<h2 class="level-2-power">Prep</h2>
+		<div class="level-2-power"><span class="action">â</span><span id="glamorize">Glamorize</span></div>
+		<br>
+		<h2>Trained Skill actions</h2>
+		<div><span class="action">á</span><span id="demoralize">Demoralize</span></div>
+		<div><span class="action">á</span><span id="hide">Hide</span></div>
+		<div><span class="action">á</span><span id="perform">Perform</span></div>
+		<div class="level-4-power" style="margin-left: 0.5em"><span class="action">á</span><span id="enjoy-the-show">Enjoy the Show</span></div>
+		<div><span class="action">á</span><span id="reposition">Reposition</span></div>
+		<div><span class="action">á</span><span id="shove">Shove</span></div>
+		<div><span class="action">á</span><span id="trip">Trip</span></div>
+		<br>
+		<h2>Out of combat Skill actions</h2>
+		<div><span id="make-an-impression">Make an Impression</span></div>
+		<br>
+		<h2>Untrained Skill actions</h2>
+		<div><span class="action">á</span><span id="create-a-diversion">Create a Diversion</span></div>
+		<div><span class="action">á</span><span id="feint">Feint</span></div>
+		<br>
+	</div>
+	<div id="right"></div>
+</div>
+<script>
+var _top = document.getElementById("top")
+var _left = document.getElementById("left")
+var _middle = document.getElementById("middle")
+var _right = document.getElementById("right")
+var currentLevel = 1
+document.getElementById("left").addEventListener("mouseover", function(event){
+	(event.target.parentElement.id == "level-1" || event.target.parentElement.parentElement.id == "level-1")  ? currentLevel = 1 :
+	(event.target.parentElement.id == "level-2" || event.target.parentElement.parentElement.id == "level-2") ? currentLevel = 2 :
+	(event.target.parentElement.id == "level-3" || event.target.parentElement.parentElement.id == "level-3") ? currentLevel = 3 :
+	(event.target.parentElement.id == "level-4" || event.target.parentElement.parentElement.id == "level-4") ? currentLevel = 4 :
+	(event.target.parentElement.id == "level-5" || event.target.parentElement.parentElement.id == "level-5") ? currentLevel = 5 :
+	(event.target.parentElement.id == "level-6" || event.target.parentElement.parentElement.id == "level-6") ? currentLevel = 6 :
+	(event.target.parentElement.id == "level-7" || event.target.parentElement.parentElement.id == "level-7") ? currentLevel = 7 :
+	(event.target.parentElement.id == "level-8" || event.target.parentElement.parentElement.id == "level-8") ? currentLevel = 8 :
+	(event.target.parentElement.id == "level-9" || event.target.parentElement.parentElement.id == "level-9") ? currentLevel = 9 :
+	(event.target.parentElement.id == "level-10" || event.target.parentElement.parentElement.id == "level-10") ? currentLevel = 10 :
+	null
+	console.log(currentLevel)
+	document.getElementById("level-1-defenses").style.display = "none"
+	document.getElementById("level-2-defenses").style.display = "none"
+	document.getElementById("level-3-defenses").style.display = "none"
+	document.getElementById("level-4-defenses").style.display = "none"
+	document.getElementById("level-5-defenses").style.display = "none"
+	document.getElementById("level-6-defenses").style.display = "none"
+	document.getElementById("level-7-defenses").style.display = "none"
+	document.getElementById("level-8-defenses").style.display = "none"
+	document.getElementById("level-9-defenses").style.display = "none"
+	document.getElementById("level-10-defenses").style.display = "none"
+	document.getElementById("level-"+currentLevel+"-defenses").style.display = "inline-flex"
+	unlockCSS()
+})
+function unlockCSS(){
+	for (var i = 1; i < currentLevel; i++){
+		Array.from(document.getElementsByClassName("unlock-" + i)).forEach(e => e.classList.add("locked"))
+		Array.from(document.getElementsByClassName("level-" + i + "-power")).forEach(e => e.classList.remove("locked"))
+		document.getElementById("level-" + i).classList.remove("locked-level")
+	}
+	for (var i = currentLevel + 1; i <= 10; i++){
+		Array.from(document.getElementsByClassName("unlock-" + i)).forEach(e => e.classList.add("locked"))
+		Array.from(document.getElementsByClassName("level-" + i + "-power")).forEach(e => e.classList.add("locked"))
+		document.getElementById("level-" + i).classList.add("locked-level")
+	}
+
+	Array.from(document.getElementsByClassName("unlock-" + currentLevel)).forEach(e => {e.classList.add("current"); e.classList.remove("locked")})
+	Array.from(document.getElementsByClassName("level-" + currentLevel + "-power")).forEach(e => e.classList.remove("locked"))
+	document.getElementById("level-" + currentLevel).classList.remove("locked-level")
+
+}
+document.getElementById("stride").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Stride</h1>
+	<div>
+		<table>
+			<tr>
+				<td>Speed (ft.)</td>
+				<td>| <span class="unlock-1">5</span> | <span class="unlock-2">5</span> | <span class="unlock-3">10</span> | <span class="unlock-4">10</span> | <span class="unlock-5">20</span> | <span class="unlock-6">20</span> | <span class="unlock-7">20</span> | <span class="unlock-8">20</span> | <span class="unlock-9">20</span> | <span class="unlock-10">20</span></td>
+				<td>(3) Fleet,<br>(5) Strong Tail</td>
+			</tr>
+			<tr>
+				<td>Speed (ft.)</td>
+				<td>| <span class="unlock-1">5</span> | <span class="unlock-2">10</span> | <span class="unlock-3">15</span> | <span class="unlock-4">15</span> | <span class="unlock-5">25</span> | <span class="unlock-6">25</span> | <span class="unlock-7">25</span> | <span class="unlock-8">25</span> | <span class="unlock-9">25</span> | <span class="unlock-10">25</span></td>
+				<td>Both + Panache</td>
+			</tr>
+			<tr>
+				<td>Water Dance</td>
+				<td>| <span class="unlock-1">30</span> | <span class="unlock-2">30</span> | <span class="unlock-3">30</span> | <span class="unlock-4">35</span> | <span class="unlock-5">35</span> | <span class="unlock-6">35</span> | <span class="unlock-7">40</span> | <span class="unlock-8">40</span> | <span class="unlock-9">40</span> | <span class="unlock-10">45</span></td>
+				<td><span style="font-size: 0.98em">(<span class="action">â</span>, per action)</span></td>
+			</tr>
+			<tr>
+				<td>Burning Jet</td>
+				<td>| <span class="unlock-1">20</span> | <span class="unlock-2">20</span> | <span class="unlock-3">20</span> | <span class="unlock-4">20</span> | <span class="unlock-5">20</span> | <span class="unlock-6">30</span> | <span class="unlock-7">30</span> | <span class="unlock-8">30</span> | <span class="unlock-9">30</span> | <span class="unlock-10">30</span></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>Steam Knight</td>
+				<td>| <span class="unlock-1">—</span> | <span class="unlock-2">—</span> | <span class="unlock-3">—</span> | <span class="unlock-4">—</span> | <span class="unlock-5">—</span> | <span class="unlock-6">30</span> | <span class="unlock-7">30</span> | <span class="unlock-8">30</span> | <span class="unlock-9">30</span> | <span class="unlock-10">30</span></td>
+				<td>(+10 ft. Status)</td>
+			</tr>
+		</table>
+		<br>
+		<div class="content">
+			<label>
+				<input type="checkbox"> Boots of Bounding (level 7) (340 gp)</label><br>
+				The springy soles of these sturdy leather boots cushion your feet and make each step lighter.<br>
+				These boots give you a:<br>
+				- +5-foot item bonus to your Speed and<br>
+				- a +2 item bonus to Athletics checks to High Jump and Long Jump.<br>
+				In addition, when you use the Leap action, you can move 5 feet further if jumping horizontally or 3 feet higher if jumping vertically.
+		</div>
+		 <br>
+		  <br>
+		  
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("step").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Step</h1>
+	<div>
+		<i>Level 3:</i> Shift 5 ft.
+	</div>
+	`})
+document.getElementById("leap").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Leap</h1>
+	<div class="content">
+		<div class="tag-passive">Move</div><br>
+		<br>
+		You take a short horizontal or vertical jump.
+		Jumping a greater distance requires using the Athletics skill for a High Jump or Long Jump.<br>
+		<br>
+		- <b>Horizontal Jump</b> <span class="level-2-power">up to 10 feet horizontally if your Speed is at least 15 feet, <span class="level-5-power">or up to 15 feet horizontally if your Speed is at least 30 feet.</span> You land in the space where your Leap ends (meaning you can typically clear a 5-foot gap, or a 10-foot gap if your Speed is 30 feet or more).</span> You can't make a horizontal Leap if your Speed is less than 15 feet.<br>
+		- <b>Vertical Jump</b> up to 3 feet vertically and 5 feet horizontally onto an elevated surface.
+	</div>
+	<h1>High Jump <small class="action">â</small></h1>
+	<div class="content">
+		<b>Athletics vs DC 30</b><br>
+		<br>
+		| <span class="unlock-1">+3</span> | <span class="unlock-2">+4</span> | <span class="unlock-3">+5</span> | <span class="unlock-4">+6</span> | <span class="unlock-5">+10</span> | <span class="unlock-6">+11</span> | <span class="unlock-7">+12</span> | <span class="unlock-8">+13</span> | <span class="unlock-9">+16</span> | <span class="unlock-10">+18</span> |</span><br>
+		<br>
+		@ level 1-4: can only succeed on natural 20, fail upgrades to success.<br>
+		@ level 5: can only succeed on natural 20, success upgrades to crit.<br>
+		<br>
+		You Stride, then attempt a DC 30 Athletics check to jump vertically. If you didn't Stride at least 10 feet, you automatically fail. This DC might be increased or decreased due to the situation, as determined by the GM.<br>
+		<br>
+		- <span class="level-5-power"><b>Critical Success</b> You Leap up to 8 feet vertically and 10 feet horizontally.</span><br>
+		- <span style="${currentLevel == 5 ? "color: silver" : ""}"><b>Success</b> You Leap up to 5 feet vertically and 5 feet horizontally.</span><br>
+		- <b>Failure</b> You Leap normally.<br>
+		- <b>Critical Failure</b> You fall prone in your space.<br>
+	</div>
+	<h1>Long Jump <small class="action">â</small></h1>
+	<div class="content">
+		<b>Athletics vs DC 15</b><br>
+		<br>
+		| <span class="unlock-1">+3</span> | <span class="unlock-2">+4</span> | <span class="unlock-3">+5</span> | <span class="unlock-4">+6</span> | <span class="unlock-5">+10</span> | <span class="unlock-6">+11</span> | <span class="unlock-7">+12</span> | <span class="unlock-8">+13</span> | <span class="unlock-9">+16</span> | <span class="unlock-10">+18</span> |</span><br>
+		<br>
+		You Stride, then attempt a DC 15 Athletics check to make a long jump in the direction you were Striding. If you didn't Stride at least 10 feet, you automatically fail your check. The GM might increase or decrease this DC depending on the situation.<br>
+		<br>
+		- <b>Success</b> You Leap up to a distance equal to your check result rounded down to the nearest 5 feet. You can't jump farther than your land Speed.<br>
+		- <b>Failure</b> You make a normal horizontal Leap.<br>
+		- <b>Critical Failure</b> You make a normal horizontal Leap, then fall and land prone.<br>
+	</div>
+	<h1>Grab an Edge <small class="action">ä</small></h1>
+	<div class="content">
+		<b>Reflex vs Climb DC</b><br>
+		<br>
+		| <span class="unlock-1">+7</span> | <span class="unlock-2">+8</span> | <span class="unlock-3">+9</span> | <span class="unlock-4">+10</span> | <span class="unlock-5">+11</span> | <span class="unlock-6">+12</span> | <span class="unlock-7">+13</span> | <span class="unlock-8">+14</span> | <span class="unlock-9">+15</span> | <span class="unlock-10">+16</span> |</span><br>
+		<br>
+		<div class="tag-active">Manipulate</div><br>
+		<br>
+		<b>Trigger</b> You fall from or past an edge or handhold.<br>
+		<b>Requirements</b> Your hands are not tied behind your back or otherwise restrained<br>
+		<br>
+		When you fall off or past an edge or other handhold, you can try to grab it, potentially stopping your fall. You must succeed at your choice of an Acrobatics check or a Reflex save, usually at the Climb DC. If you grab the edge or handhold, you can then Climb up using Athletics.<br>
+		<br>
+		<b>Critical Success</b> You grab the edge or handhold, whether or not you have a hand free, typically by using a suitable held item to catch yourself (catching a battle axe on a ledge, for example). You still take damage from the distance fallen so far, but you treat the fall as though it were 30 feet shorter.<br>
+		<b>Success</b> If you have at least one hand free, you grab the edge or handhold, stopping your fall. You still take damage from the distance fallen so far, but you treat the fall as though it were 20 feet shorter. If you have no hands free, you continue to fall as if you had failed the check.<br>
+		<b>Critical Failure</b> You continue to fall, and if you've fallen 20 feet or more before you use this reaction, you take 10 bludgeoning damage from the impact for every 20 feet fallen.
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("initiative").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Initiative</h1>
+	<div>
+		Bonuses:<br>
+		- Perception | <span class="unlock-1">+3</span> | <span class="unlock-2">+4</span> | <span class="unlock-3">+5</span> | <span class="unlock-4">+6</span> | <span class="unlock-5">+7</span> | <span class="unlock-6">+8</span> | <span class="unlock-7">+9</span> |  <span class="unlock-8">+10</span> |  <span class="unlock-9">+13</span> |  <span class="unlock-10">+14</span> |<br>
+		- Stealth | <span class="unlock-1">+2</span> | <span class="unlock-2">+5</span> | <span class="unlock-3">+6</span> | <span class="unlock-4">+7</span> | <span class="unlock-5">+9</span> | <span class="unlock-6">+10</span> | <span class="unlock-7">+11</span> | <span class="unlock-8">+12</span> | <span class="unlock-9">+13</span> | <span class="unlock-10">+14</span> |<br>
+		- Performance | <span class="unlock-1">—</span> | <span class="unlock-2">—</span> | <span class="unlock-3">—</span> | <span class="unlock-4">—</span> | <span class="unlock-5">—</span> | <span class="unlock-6">—</span> | <span class="unlock-7">—</span> | <span class="unlock-8">—</span> | <span class="unlock-9">—</span> | <span class="unlock-10">+20</span> |<br>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("water-dance").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Water Dance</h1>
+	<div class="content">
+		<span class="tag-passive">Evocation</span> <span class="tag-active">Impulse</span> <span class="tag-passive">Kineticist</span> <span class="tag-passive">Primal</span> <span class="tag-passive">Water</span><br>
+		<br>
+		A surging wave forms behind and around a creature, pushing<br>
+		it forward rapidly. Target a willing creature within 30 feet. A<br>
+		wave appears behind and around the target and lets it Stride<br>
+		up to <span class="unlock-1 unlock-2 unlock-3">30</span> <span class="unlock-4 unlock-5 unlock-6">35</span> <span class="unlock-7 unlock-8 unlock-9">40</span> <span class="unlock-10">45</span> feet. If the target is in the water, it can instead<br>
+		Swim up to <span class="unlock-1 unlock-2 unlock-3">40</span> <span class="unlock-4 unlock-5 unlock-6">45</span> <span class="unlock-7 unlock-8 unlock-9">50</span> <span class="unlock-10">55</span> feet. The target gains a <span class="bonus">+2 circumstance bonus to
+		defenses</span> against any reactions<br>
+		triggered by this movement. If you target yourself, you can move twice instead of once.<br>
+		<hr>
+		<b>Base</b> Stride starts at 30 feet, and Swim starts at 40 feet.<br>
+		<b>Level (+3)</b> The distance of the Stride or Swim increases by 5 feet.<br>
+	</div>
+	`
+	unlockCSS()})
+// document.getElementById("leading-dance").addEventListener("mouseover", function(){_right.innerHTML = `
+// 	<h1>Leading Dance</h1>
+// 	<div class="content">
+// 		<b>Performance vs Will DC</b><br>
+// 		<br>
+// 		| <span class="unlock-1"></span> | <span class="unlock-2"></span> | <span class="unlock-3"></span> | <span class="unlock-4"></span> | <span class="unlock-5"></span> | <span class="unlock-6"></span> | <span class="unlock-7"></span> | <span class="unlock-8"></span> | <span class="unlock-9"></span> | <span class="unlock-10"></span>|<br>
+// 		<br>
+// 		<div class="tag-active bravado">Bravado</div> <div class="tag-passive">Move</div> <div class="tag-passive">Swashbuckler</div><br>
+// 		<div class="bravado-description"><i>Actions with Bravado can grant panache, depending on the result of the check involved. If you succeed at the check on a bravado action, you gain panache, and if you fail (but not critically fail) the check, you gain panache but only until the end of your next turn. These effects can be applied even if the action had no other effect due to a failure or a creature's immunity.</i></div>
+// 		<br>
+// 		<b>Requirements</b> You are adjacent to an enemy.<br>
+// 		<br>
+// 		You sweep your foe into your dance. Attempt a Performance check against an adjacent enemy's Will DC.<br>
+// 		<br>
+// 		<b>Critical success</b> Your foe is swept up in your dance. You both move up to 10 feet in the same direction, remaining adjacent to one another. Your movement doesn't trigger reactions from the target (and the target's movement doesn't trigger reactions because it's forced movement).<br>
+// 		<b>Success</b> As critical success, but you both move only 5 feet.<br>
+// 		<b>Failure</b> The foe doesn't follow your steps. You can move 5 feet if you choose, but this movement triggers reactions normally.<br>
+// 		<b>Critical Failure</b> You stumble, falling prone in your space.<br>
+// 	</div>
+// 	`})
+document.getElementById("tears-of-pearl").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Tears of Pearl</h1>
+	<div class="content">
+		<b>Class DC vs Will save</b><br>
+		<br>
+		| <span class="unlock-1">17</span> | <span class="unlock-2">18</span> | <span class="unlock-3">19</span> | <span class="unlock-4">20</span> | <span class="unlock-5">+21</span> | <span class="unlock-6">22</span> | <span class="unlock-7">25</span> | <span class="unlock-8">26</span> | <span class="unlock-9">27</span> | <span class="unlock-10">29</span> |</span><br>
+		<br>
+		<div class="tag-passive">Emotion</div> <div class="tag-active manipulate">Manipulate</div> <div class="tag-passive">Mental</div> <div class="tag-passive">Merfolk</div> <div class="tag-passive">Primal</div> <div class="tag-active visual">Visual</div><br>
+		<div class="manipulate-description"><i>You must physically manipulate an item or make gestures to use an action with this trait. Creatures without a suitable appendage can’t perform actions with this trait. Manipulate actions often trigger reactions.</i></div>
+		<div class="visual-description"><i>A visual effect can affect only creatures that can see it. This applies only to visible parts of the effect, as determined by the GM.</i></div>
+		<br>
+		<b>Cooldown</b> Once per day<br>
+		<br>
+		You weep, and your tears become gleaming pearls as they fall to the ground,
+		so beautiful others can't help but grab at them. All creatures adjacent to you
+		must attempt a Will save against the higher of your class DC or spell DC.
+		The pearls dissolve at the start of your next turn, turning into salt water.<br>
+		<hr>
+		<b>Critical Success</b> The target is unaffected.<br>
+		<b>Success</b> The target is slowed 1 until the start of your next turn as it covets the pearls or reaches for them.<br>
+		<b>Failure</b> The target is slowed 1 until the start of your next turn as it grabs for the pearls,
+		and if it doesn't have a free hand (or similar appendage), it must spend its first action on its next turn
+		to Release one item it's holding.<br>
+		<b>Critical Failure</b> As failure, but the target is slowed 2 instead of slowed 1.<br>
+	</div>
+	`})
+document.getElementById("elemental-blast").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Elemental Blast</h1>
+	<div class="content">
+		<b>Constitution vs AC</b><br>
+		<br>
+		| <span class="unlock-1">+7</span> | <span class="unlock-2">+8</span> | <span class="unlock-3">+9</span> | <span class="unlock-4">+10</span> | <span class="unlock-5">+11</span> | <span class="unlock-6">+12</span> | <span class="unlock-7">+15</span> | <span class="unlock-8">+16</span> | <span class="unlock-9">+17</span> | <span class="unlock-10">+19</span> |<br>
+		<br>
+		<label><input type="checkbox"> Gate Attenuator (level 3) +1 item bonus</label><br>
+		<br>
+		<span class="tag-active">Attack</span> <span class="tag-active">Impulse</span> <span class="tag-passive">Kineticist</span> <span class="tag-passive">Primal</span><br>
+		<br>
+		With a wave of your hand, you collect elemental matter from your aura and swing or hurl it. Choose one of your kinetic elements and a damage type listed for that element, then make a melee or ranged impulse attack against the AC of one creature. Add your Strength modifier to the damage roll for a melee Elemental Blast. If you make a 2-action Elemental Blast, you gain a status bonus to the damage roll equal to your Constitution modifier.<br>
+		<br>
+		<b>Fire</b> <span class="unlock-1 unlock-2 unlock-3 unlock-4">1d6</span> <span class="unlock-5 unlock-6 unlock-7 unlock-8">2d6</span> <span class="unlock-9 unlock-10">3d6</span> <span class="unlock-5">+2</span> <span class="unlock-6 unlock-7">+3</span> <span class="unlock-8 unlock-9">+4</span> <span class="unlock-10">+5</span> fire, 60 feet<br>
+		<b>Water</b> <span class="unlock-1 unlock-2 unlock-3 unlock-4">1d8</span> <span class="unlock-5 unlock-6 unlock-7 unlock-8">2d8</span> <span class="unlock-9 unlock-10">3d8</span> bludgeoning or cold, 30 feet<br>
+		<br>
+		<b>Critical success</b> The target takes double damage<br>
+		<b>Success</b> The target takes full damage<br>
+		<hr>
+		<b>Base 1</b> The damage starts at <span class="level-based">1d6</span> fire, or <span class="level-based">1d8</span> bludgeoning or cold<br>
+		<b>Level (+4)</b> The damage increases by <span class="level-based">one die</span>.<br>
+		<hr>
+		<table>
+			<tr>
+				<th style="width: 80px;">Level</th>
+				<th>+1 damage bonus at</th>
+			</tr>
+			<tr class="unlock-5">
+				<td>Level 5</td>
+				<td>fire weakness 3+</td>
+			</tr>
+			<tr class="unlock-6">
+				<td>Level 6</td>
+				<td>fire weakness 4+</td>
+			</tr>
+			<tr class="unlock-7">
+				<td>Level 7</td>
+				<td>fire weakness 5+</td>
+			</tr>
+			<tr class="unlock-8">
+				<td>Level 8</td>
+				<td>fire weakness 5+</td>
+			</tr>
+			<tr class="unlock-9">
+				<td>Level 9</td>
+				<td>fire weakness 6+</td>
+			</tr>
+			<tr class="unlock-10">
+				<td>Level 10</td>
+				<td>fire weakness 6+</td>
+			</tr>
+		</table>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("flying-flame").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Flying Flame</h1>
+	<div class="content">
+		<b>Class DC vs basic Reflex save</b><br>
+		<br>
+		| <span class="unlock-1">17</span> | <span class="unlock-2">18</span> | <span class="unlock-3">19</span> | <span class="unlock-4">20</span> | <span class="unlock-5">+21</span> | <span class="unlock-6">22</span> | <span class="unlock-7">25</span> | <span class="unlock-8">26</span> | <span class="unlock-9">27</span> | <span class="unlock-10">29</span> |</span><br>
+		<br>
+		<span class="tag-passive">Fire</span> <span class="tag-active">Impulse</span> <span class="tag-passive">Kineticist</span> <span class="tag-passive">Primal</span><br>
+		<br>
+		A Tiny shape of flame appears, taking a form of your choice—such as a bird, an arrow, or a simple sphere.
+		It <span class="mechanic">Flies</span> from you up to 30 feet in a path you choose.
+		Each creature it passes through takes<br>
+		<span class="unlock-1 unlock-2">1d6</span> <span class="unlock-3 unlock-4">2d6</span> <span class="unlock-5 unlock-6">3d6</span> <span class="unlock-7 unlock-8">4d6</span> <span class="unlock-9 unlock-10">5d6</span> <span class="unlock-5">+2</span> <span class="unlock-6 unlock-7">+3</span> <span class="unlock-8 unlock-9">+4</span> <span class="unlock-10">+5</span> fire damage<br>
+		with a basic Reflex save against your class DC.
+		A creature attempts only one save, even if the flame passes through it multiple times.<br>
+		<hr>
+		<b>Base 1</b> The damage starts at <span class="level-based">1d6</span> fire.<br>
+		<b>Level (+2)</b> The damage increases by <span class="level-based">1d6</span>.<br>
+		<hr>
+		<table>
+			<tr>
+				<th style="width: 80px;">Level</th>
+				<th>+1 damage bonus at</th>
+			</tr>
+			<tr class="unlock-5">
+				<td>Level 5</td>
+				<td>fire weakness 3+</td>
+			</tr>
+			<tr class="unlock-6">
+				<td>Level 6</td>
+				<td>fire weakness 4+</td>
+			</tr>
+			<tr class="unlock-7">
+				<td>Level 7</td>
+				<td>fire weakness 5+</td>
+			</tr>
+			<tr class="unlock-8">
+				<td>Level 8</td>
+				<td>fire weakness 5+</td>
+			</tr>
+			<tr class="unlock-9">
+				<td>Level 9</td>
+				<td>fire weakness 6+</td>
+			</tr>
+			<tr class="unlock-10">
+				<td>Level 10</td>
+				<td>fire weakness 6+</td>
+			</tr>
+		</table>
+	</div>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("oceans-balm").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Ocean's Balm</h1>
+	<div class="content">
+		<i>No save</i><br>
+		<br>
+		<span class="tag-passive">Healing</span> <span class="tag-active">Impulse</span> <span class="tag-passive">Kineticist</span> <span class="tag-active">Manipulate</span> <span class="tag-passive">Primal</span> <span class="tag-passive">Vitality</span> <span class="tag-passive">Water</span><br>
+		<br>
+		A blessing of the living sea salves wounds and douses flames. Touch a willing living creature.
+		It regains:<br>
+		<div style="margin: 0.5em 2em;">
+			- <span class="unlock-1 unlock-2">1d8</span> <span class="unlock-3 unlock-4">2d8</span> <span class="unlock-5 unlock-6">3d8</span> <span class="unlock-7 unlock-8">4d8</span> <span class="unlock-9 unlock-10">5d8</span> Hit Points and<br>
+			- gains resistance <span class="unlock-1 unlock-2">2</span> <span class="unlock-3 unlock-4">3</span> <span class="unlock-5 unlock-6">4</span> <span class="unlock-7 unlock-8">5</span> <span class="unlock-9 unlock-10">6</span> to fire for 1 minute<br>
+		</div>
+		If it has persistent fire damage, it can attempt a flat check to remove it with especially appropriate help.
+		The target is temporarily immune to healing from Ocean's Balm for 10 minutes.<br>
+		<hr>
+		<b>Base 1</b> The healing starts at <span class="level-based">1d8</span>.<br>
+		<b>Level (+2)</b> The healing increases by <span class="level-based">1d8</span>, the resistance increases by <span class="level-based">1</span>.<br>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("thermal-nimbus").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Thermal Nimbus</h1>
+	<div class="content">
+		<i>No save</i><br>
+		<br>
+		<span class="tag-passive">Fire</span> <span class="tag-active">Impulse</span> <span class="tag-passive">Kineticist</span> <span class="tag-passive">Primal</span> <span class="tag-active">Stance</span><br>
+		<br>
+		You direct waves of warmth into or out of your kinetic gate to drastically shift the temperature around you.
+		Choose cold or fire. You and allies in your kinetic aura gain resistance equal to your level to damage of that type.
+		Any creature that starts its turn in your kinetic aura or moves into your aura during its turn takes damage equal to
+		half your level of the chosen type. Elemental resistance from a gate junction is cumulative with resistance from Thermal Nimbus.<br>
+		<hr>
+		<table>
+			<tr>
+				<th style="width: 80px;">Level</th>
+				<th style="width: 120px;">Allies</th>
+				<th style="width: 100px;">Creatures</th>
+				<th style="width: 160px;">+1 damage bonus at</th>
+			</tr>
+			<tr>
+				<td><span class="unlock-5">Level 5</span></td>
+				<td><span class="unlock-5">5 fire resistance</span></td><td><span class="unlock-5">4 fire damage</span></td><td><span class="unlock-5">fire weakness 3+</span></td>
+			</tr>
+			<tr>
+				<td><span class="unlock-6">Level 6</span></td>
+				<td><span class="unlock-6">6 fire resistance</span></td><td><span class="unlock-6">6 fire damage</span></td><td><span class="unlock-6">fire weakness 4+</span></td>
+			</tr>
+			<tr>
+				<td><span class="unlock-7">Level 7</span></td>
+				<td><span class="unlock-7">7 fire resistance</span></td><td><span class="unlock-7">6 fire damage</span></td><td><span class="unlock-7">fire weakness 4+</span></td>
+			</tr>
+			<tr>
+				<td><span class="unlock-8">Level 8</span></td>
+				<td><span class="unlock-8">8 fire resistance</span></td><td><span class="unlock-8">8 fire damage</span></td><td><span class="unlock-8">fire weakness 5+</span></td>
+			</tr>
+			<tr>
+				<td><span class="unlock-9">Level 9</span></td>
+				<td><span class="unlock-9">9 fire resistance</span></td><td><span class="unlock-9">8 fire damage</span></td><td><span class="unlock-9">fire weakness 5+</span></td>
+			</tr>
+			<tr>
+				<td><span class="unlock-10">Level 10</span></td>
+				<td><span class="unlock-10">10 fire resistance</span></td><td><span class="unlock-10">10 fire damage</span></td><td><span class="unlock-10">fire weakness 6+</span></td>
+			</tr>
+		</table>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("steam-knight").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Steam Knight</h1>
+	<div class="content">
+		<b>Class DC vs basic Reflex save</b><br>
+		<br>
+		| <span class="unlock-1">17</span> | <span class="unlock-2">18</span> | <span class="unlock-3">19</span> | <span class="unlock-4">20</span> | <span class="unlock-5">+21</span> | <span class="unlock-6">22</span> | <span class="unlock-7">25</span> | <span class="unlock-8">26</span> | <span class="unlock-9">27</span> | <span class="unlock-10">29</span> |</span><br>
+		<br>
+		<span class="tag-passive">Composite</span> <span class="tag-passive">Fire</span> <span class="tag-active">Impulse</span> <span class="tag-passive">Kineticist</span> <span class="tag-passive">Primal</span> <span class="tag-active">Stance</span> <span class="tag-passive">Water</span><br>
+		<br>
+		You shape your kinetic aura into swirling armor of steam that scalds your enemies and propels you on super-heated jet streams.
+		A creature can take damage from Steam Knight only once per round. Your steam armor has the following effects.<br>
+		<br>
+		- You gain a +10-foot status bonus to your Speed.<br>
+		- When you Leap, you can jump up to your Speed. You don't immediately fall at the end of a jump,
+		provided you Leap again with your next action. If you Leap over a creature and come within 10 feet,
+		that creature takes <span class="level-based">2d6</span> <span class="unlock-6 unlock-7">+3</span> <span class="unlock-8 unlock-9">+4</span> <span class="unlock-10">+5</span> fire damage with a basic Reflex save against your class DC.<br>
+		- At the start of each of your turns, you can emit steam as a free action. It deals <span class="level-based">2d6</span> <span class="unlock-6 unlock-7">+3</span> <span class="unlock-8 unlock-9">+4</span> <span class="unlock-10">+5</span> fire damage
+		to each creature in your kinetic aura with a basic Reflex save against your class DC. A creature that fails is also pushed 5 feet.<br>
+		<hr>
+		<b>Base 6</b> The damage starts at 2d6.<br>
+		<b>Level (+5)</b> The fire damage from a jump or blast of steam increases by <span class="level-based">1d6</span>.<br>
+		<hr>
+		<table>
+			<tr>
+				<th style="width: 80px;">Level</th>
+				<th>+1 damage bonus at</th>
+			</tr>
+			<tr class="unlock-6">
+				<td>Level 6</td>
+				<td>fire weakness 4+</td>
+			</tr>
+			<tr class="unlock-7">
+				<td>Level 7</td>
+				<td>fire weakness 4+</td>
+			</tr>
+			<tr class="unlock-8">
+				<td>Level 8</td>
+				<td>fire weakness 5+</td>
+			</tr>
+			<tr class="unlock-9">
+				<td>Level 9</td>
+				<td>fire weakness 5+</td>
+			</tr>
+			<tr class="unlock-10">
+				<td>Level 10</td>
+				<td>fire weakness 6+</td>
+			</tr>
+		</table>
+	</div>
+	`
+	unlockCSS()
+	})
+document.getElementById("shield-block").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Shield Block (Spell)</h1>
+	<div class="content">
+		<i>No save</i><br>
+		<br>
+		<span class="tag-passive">General</span><br>
+		<br>
+		<b>Trigger</b> While you have your shield raised, you would take damage from an attack, spell, or magical effect.<br>
+		<b>Cooldown</b> Once per 10 minutes.<br>
+		<br>
+		You snap your shield in place to ward off a blow. Your shield prevents you from taking an amount of damage up to the shield’s<br>
+		Hardness <span class="unlock-2 unlock-3 unlock-4">5</span> <span class="unlock-5 unlock-6 unlock-7 unlock-8">10</span> <span class="unlock-9 unlock-10">15</span>. You and the shield each take any remaining damage, possibly breaking or destroying the shield.
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("volcanic-escape").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Volcanic Escape</h1>
+	<div class="content">
+		Overflow: <span style="font-size: 0.95em;"><i>No Thermal Nimbus or Steam Knight damage start of next turn</i></span><br>
+		<br>
+		<b>Class DC vs Reflex</b><br>
+		<br>
+		| <span class="unlock-1">17</span> | <span class="unlock-2">18</span> | <span class="unlock-3">19</span> | <span class="unlock-4">20</span> | <span class="unlock-5">+21</span> | <span class="unlock-6">22</span> | <span class="unlock-7">25</span> | <span class="unlock-8">26</span> | <span class="unlock-9">27</span> | <span class="unlock-10">29</span> |</span><br>
+		<br>
+		<span class="tag-passive">Fire</span> <span class="tag-active">Impulse</span> <span class="tag-passive">Kineticist</span> <span class="tag-active">Overflow</span> <span class="tag-passive">Primal</span><br>
+		Somatic, Verbal<br>
+		<b>Trigger</b> An enemy in your kinetic aura damages you.<br>
+		<br>
+		Lava reflexively explodes underneath you and the creature that hurt you. The triggering enemy takes <span class="unlock-9">1d6</span> <span class="unlock-10">2d6</span> <span class="unlock-9 unlock-10">+5</span> fire damage
+		with a basic Reflex save against your class DC. You Leap up to half your Speed in any direction;
+		this movement doesn't trigger reactions.<br>
+		<hr>
+		<b>Base 6</b> The damage starts at <span class="level-based">1d6</span>.<br>
+		<b>Level (+4)</b> The damage increases by <span class="level-based">1d6</span>.<br>
+		<hr>
+		<table>
+			<tr>
+				<th style="width: 80px;">Level</th>
+				<th>+1 damage bonus at</th>
+			</tr>
+			<tr class="unlock-9">
+				<td>Level 9</td>
+				<td>fire weakness 6+</td>
+			</tr>
+			<tr class="unlock-10">
+				<td>Level 10</td>
+				<td>fire weakness 6+</td>
+			</tr>
+		</table>
+	</div>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("glamorize").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Glamorize</h1>
+	<div class="content">
+		<i>No save</i><br>
+		<br>
+		<div class="tag-passive">Cantrip</div> <div class="tag-passive">Concentrate</div> <div class="tag-active manipulate">Manipulate</div><br>
+		<div class="manipulate-description"><i>You must physically manipulate an item or make gestures to use an action with this trait. Creatures without a suitable appendage can’t perform actions with this trait. Manipulate actions often trigger reactions.</i></div>
+		<br>
+		<b>Duration</b> 1 hour<br>
+		<br>
+		Using simple magical gestures, you alter a minor detail of your appearance (add or remove highlights to your hair color, apply or remove cosmetics, add polish or accessories to your nails, etc.) or create a small environmental effect that’s confined to your person (adjust surrounding lighting to favor your good side, cause a brief wind to make your hair blow dramatically, make a small chime occur as you smile, etc.). While the spell is active, you can Sustain it to make further adjustments. The changes persist until the spell’s duration ends.<br>
+		<br>
+		At the GM’s discretion, such alterations might grant a <span class="bonus">+1 status bonus</span> to certain tasks, such as Impersonate or Perform.<br>
+	</div>
+	`})
+document.getElementById("jump-spell").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Jump (Spell)</h1>
+	<div class="content">
+		<i>No save</i><br>
+		<br>
+		<div class="tag-active">Manipulate</div> <div class="tag-passive">Move</div><br>
+		<br>
+		Your legs surge with strength, ready to leap high and far. You jump 30 feet in any direction without touching the ground. You must land on a space of solid ground within 30 feet of you, or else you fall after using your next action.
+	</div>
+	`
+	})
+document.getElementById("shield-spell").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Shield (Spell)</h1>
+	<div class="content">
+		<i>No save</i><br>
+		<br>
+		<div class="tag-passive">Cantrip</div> <div class="tag-passive">Concentrate</div> <div class="tag-passive">Force</div><br>
+		<br>
+		<b>Duration</b> until the start of your next turn<br>
+		<br>
+		You raise a magical shield of force. This counts as using the Raise a Shield action,
+		giving you a <span class="bonus">+1 circumstance bonus to AC</span> until the start of your next turn, but it doesn't require a hand to use.<br>
+		<br>
+		While the spell is in effect, you can use the Shield Block reaction with your magic shield.
+		The shield has Hardness <span class="unlock-2 unlock-3 unlock-4">5</span> <span class="unlock-5 unlock-6 unlock-7 unlock-8">10</span> <span class="unlock-9 unlock-10">15</span>. You can use the spell's reaction to reduce damage from any spell or magical effect,
+		even if it doesn't deal physical damage. After you use Shield Block, the spell ends and you can't cast it again for 10 minutes.<br>
+	</div>
+	`
+	unlockCSS()})
+// document.getElementById("charmed-life").addEventListener("mouseover", function(){_right.innerHTML = `
+// 	<h1>Charmed Life</h1>
+// 	<div class="content">
+// 		<i>No save</i><br>
+// 		<br>
+// 		<div class="tag-passive">Swashbuckler</div><br>
+// 		<br>
+// 		<b>Trigger</b> You attempt a saving throw, but you haven’t rolled yet.<br>
+// 		<br>
+// 		When danger calls, you have a strange knack for coming out on top. You gain a <span class="bonus">+2 circumstance bonus</span> to the triggering save.
+// 		If you succeed on the triggering saving throw, you gain panache until the end of your next turn.
+// 	</div>
+// 	`})
+document.getElementById("demoralize").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Demoralize</h1>
+	<div class="content">
+		<table>
+			<tr>
+				<td><b><span style="${currentLevel <= 3 ? "" : "color: silver;"}">Intimidation</span> <span class="level-4-power">Performance</span> vs Will</b><br>
+				<br>
+				| <span class="unlock-1">+2</span> | <span class="unlock-2">+6</span> | <span class="unlock-3">+7</span> | <span class="unlock-4">+10</span> | <span class="unlock-5">+12</span> | <span class="unlock-6">+13</span> | <span class="unlock-7">+16</span> | <span class="unlock-8">+17</span> | <span class="unlock-9">+18</span> | <span class="unlock-10">+20</span> |</td>
+			</tr>
+		</table>
+		<label><input type="checkbox"> Dancing Scarf (level 3) +1 item bonus (dance only)</label><br>
+		<label><input type="checkbox"> Dancing Scarf (level 9) +2 item bonus (dance only)</label><br>
+		<label><input type="checkbox"> Stylish Combatant +1 circumstance bonus</label><br>
+		<label><input type="checkbox"> Virtuosic Versatile Performer: Dance <span class="unlock-1 unlock-2 unlock-3 unlock-4 unlock-5 unlock-6">+1</span> <span class="unlock-7 unlock-8 unlock-9 unlock-10">+2</span> circumstance bonus</label><br>
+		<label><input type="checkbox"> Glamorize +1 status bonus</label><br>
+		<label><input type="checkbox"> Target cannot understand language -4 circumstance penalty</label><br>
+		<br>
+		<div class="tag-active auditory">Auditory</div> <div class="tag-passive">Concentrate</div> <div class="tag-passive">Emotion</div> <div class="tag-passive">Fear</div> <div class="tag-passive">Mental</div><br>
+		Level 2+: <div class="tag-active bravado">Bravado</div><br>
+		<div class="auditory-description"><i>An action with the auditory trait can be successfully performed only if the creature using the action can speak or otherwise produce the required sounds. A spell or effect with the auditory trait has its effect only if the target can hear it. This applies only to sound-based parts of the effect, as determined by the GM. This is different from a sonic effect, which still affects targets who can’t hear it (such as deaf targets) as long as the effect itself makes sound.</i></div>
+		<div class="bravado-description"><i>Actions with Bravado can grant panache, depending on the result of the check involved. If you succeed at the check on a bravado action, you gain panache, and if you fail (but not critically fail) the check, you gain panache but only until the end of your next turn. These effects can be applied even if the action had no other effect due to a failure or a creature's immunity.</i></div>
+		<br>
+		<i><b>Stylish Combatant</b> During a combat encounter, you gain a +1 circumstance bonus to Demoralize.</i><br>
+		<br>
+		With a sudden shout, a well-timed taunt, or a cutting put-down, you can shake an enemy's resolve.
+		Choose a creature within 30 feet of you who you're aware of. Attempt an Intimidation check against
+		that target's Will DC. If the target doesn't understand the language you are speaking,
+		or you're not speaking a language, you take a –4 circumstance penalty to the check.
+		Regardless of your result, the target is temporarily immune to your attempts to Demoralize it for 10 minutes.<br>
+		<br>
+		<b>Critical success</b> The target becomes <span class="mechanic">frightened 2</span><span class="level-6-power">, and it can't decrease to less than 1 at the end of its turn until it either uses a hostile action against you or it can no longer observe or sense you for at least 1 round. <span class="level-8-power">If the target's level is lower than yours, the target is fleeing for 1 round.</span></span><br>
+		<br>
+		<b>Success</b> The target becomes <span class="mechanic">frightened 1</span><span class="level-6-power">, and it can't decrease to less than 1 at the end of its turn until it either uses a hostile action against you or it can no longer observe or sense you for at least 1 round.</span><br>
+		<br>
+		<i>Level 2+: You may have Demoralize lose the auditory trait and gain the visual trait. If you do, you don’t take a penalty if the creature doesn’t understand your language.</i><br>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("create-a-diversion").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Create a Diversion</h1>
+	<div class="content">
+		<b>Deception vs Perception DC</b><br>
+		<br>
+		| <span class="unlock-1"></span> | <span class="unlock-2"></span> | <span class="unlock-3"></span> | <span class="unlock-4"></span> | <span class="unlock-5"></span> | <span class="unlock-6"></span> | <span class="unlock-7"></span> | <span class="unlock-8"></span> | <span class="unlock-9"></span> | <span class="unlock-10"></span>|<br>
+		<br>
+		<div class="tag-passive">Mental</div><br>
+		<br>
+		With a gesture, a trick, or some distracting words, you can create a diversion that draws
+		creatures' attention elsewhere. If you use a gesture or trick, this action gains
+		the manipulate trait. If you use distracting words, it gains the auditory and linguistic traits.<br>
+		<br>
+		Attempt a single Deception check and compare it to the Perception DCs of the creatures
+		whose attention you're trying to divert. Whether or not you succeed, creatures you attempt
+		to divert gain a +4 circumstance bonus to their Perception DCs against your attempts to
+		Create a Diversion for 1 minute.<br>
+		<br>
+		<b>Success</b> You become hidden to each creature whose Perception DC is less than or equal to
+		your result. (The hidden condition allows you to Sneak away) This lasts until the end of your turn or
+		until you do anything except Step or use the Stealth skill to Hide or Sneak. If you Strike a creature,
+		the creature remains off-guard against that attack, and you then become observed.
+		If you do anything else, you become observed just before you act unless the GM determines otherwise.<br>
+		<b>Failure</b> You don't divert the attention of any creatures whose Perception DC exceeds your result,
+		and those creatures are aware you were trying to trick them.<br>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("feint").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Feint</h1>
+	<div class="content">
+		<b>Deception vs Perception DC</b><br>
+		<br>
+		| <span class="unlock-1"></span> | <span class="unlock-2"></span> | <span class="unlock-3"></span> | <span class="unlock-4"></span> | <span class="unlock-5"></span> | <span class="unlock-6"></span> | <span class="unlock-7"></span> | <span class="unlock-8"></span> | <span class="unlock-9"></span> | <span class="unlock-10"></span> |<br>
+		<br>
+		<div class="tag-passive">Mental</div><br>
+		<br>
+		<b>Requirements</b> You are within melee reach of the target you attempt to Feint.<br>
+		<br>
+		With a misleading flourish, you leave an opponent unprepared for your real attack.
+		Attempt a Deception check against your target's Perception DC.<br>
+		<br>
+		<b>Critical Success</b> You throw your enemy's defenses against you entirely off.
+		The target is off-guard against melee attacks that you attempt against it until the end of your next turn.<br>
+		<b>Success</b> Your foe is fooled, but only momentarily. The target is off-guard against the next melee attack
+		that you attempt against it before the end of your current turn.<br>
+		<b>Failure</b> —<br>
+		<b>Critical Failure</b> Your feint backfires. You are off-guard against melee attacks the target attempts
+		against you until the end of your next turn.<br>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("hide").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Hide</h1>
+	<div class="content">
+		Secret<br>
+		<b>Stealth vs Perception DC</b><br>
+		<br>
+		| <span class="unlock-1">+2</span> | <span class="unlock-2">+6</span> | <span class="unlock-3">+7</span> | <span class="unlock-4">+8</span> | <span class="unlock-5">+9</span> | <span class="unlock-6">+10</span> | <span class="unlock-7">+11</span> | <span class="unlock-8">+12</span> | <span class="unlock-9">+13</span> | <span class="unlock-10">+14</span> |<br>
+		<br>
+		You huddle behind cover or greater cover or deeper into concealment to become hidden, rather than observed.
+		The GM rolls your Stealth check in secret and compares the result to the Perception DC of each creature
+		you're observed by but that you have cover or greater cover against or are concealed from. You get a
+		<span class="bonus">+2 circumstance bonus</span> to your check if you have standard cover (or <span class="bonus">+4</span> from greater cover).<br>
+		<br>
+		<b>Success</b> If the creature could see you, you're now hidden from it instead of observed.
+		If you were hidden from or undetected by the creature, you retain that condition.<br>
+		<br>
+		If you successfully become hidden to a creature but then cease to have cover or greater cover against it or
+		be concealed from it, you become observed again. You cease being hidden if you do anything except
+		Hide, Sneak, or Step. If you attempt to Strike a creature, the creature remains off-guard against that attack,
+		and you then become observed. If you do anything else, you become observed just before you act unless the GM
+		determines otherwise. The GM might allow you to perform a particularly unobtrusive action without being noticed, possibly requiring another Stealth check.<br>
+		<br>
+		If a creature uses Seek to make you observed by it, you must successfully Hide to become hidden from it again.<br>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("perform").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Perform</h1>
+	<div class="content">
+		<b>Performance vs Simple DC</b><br>
+		<br>
+		| <span class="unlock-1">+5</span> | <span class="unlock-2">+6</span> | <span class="unlock-3">+9</span> | <span class="unlock-4">+10</span> | <span class="unlock-5">+12</span> | <span class="unlock-6">+13</span> | <span class="unlock-7">+16</span> | <span class="unlock-8">+17</span> | <span class="unlock-9">+18</span> | <span class="unlock-10">+20</span> |<br>
+		<br>
+		<label><input type="checkbox"> Dancing Scarf (level 3) +1 item bonus (dance only)</label><br>
+		<label><input type="checkbox"> Dancing Scarf (level 9) +2 item bonus (dance only)</label><br>
+		<label><input type="checkbox"> Virtuosic Versatile Performer: Dance <span class="unlock-1 unlock-2 unlock-3 unlock-4 unlock-5 unlock-6">+1</span> <span class="unlock-7 unlock-8 unlock-9 unlock-10">+2</span> circumstance bonus</label><br>
+		<label><input type="checkbox"> Glamorize +1 status bonus</label><br>
+		<br>
+		When making a brief performance—one song, a quick dance, or a few jokes—you use the
+		Perform action. This action is most useful when you want to prove your capability or
+		impress someone quickly. Performing rarely has an impact on its own, but it might
+		influence the DCs of subsequent Diplomacy checks against the observers, or even
+		change their attitudes if the GM sees fit.<br>
+		<br>
+		<b>Critical Success</b> Your performance impresses the observers, and they're likely to share stories of your ability.<br>
+		<b>Success</b> You prove yourself, and observers appreciate the quality of your performance.<br>
+		<b>Failure</b> Your performance falls flat.<br>
+		<b>Critical Failure</b> You demonstrate only incompetence.<br>
+		<hr>
+		Sample Perform tasks:<br>
+		<b>Untrained (DC 10)</b> Audience of commoners<br>
+		<b>Trained (DC 15)</b> Audience of artisans<br>
+		<b>Expert (DC 20)</b> Audience of merchants or minor nobles<br>
+		<b>Master (DC 30)</b> Audience of high nobility or minor royalty<br>
+		<b>Legendary (DC 40)</b> Audience of major royalty or otherworldly beings<br>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("enjoy-the-show").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Enjoy the Show</h1>
+	<div class="content">
+		<b>Performance vs Simple DC</b><br>
+		<br>
+		| <span class="unlock-1">+5</span> | <span class="unlock-2">+6</span> | <span class="unlock-3">+9</span> | <span class="unlock-4">+10</span> | <span class="unlock-5">+12</span> | <span class="unlock-6">+13</span> | <span class="unlock-7">+16</span> | <span class="unlock-8">+17</span> | <span class="unlock-9">+18</span> | <span class="unlock-10">+20</span> |<br>
+		<br>
+		<label><input type="checkbox"> Dancing Scarf (level 3) +1 item bonus (dance only)</label><br>
+		<label><input type="checkbox"> Dancing Scarf (level 9) +2 item bonus (dance only)</label><br>
+		<label><input type="checkbox"> Stylish Combatant +1 circumstance bonus</label><br>
+		<label><input type="checkbox"> Virtuosic Versatile Performer: Dance <span class="unlock-1 unlock-2 unlock-3 unlock-4 unlock-5 unlock-6">+1</span> <span class="unlock-7 unlock-8 unlock-9 unlock-10">+2</span> circumstance bonus</label><br>
+		<label><input type="checkbox"> Glamorize +1 status bonus</label><br>
+		<br>
+		<span class="tag-active">Bravado</span><br>
+		<br>
+		When you Perform, you can choose single creature within 30 feet
+	and use the following success, critical success, and critical failure effects instead of
+	the normal results; if you do, Perform gains the bravado trait, as well as the
+	auditory and linguistic trait as normal for oration.<br>
+		<br>
+		<b>Critical success</b> The target takes a <span class="bonus">–2 circumstance penalty</span> to attack rolls against creatures other than you until the end of its next turn.<br>
+		<b>Success</b> The target takes a <span class="bonus">–1 circumstance penalty</span> to attack rolls against creatures other then you until 	the end of its next turn.<br>
+		<b>Failure</b> —<br>
+		<b>Critical Failure</b> The target gains a <span class="bonus">+1 circumstance bonus</span> to attack rolls targeting you until the end of its next turn.<br>
+		<hr>
+		Sample Perform tasks:<br>
+		<b>Untrained (DC 10)</b> Audience of commoners<br>
+		<b>Trained (DC 15)</b> Audience of artisans<br>
+		<b>Expert (DC 20)</b> Audience of merchants or minor nobles<br>
+		<b>Master (DC 30)</b> Audience of high nobility or minor royalty<br>
+		<b>Legendary (DC 40)</b> Audience of major royalty or otherworldly beings<br>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("reposition").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Reposition</h1>
+	<div class="content">
+		<b>Athletics vs Fortitude DC</b><br>
+		<br> | <span class="unlock-1">+3</span> | <span class="unlock-2">+4</span> | <span class="unlock-3">+5</span> | <span class="unlock-4">+6</span> | <span class="unlock-5">+10</span> | <span class="unlock-6">+11</span> | <span class="unlock-7">+12</span> | <span class="unlock-8">+13</span> | <span class="unlock-9">+16</span> | <span class="unlock-10">+18</span> |</span><br>
+		<br>
+		<div class="tag-active">Attack</div><br>
+		<i>An ability with this trait involves an attack. For each attack you make beyond the first on your turn, you take a multiple attack penalty.</i><br>
+		<br>
+		<b>Requirements</b> You either have at least one hand free, or you're grabbing or restraining the target.
+		The target can't be more than one size larger than you.<br>
+		<br>
+		You muscle a creature or object around. Attempt an Athletics check against the target's Fortitude DC.<br>
+		<br>
+		<b>Critical Success</b> You move the creature up to 10 feet. It must remain within your reach during this movement,
+		and you can't move it into or through obstacles.<br>
+		<b>Success</b> You move the target up to 5 feet. It must remain within your reach during this movement,
+		and you can't move it into or through obstacles.<br>
+		<b>Failure</b> —<br>
+		<b>Critical Failure</b> The target can move you up to 5 feet as though it successfully Repositioned you.<br>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("shove").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Shove</h1>
+	<div class="content">
+		<b>Athletics vs Fortitude DC</b><br>
+		<br>
+		| <span class="unlock-1">+3</span> | <span class="unlock-2">+4</span> | <span class="unlock-3">+5</span> | <span class="unlock-4">+6</span> | <span class="unlock-5">+10</span> | <span class="unlock-6">+11</span> | <span class="unlock-7">+12</span> | <span class="unlock-8">+13</span> | <span class="unlock-9">+16</span> | <span class="unlock-10">+18</span> |</span><br>
+		<br>
+		<div class="tag-active">Attack</div><br>
+		<i>An ability with this trait involves an attack. For each attack you make beyond the first on your turn, you take a multiple attack penalty.</i><br>
+		<br>
+		<b>Requirements</b> You have at least one hand free. The target can't be more than one size larger than you.<br>
+		<br>
+		You push a creature away from you. Attempt an Athletics check against your target's Fortitude DC.<br>
+		<br>
+		<b>Critical Success</b> You push your target up to 10 feet away from you.
+		You can Stride after it, but you must move the same distance and in the same direction.<br>
+		<b>Success</b> You push your target back 5 feet. You can Stride after it,
+		but you must move the same distance and in the same direction.<br>
+		<b>Failure</b> —<br>
+		<b>Critical Failure</b> You lose your balance, fall, and land prone.<br>
+	</div>
+	`
+	unlockCSS()})
+document.getElementById("trip").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Trip</h1>
+	<div class="content">
+		<b>Athletics vs Reflex DC</b><br>
+		<br>
+		| <span class="unlock-1">+3</span> | <span class="unlock-2">+4</span> | <span class="unlock-3">+5</span> | <span class="unlock-4">+6</span> | <span class="unlock-5">+10</span> | <span class="unlock-6">+11</span> | <span class="unlock-7">+12</span> | <span class="unlock-8">+13</span> | <span class="unlock-9">+16</span> | <span class="unlock-10">+18</span> |</span><br>
+		<br>
+		<div class="tag-active">Attack</div><br>
+		<i>An ability with this trait involves an attack. For each attack you make beyond the first on your turn, you take a multiple attackpenalty.</i><br>
+		<br>
+		<b>Requirements</b> You have at least one hand free. Your target can't be more than one size larger than you.<br>
+		<br>
+		You try to knock a creature to the ground. Attempt an Athletics check against the target's Reflex DC.<br>
+		<br>
+		<b>Critical Success</b> The target falls, lands prone, and takes 1d6 bludgeoning damage.<br>
+		<b>Success</b> The target falls and lands prone.<br>
+		<b>Failure</b> —<br>
+		<b>Critical Failure</b> You lose your balance, fall, and land prone.<br>
+	</div>
+	`
+	unlockCSS()})
+
+
+
+document.getElementById("scaly-hide").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Scaly Hide</h1>
+	<div>
+		<div class="tag-passive">Dragonblood</div>
+		<br>
+		You were born with a layer of scales across your entire body that resemble those of your draconic progenitor.<br>
+		<br>
+		When you’re unarmored, the scales give you a <span class="bonus">+1 item bonus</span> to AC with a Dexterity cap of +3. The item bonus to AC increases to <span class="bonus">+2</span> at 5th level.<br>
+		<br>
+		The item bonus to AC from these scales is cumulative with armor potency runes on your explorer's clothing, the mystic armor spell, or bands of force.<br>
+		<br>
+		<b>Special</b> You can select this feat only at 1st level, and you can't retrain into or out of this feat.<br>
+	</div>
+	`})
+document.getElementById("virtuosic-performer").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Virtuosic Performer</h1>
+	<div>
+		<div class="tag-passive">General</div> <div class="tag-passive">Skill</div>
+		<br>
+		You have exceptional talent with one type of performance.<br>
+		<br>
+		You gain a <span class="bonus">+1 circumstance bonus</span> when making a certain type of performance.<br>
+		<br>
+		If you are a master in Performance, this bonus increases to <span class="bonus">+2</span>.<br>
+		<br>
+		Select one of the following specialties and apply the bonus when attempting Performance checks of that type. If it’s unclear whether the specialty applies, the GM decides.<br>
+		<br>
+		<b>[Dance]</b><br>
+	</div>
+	`})
+document.getElementById("base-kinesis").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1><span class="action"><small>â</small></span> Base Kinesis</h1>
+	<div>
+		<div class="tag-active">Impulse</div> <div class="tag-passive">Kineticist</div> <div class="tag-passive">Primal</div><br>
+		<br>
+		<b>Range</b> 30 feet<br>
+		<b>Target</b> Non-magical non-secured Water or Fire with Bulk light or less<br>
+		<br>
+		It's trivial for you to create some of your element or alter a portion of it that already exists. Choose one of your kinetic elements to affect. This impulse has a range of 30 feet, and the Bulk of the target must be negligible or light. The GM decides what Bulk the element is. You can't affect an element that's magical, secured in place (like a stone mortared in a wall), or attended by a creature unwilling to let you.<br>
+		<br>
+		Choose one of the following options, though the GM might allow you to make similar small alterations. Base Kinesis can't deal damage or cause conditions unless otherwise noted.<br>
+		<br>
+		<b>Generate</b> You bring an ordinary, non-magical piece of water or fire from its elemental plane. The element can be used for any of its normal uses.<br>
+		<b>Move</b> Move an existing piece of fire or water up to 20 feet in any direction. If you bring it into your space, you can catch it in an open hand. You can Sustain the impulse to keep moving the element.<br>
+		<b>Suppress</b> You destroy an existing piece of element, such as snuffing out a flame or evaporating water from a cup. This affects only natural forms of the element, not durable, crafted goods like a stone statue, metal lock, or wooden door.<br>
+		<hr>
+		<b>Level (+4)</b> The range increases by 15 feet, and the maximum Bulk increases by 1 (allowing Bulk 1 at 5th level).<br>
+	</div>
+	`})
+document.getElementById("bard-dedication").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Bard Dedication</h1>
+	<div>
+		<div class="tag-passive">Archetype</div> <div class="tag-passive">Dedication</div> <div class="tag-passive">Multiclass</div>
+		<br>
+		You cast spells like a bard and gain the Cast a Spell activity.<br>
+		<br>
+		You gain a spell repertoire with two common cantrips from the occult spell list or any other occult cantrips you’ve learned or discovered.<br>
+		<br>
+		You’re trained in the spell attack modifier and spell DC statistics.<br>
+		<br>
+		Your key spellcasting attribute for bard archetype spells is Charisma, and they are occult bard spells.<br>
+		<br>
+		You become trained in Occultism and Performance; for each of these skills in which you were already trained, you instead become trained in a skill of your choice.<br>
+		<br>
+		Choose a muse as you would if you were a bard. You can take that muse’s feats, but you don’t gain the starting feat, spell or any other abilities the choice of muse grants.<br>
+	</div>
+	`})
+document.getElementById("muse-polymath").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Muse: Polymath</h1>
+	<div>
+		Your muse is a jack of all trades, flitting between skills and pursuits. Some bards are constantly moved by new muses or draw their inspiration from an idealized being, whether it's based on a real person or purely philosophical. If your muse is a single creature, it might be an eclectic creature like a fey or one who's learned a lot over a long lifespan; if a deity, it might be Desna or Calistria. Art inspired by a polymath muse is restless, with each composition exhibiting new techniques and an ever-evolving style.<br>
+		<br>
+		As a bard with a polymath muse, you are interested in a wide array of topics but rarely dedicated to any one, and you rarely make up your mind—you want to try everything.<br>
+	</div>
+	`})
+document.getElementById("basic-muses-whispers").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Basic Muse's Whispers</h1>
+	<div>
+		<div class="tag-passive">Archetype</div>
+		<br>
+		You gain a 1st- or 2nd-level bard feat.<br>
+	</div>
+	`})
+document.getElementById("basic-flair").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Basic Flair</h1>
+	<div>
+		<div class="tag-passive">Archetype</div>
+		<br>
+		You gain a 1st- or 2nd-level swashbuckler feat.<br>
+	</div>
+	`})
+document.getElementById("antagonize").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Antagonize</h1>
+	<div>
+		<div class="tag-passive">Swashbuckler</div>
+		<br>
+		Your taunts and threats earn your foes' ire. When you successfully Demoralize a creature, its frightened condition can't decrease to less than 1 at the end of its turn until:<br>
+			- it either uses a hostile action against you or<br>
+			- it can no longer observe or sense you for at least 1 round.<br>
+	</div>
+	`})
+document.getElementById("fleet").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Fleet</h1>
+	<div>
+		<div class="tag-passive">General</div>
+		<br>
+		You move more quickly on foot. Your Speed increases by 5 feet.<br>
+	</div>
+	`})
+document.getElementById("versatile-performance").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Versatile Performance</h1>
+	<div>
+		<div class="tag-passive">Bard</div>
+		<br>
+		You can rely on the grandeur of your performances rather than ordinary social skills.<br>
+		<br>
+		You can use Performance instead of Diplomacy to Make an Impression and instead of Intimidation to Demoralize.<br>
+		<br>
+		You can also use an acting Performance instead of Deception to Impersonate.<br>
+		<br>
+		In addition, you can use your proficiency rank in Performance to meet the prerequisites of skill feats that require a particular proficiency rank in Deception, Diplomacy, or Intimidation. <br>
+	</div>
+	`})
+document.getElementById("intimidating-glare").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Intimidating Glare</h1>
+	<div>
+		<div class="tag-passive">General</div> <div class="tag-passive">Skill</div>
+		<br>
+		You can Demoralize with a mere glare. When you do, Demoralize loses the auditory trait and gains the visual trait, and you don’t take a penalty if the creature doesn’t understand your language.<br>
+	</div>
+	`})
+document.getElementById("strong-tail").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Strong Tail</h1>
+	<div>
+		<div class="tag-passive">Merfolk</div>
+		<br>
+		From sheer necessity, you've gotten surprisingly good at moving around on land. Your tail is unusually muscular and lets you hop or slither on land at a modest speed.<br>
+		<br>
+		Your land Speed increases to 15 feet.<br>
+	</div>
+	`})
+document.getElementById("fire-aura-junction").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Fire Aura Junction</h1>
+	<div>
+		<br>
+		<br>
+		An aura junction adds an effect to your kinetic aura when you Channel Elements.<br>
+		<br>
+		<b>Fire</b> Enemies in your kinetic aura gain weakness to fire from your fire impulses. The weakness is equal to half your level (minimum weakness 1).
+	</div>
+	`})
+document.getElementById("battle-cry").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Battle Cry</h1>
+	<div>
+		<div class="tag-passive">General</div> <div class="tag-passive">Skill</div>
+		<br>
+		You are quick to capitalize on your distractions.<br>
+		<br>
+		When you roll initiative, you can yell a mighty battle cry and Demoralize an observed foe as a free action.<br>
+		<br>
+		If you’re legendary in Intimidation, you can use a reaction to Demoralize your foe when you critically succeed at an attack roll.<br>
+	</div>
+	`})
+document.getElementById("swashbuckler-dedication").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Swashbuckler Dedication</h1>
+	<div>
+		<div class="tag-passive">Archetype</div> <div class="tag-passive">Dedication</div> <div class="tag-passive">Multiclass</div>
+		<br>
+		Choose a swashbuckler’s style. You gain the panache and stylish combatant class features, and you apply the bravado trait to Tumble Through and any actions indicated in your swashbuckler style, allowing you to gain panache. You become trained in Acrobatics or the skill associated with your style. If you were already trained in both skills, you instead become trained in a skill of your choice. You also become trained in swashbuckler class DC. You don’t gain any other effects of your chosen style.<br>
+	</div>
+	`})
+document.getElementById("panache").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Panache</h1>
+	<div>
+		<br>
+		<br>
+		You care as much about the way you accomplish something as whether you actually accomplish it in the first place. When you perform an action with particular style, you can leverage this moment of verve to perform spectacular, deadly maneuvers. This heightened state of flair is called panache.<br>
+		<br>
+		You gain panache by performing actions that have the bravado trait. Tumble Through and additional actions determined by your swashbuckler's style (see below) gain the bravado trait when you use them. The GM might determine that a check to perform a particularly daring action, such as swinging on a chandelier or sliding down a drapery, can gain the bravado trait. These checks typically involve at least a single action and a non-trivial DC. Normally, you gain and use panache only in combat encounters; when an encounter ends, you lose panache.<br>
+		<br>
+		Powerful finisher actions, including Confident Finisher, can be used only while you have panache and cause you to lose your panache.<br>
+	</div>
+	`})
+document.getElementById("stylish-combatant").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Stylish Combatant</h1>
+	<div>
+		<br>
+		<br>
+		You gain a <span class="bonus">+1 circumstance bonus to skill checks</span> with the bravado trait while in a combat encounter. While you have panache, you gain a <span class="bonus">+5-foot status bonus to your Speeds.</span><br>
+	</div>
+	`})
+document.getElementById("swashbuckler-style").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Swashbuckler Style</h1>
+	<div>
+		<br>
+		<br>
+		You boast, taunt, and psychologically needle your foes. You are trained in Intimidation. When you Demoralize, the action gains the bravado trait.<br>
+	</div>
+	`})
+document.getElementById("terrified-retreat").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Terrified Retreat</h1>
+	<div>
+		<div class="tag-passive">General</div> <div class="tag-passive">Skill</div>
+		<br>
+		When you critically succeed at the Demoralize action, if the target's level is lower than yours, the target is fleeing for 1 round.<br>
+	</div>
+	`})
+document.getElementById("water-skill-junction").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Water Skill Junction</h1>
+	<div>
+		A skill junction makes you trained in the listed skill and grants you the listed skill feat. If you were already trained in the listed skill, you instead become trained in a skill of your choice. While your kinetic aura is active, you gain a +1 status bonus to the listed skill; the bonus increases to +2 at 10th level and +3 at 17th level.<br>
+		<br>
+		<b>Athletics</b>, <b>Underwater Marauder</b><br>
+	</div>
+	`})
+document.getElementById("underwater-marauder").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Underwater Marauder</h1>
+	<div>
+		<div class="tag-passive">General</div> <div class="tag-passive">Skill</div>
+		<br>
+		You’ve learned to fight underwater. You are not off-guard while in water, and you don’t take the usual penalties for using a bludgeoning or slashing melee weapon in water.<br>
+	</div>
+	`})
+document.getElementById("aura-shaping").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Aura Shaping</h1>
+	<div>
+		<div class="tag-passive">Kineticist</div>
+		<br>
+		You control the size of your kinetic aura. You can make your kinetic aura's emanation any size from a 5-foot emanation to a 20-foot emanation (you must choose a multiple of 5). You choose the size when you Channel Elements and can change it when you use a stance impulse that affects your kinetic aura. Increase the maximum size you can choose by 5 feet at 15th and 20th levels.<br>
+	</div>
+	`})
+document.getElementById("cat-fall").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Cat Fall</h1>
+	<div>
+		Your catlike aerial acrobatics allow you to cushion your falls. Treat falls as 10 feet shorter. If you’re an expert in Acrobatics, treat falls as 25 feet shorter and 50 feet if you’re a master. If you’re legendary in Acrobatics, you always land on your feet and don’t take damage, regardless of the distance of the fall.
+	</div>
+	`})
+document.getElementById("make-an-impression").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Make an Impression</h1>
+	<div>
+		<b style="${currentLevel >= 4 ? "color: silver" : ""}">Diplomacy</b> <b style="${currentLevel < 4 ? "color: silver" : ""}">Performance</b> <b>vs Will DC</b><br>
+		<br>
+		<div class="tag-active">Auditory</div> <div class="tag-passive">Concentrate</div> <div class="tag-passive">Exploration</div> <div class="tag-passive">Linguistic</div> <div class="tag-passive">Mental</div><br>
+		<br>
+		With at least 1 minute of conversation, during which you engage in charismatic overtures, flattery, and other acts of goodwill, you seek to make a good impression on someone to make them temporarily agreeable.<br>
+		<br>
+		At the end of the conversation, attempt a Diplomacy check against the Will DC of one target. You can instead choose up to five targets if you take a –2 penalty. The GM might add other bonuses or penalties based on the situation. Any impression you make lasts for only the current social interaction unless the GM decides otherwise. See the Changing Attitudes sidebar for a summary of the attitude conditions.<br>
+		<br>
+		<b>Critical Success</b> The target's attitude toward you improves by two steps.<br>
+		<b>Success</b> The target's attitude toward you improves by one step.<br>
+		<b>Critical Failure</b> The target's attitude toward you decreases by one step.<br>
+	</div>
+	`})
+document.getElementById("fan-dancer-dedication").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Fan Dancer Dedication</h1>
+	<div>
+		<div class="tag-passive">Uncommon</div> <div class="tag-passive">Archetype</div> <div class="tag-passive">Dedication</div>
+		<br>
+		You sweep across the battlefield, manifesting both the gentle spring breeze and the crisp autumn gusts. <span class="locked">You become an expert in Performance. At 7th level you become a master in Performance, and</span> at 15th level, you become legendary in Performance.<br>
+		Whenever you Feint while holding a fan, you can give your Feint the air trait. If you do, you can Stride 10 feet before or after as part of the same action.<br>
+	</div>
+	`})
+document.getElementById("solo-dancer").addEventListener("mouseover", function(){_right.innerHTML = `
+	<h1>Solo Dancer</h1>
+	<div>
+		<div class="tag-passive">Archetype</div> <div class="tag-passive">Skill</div><br>
+		<br>
+		You often dance alone with a grace exceeding that of most other performers, carrying yourself with a poise and confidence that draws the attention of those around you. You can always roll Performance for initiative, and during the first round of combat, creatures that act after you are off-guard to you.<br>
+	</div>
+	`})
+</script>
+</body>
+</html>
