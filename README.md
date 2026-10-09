@@ -1,5 +1,3 @@
-***For all:*** *use number keys on your keyboard to switch between levels 1-8 or 1-9.*
-
 ### Pathfinder 1e
 
 *(Arrow keys left/right to switch between levels)*
@@ -7,6 +5,8 @@
 https://amyzee.github.io/Character-Sheets/kineticist1ev2.html
 
 ### Pathfinder 2e
+
+*(Arrow keys left/right to switch between levels)*
 
 https://amyzee.github.io/Character-Sheets/
 
@@ -18,15 +18,17 @@ https://amyzee.github.io/Character-Sheets/kineticist-water-dancer.html
 
 ### 13th Age
 
+*(Number keys to switch between levels 1-3)*
+
 https://amyzee.github.io/Character-Sheets/charsheet-cleric-fala *(Images: CC BY 3.0 game-icons.net)*
 
 ### 5e
 
-https://amyzee.github.io/Character-Sheets/5e-psion-spellblade
+https://amyzee.github.io/Character-Sheets/5e-psion-spellblade *(Permanent level 10)*
 
-https://amyzee.github.io/Character-Sheets/charsheet-druid/druid.html
+https://amyzee.github.io/Character-Sheets/charsheet-druid/druid.html *(Number keys to switch between levels 1-10)*
 
-https://amyzee.github.io/Character-Sheets/charsheet-druid/druid2024.html
+https://amyzee.github.io/Character-Sheets/charsheet-druid/druid2024.html *(Number keys to switch between levels 1-10)*
 
 
 ### Character builder
