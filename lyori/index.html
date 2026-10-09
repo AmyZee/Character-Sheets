@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0">
+<meta charset="utf-8">
+<style>
+html, body{
+	margin: 0;
+	padding: 0;
+}
+#preload{
+	width: 0;
+	height: 0;
+	background:
+		url("floor-grass-192-day.png"),
+		url("floor-grass-192-evening.png"),
+		url("floor-grass-192-night.png"),
+		url("floor-dirt-1.png"),
+		url("floor-dirt-2.png"),
+		url("floor-dirt-3.png"),
+		url("floor-hole.png"),
+		url("turn-counter.png"),
+		url("turn-counter-2.png"),
+		url("turn-empty.png"),
+		url("turn-empty-2.png"),
+		url("background-image-1.png"),
+		url("background-image-2.png"),
+		url("enemy1.png"),
+		url("enemy1-peril.png"),
+		url("enemy2.png"),
+		url("enemy2-peril.png"),
+		url("playerNorth.png"),
+		url("playerSouth.png"),
+		url("playerEast.png"),
+		url("playerWest.png"),
+		url("inner-explosion.png");
+}
+#container{
+	position: relative;
+	margin: 0 auto;
+	width: 528px;
+}
+#canvas{
+	position: absolute;
+	border: 1px solid black;
+	margin: 0 auto;
+	display: block;
+
+}
+#bgsky{
+	position: absolute;
+	display: block;
+	margin: 0 auto;
+}
+#playbutton{
+	position: absolute;
+	top: 268px;
+	left: 250px;
+}
+#screenshaketoggle{
+	position: absolute;
+	top: 570px;
+	right: 0;
+}
+#soundtoggle{
+	position: absolute;
+	top: 570px;
+	right: 130px;
+}
+#musictoggle{
+	position: absolute;
+	top: 570px;
+	right: 220px;
+}
+
+#instructions{
+	position: absolute;
+	top: 600px;
+}
+
+.canvasShake{
+  animation: screenshake 0.3s;
+}
+
+@keyframes screenshake{
+0% {transform: translate(0px, 0px)}
+15% {transform: translate(0px, 4px)}
+30% {transform: translate(0px, 0px)}
+45% {transform: translate(0px, 4px)}
+60% {transform: translate(0px, 0px)}
+75% {transform: translate(0px, 2px)}
+90% {transform: translate(0px, 0px)}
+100% {transform: translate(0px, 0px)}
+}
+
+</style>
+</head>
+<body onload='document.getElementById("playbutton").disabled = false'>
+<div id="preload"></div>
+<div id="container">
+<img id="bgsky" src="background-image-1.png">
+<canvas id="canvas" width="528" height="560"></canvas>
+<button id="playbutton" style="display: block; margin: 0 auto" disabled>Play</button>
+<button id="screenshaketoggle">Screenshake On</button>
+<button id="soundtoggle">Sound On</button>
+<button id="musictoggle">Music On</button>
+<div id="instructions">
+	Arrow keys to move.<br>
+	Green enemies take 1 hit, red enemies take 2 hits.<br>
+	You can kill enemies on black holes to resurface tiles.<br>
+	Every 4 turns, new enemies spawn.<br>
+	Developer's High Score: 51<br>
+	<br>
+	Attack SFX and Explosion SFX sourced on Zapsplat and modified using Audacity.<br>
+	All other sounds created using Bosca Ceoil and Audacity.<br>
+</div>
+</div>
+<script>
+
+window.devicePixelRatio = 2
+
+var score
+var turn
+var health
+var healthNumber
+var playArea = []
+var enemyArea = []
+var player = {}
+
+//Accessabiliy options
+var screenshake = true
+var music = true
+var currentTrack = 0
+var sound = true
+
+
+
+document.getElementById("screenshaketoggle").addEventListener("click", function(){
+	if(screenshake == true){
+		screenshake = false
+		document.getElementById("screenshaketoggle").innerHTML = "Screenshake Off"
+	} else {
+		screenshake = true
+		document.getElementById("screenshaketoggle").innerHTML = "Screenshake On"
+	}
+}, false)
+document.getElementById("soundtoggle").addEventListener("click", function(){
+	if(sound == true){
+		sound = false
+		document.getElementById("soundtoggle").innerHTML = "Sound Off"
+	} else {
+		sound = true
+		document.getElementById("soundtoggle").innerHTML = "Sound On"
+	}
+}, false)
+document.getElementById("musictoggle").addEventListener("click", function(){
+	if(music == true){
+		music = false
+		document.getElementById("musictoggle").innerHTML = "Music Off"
+		pyoro0Music.muted = true
+		pyoro1Music.muted = true
+		pyoro2Music.muted = true
+		pyoro3Music.muted = true
+	} else {
+		music = true
+		if(currentTrack == 0){
+			pyoro0Music.muted = false
+		} else if(currentTrack == 1){
+			pyoro1Music.muted = false
+		} else if (currentTrack == 2){
+			pyoro2Music.muted = false
+		} else if (currentTrack == 3){
+			pyoro3Music.muted = false
+		}
+		document.getElementById("musictoggle").innerHTML = "Music On"
+	}
+}, false)
+
+var spawnNewEnemyAudio = new Audio("new-enemy.wav")
+	spawnNewEnemyAudio.preload = true
+var changeSceneryAudio = new Audio("level-up.wav")
+	changeSceneryAudio.preload = true
+var pyoro0Music = new Audio("synthwave0.wav")
+	pyoro0Music.preload = true
+	pyoro0Music.loop = true
+var pyoro1Music = new Audio("synthwave1.wav")
+	pyoro1Music.preload = true
+	pyoro1Music.loop = true
+var pyoro2Music = new Audio("synthwave2.wav")
+	pyoro2Music.preload = true
+	pyoro2Music.loop = true
+var pyoro3Music = new Audio("synthwave3.wav")
+	pyoro3Music.preload = true
+	pyoro3Music.loop = true
+var explosionAudio = new Audio("explosion.wav")
+	explosionAudio.preload = true
+var attackAudio = new Audio("attack.wav")
+	attackAudio.preload = true
+
+
+
+
+
+
+function playMusic(){
+	pyoro0Music.muted = true
+	pyoro1Music.muted = true
+	pyoro2Music.muted = true
+	pyoro3Music.muted = true
+	pyoro0Music.play()
+	pyoro1Music.play()
+	pyoro2Music.play()
+	pyoro3Music.play()
+	if(music == true){
+		pyoro0Music.muted = false
+	}
+}
+
+
+function calculateHealthEmoji(){
+	health = health.slice(0,healthNumber-2) //Emoji's count as 2 characters each
+	healthNumber -= 2
+
+}
+function calculateTurnBar(){
+	ctx.drawImage(turnimgempty2, 90, 3)
+	// ctx.fillText("👿", 73, 12)
+	ctx.drawImage(turnimgempty, 109, 3)
+	ctx.drawImage(turnimgempty, 128, 3)
+	//ctx.drawImage(turnimgempty, 147, 3)
+	if(turn == 1){
+		ctx.font = "11px Arial"
+		ctx.fillText("😈", 73, 12)
+	}
+	else if(turn > 1){
+		ctx.drawImage(turnimg2, 90, 3)
+		if (turn > 2){
+			ctx.drawImage(turnimg, 109, 3)
+			if (turn > 3){
+				ctx.drawImage(turnimg, 128, 3)
+			}
+		}
+	}
+}
+
+
+/*playArea: 0 = empty tiles,
+	1 = enemy1 1 turn, 2 = enemy2 1 turn, 3 = enemy1 2 turns, 4 = enemy2 2 turns, 5 = enemy1 3 turns, 6 = enemy2 3 turns, 7 = enemy1 4 turns, 8 = enemy2 4 turns,
+	9 = enemy1 5 turns, 10 = enemy2 5 turns,
+	_ = normal tiles, P = player, E = inner explosion, e = outer explosion
+	All numbers (enemies, empty tiles) stop player movement
+*/
+
+
+
+
+const canvas = document.getElementById("canvas")
+const ctx = canvas.getContext("2d")
+	  ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
+
+ctx.fillStyle = "#dde"
+ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+var enemy1img = new Image()
+	enemy1img.src = "enemy1.png"
+var enemy1img_peril = new Image()
+	enemy1img_peril.src = "enemy1-peril.png"
+var enemy2img = new Image()
+	enemy2img.src = "enemy2.png"
+var enemy2img_peril = new Image()
+	enemy2img_peril.src = "enemy2-peril.png"
+var playerimg = new Image()
+	playerimg.src = "playerSouth.png"
+var grassimg = new Image()
+	grassimg.src = "floor-grass-192-day.png"
+var dirtimg = new Image()
+	dirtimg.src = "floor-dirt-1.png"
+var holeimg = new Image()
+	holeimg.src = "floor-hole.png"
+var skyimg = "background-image-1.png"
+var turnimg = new Image()
+	turnimg.src = "turn-counter.png"
+var turnimg2 = new Image()
+	turnimg2.src = "turn-counter-2.png"
+var turnimgempty = new Image()
+	turnimgempty.src = "turn-empty.png"
+var turnimgempty2 = new Image()
+	turnimgempty2.src = "turn-empty-2.png"
+var innerexplosionimg = new Image()
+	innerexplosionimg.src = "inner-explosion.png"
+
+ctx.drawImage(enemy2img, 0, 0)
+
+
+function spawnNewEnemy(){
+
+	var randomX = Math.floor(Math.random()*5)
+	var randomY = Math.floor(Math.random()*5)
+	var randomType = Math.floor((Math.random()+1)*2)
+	var randomStrength = Math.floor((Math.random()*2)+5)
+	var randomEnemy = randomType * randomStrength
+
+	if(enemyArea[randomY][randomX] == "."){ //Check if floor is free from existing enemy or explosion
+		enemyArea[randomY][randomX] = randomEnemy
+		if(sound == true){
+			spawnNewEnemyAudio.play()
+		}
+		if(screenshake == true){
+			document.getElementById("canvas").classList.add("canvasShake")
+			setTimeout(function(){
+				document.getElementById("canvas").classList.remove("canvasShake")
+			}, 300)
+		}
+		
+	} else { //If it isn't free, retry with hopefully another tile, chosen at random again
+		spawnNewEnemy()
+	}
+	
+
+}
+function turnCounter(){
+	turn--
+	if(turn == 0){
+		turn = 4
+		spawnNewEnemy()
+		if(score == 7){
+			if(music == true){
+				pyoro1Music.muted = false
+				pyoro0Music.muted = true
+			}
+			currentTrack = 1
+		}
+		if(score > 6){
+			spawnNewEnemy()
+			if(score > 12){
+				spawnNewEnemy()
+				if(grassimg.getAttribute("src") != "floor-grass-192-evening.png" && score <= 18){
+					grassimg.src = "floor-grass-192-evening.png"
+					dirtimg.src = "floor-dirt-2.png"
+					if(sound == true){
+						changeSceneryAudio.play()	
+					}
+					if(music == true){
+						pyoro2Music.muted = false
+						pyoro1Music.muted = true
+					}
+					currentTrack = 2
+				}
+				if(score > 18){
+					spawnNewEnemy()
+					if(score > 24){
+						spawnNewEnemy()
+						if(grassimg.getAttribute("src") != "floor-grass-192-night.png"){
+							grassimg.src = "floor-grass-192-night.png"
+							dirtimg.src = "floor-dirt-3.png"
+							skyimg = "background-image-2.png"
+							if(sound == true){
+								changeSceneryAudio.play()	
+							}							
+							if(music == true){
+								pyoro3Music.muted = false
+								pyoro2Music.muted = true
+							}
+							currentTrack = 3		
+						}
+
+					}
+				}
+			}
+		}
+	}
+}
+function drawPlayArea(){
+
+	if(healthNumber == 0){ //Game over
+		ctx.fillStyle = "lightyellow"
+		ctx.fillRect(0, 0, 264, 310)
+		ctx.fillStyle = "#111"
+		ctx.font = "16px Arial"
+		ctx.fillText("Game Over", 100, 120)
+		ctx.fillText("Final score: " + score, 100, 150)
+	} else {
+		//Score area
+		ctx.fillStyle = "lightyellow"
+		ctx.fillRect(0, 0, 264, 16)
+		ctx.fillStyle = "#111"
+		ctx.font = "11px Arial"
+		ctx.fillText("✨ " + score, 4, 12)
+		ctx.fillText(health, 200, 12)
+		// calculateTurnBar()
+
+		//Play area
+		//ctx.fillStyle = "darkgreen"
+		//ctx.fillRect(0, 20, 310, 310)
+		ctx.drawImage(dirtimg, 0, 16, 264, 264)
+		document.getElementById("bgsky").src = skyimg
+		for(var i = 0; i < 5; i++){
+			for (var j = 0; j < 5; j++){
+				if(playArea[i][j] == "_"){
+					//ctx.fillStyle = "forestgreen" //regular tiles
+					//ctx.fillRect(10+(j*60), 30+(i*60), 50, 50)
+					ctx.drawImage(grassimg, 4+(j*52), 20+(i*52), 48, 48)
+				}
+				else if (playArea[i][j] == 0){
+					//ctx.fillStyle = "black" //empty tiles
+					//ctx.fillRect(10+(j*60), 30+(i*60), 50, 50)
+					ctx.clearRect(0+(j*52), 16+(i*52), 56, 56)
+					ctx.drawImage(holeimg, 0+(j*52), 16+(i*52), 56, 56)
+
+				}
+				else if (playArea[i][j] == "P"){ //player
+					//ctx.fillStyle = "rgba(65,105,225, 1)"
+					//ctx.fillRect(30+(j*60), 70+(i*60), 50, 50)
+					//ctx.fillStyle = "forestgreen" //regular tiles
+					//ctx.fillRect(10+(j*60), 30+(i*60), 50, 50)
+					ctx.drawImage(grassimg, 4+(j*52), 20+(i*52), 48, 48)
+					ctx.drawImage(playerimg, 4+(j*52), 20+(i*52), 48, 48)
+				}
+
+		
+			}
+		}
+		drawEnemyArea()
+	}
+}
+function drawEnemyArea(){
+
+	enemyDrawn = ""
+
+	//Decrease Enemy by 2
+	for(var i = 0; i < 5; i++){
+		for (var j = 0; j < 5; j++){
+			if(Number.isInteger(enemyArea[i][j]) == true) {
+				enemyArea[i][j]-=2
+			}	
+		}
+	}
+
+	//Enemies
+	for(var i = 0; i < 5; i++){
+		for (var j = 0; j < 5; j++){
+
+			if(enemyArea[i][j] == "e"){
+				enemyArea[i][j] = "."
+			}
+			if(enemyArea[i][j] == "ee"){
+				enemyArea[i][j] = "e"
+			}
+
+			else if(Number.isInteger(enemyArea[i][j]) == true){
+
+				if(enemyArea[i][j] == -1 || enemyArea[i][j] == 0){
+					if(sound == true){
+						explosionAudio.load()
+						explosionAudio.play()
+					}
+					enemyArea[i][j] = "E"
+					playArea[i][j] = 0
+				//	ctx.fillStyle = "orange"
+				//	ctx.drawImage(innerexplosionimg, 8+(j*52), 24+(i*52), 40, 40)
+					ctx.drawImage(innerexplosionimg, -48+(j*52), -32+(i*52), 152, 152)
+				//	ctx.fillRect(-48+(j*52), -32+(i*52), 152, 152)
+					if(i-1 > -1){
+						enemyArea[i-1][j] = "e"
+					}
+					if(i+1 < 5){
+						enemyArea[i+1][j] = "ee" //if it was "e", it turns into "." immediately on the next for-loop, given that it checks the letter AFTER the inner explosion tile in the loop
+					}
+					if(j-1 > -1){
+						enemyArea[i][j-1] = "e"
+					}
+					if(j-1 < 5){
+						enemyArea[i][j+1] = "ee"
+					}
+					//ctx.fillRect(8+(j*52), 24+(i*52), 40, 40)
+				}
+				else if(Number.isInteger(enemyArea[i][j]/2) != true){
+					if(enemyArea[i][j] == 1){
+						enemyDrawn = enemy1img_peril
+					} else {
+						enemyDrawn = enemy1img
+					}
+
+				}
+				else if(Number.isInteger(enemyArea[i][j]/2) == true && enemyArea[i][j] != 0){
+					if(enemyArea[i][j] == 2){
+						enemyDrawn = enemy2img_peril
+					} else {
+						enemyDrawn = enemy2img
+					}
+				}
+				// ctx.fillRect(35+(j*60), 75+(i*60), 40, 40)
+				if(enemyDrawn != ""){
+					ctx.drawImage(enemyDrawn, 8+(j*52), 24+(i*52), 40, 40)
+					enemyDrawn = ""
+				}
+				
+
+				ctx.fillStyle = "rgba(255,255,255,0.7)"
+				ctx.font = "25px Arial"
+				if(Number.isInteger(enemyArea[i][j]) == true && enemyArea[i][j] != 0){
+					ctx.fillText(Math.ceil(enemyArea[i][j]/2), 36+j*52, 64+i*52)
+				}
+			}
+		}
+	}
+	//Outer explosion rendering
+	for(var i = 0; i < 5; i++){
+		for (var j = 0; j < 5; j++){
+			if(enemyArea[i][j] == "e"){
+				//ctx.fillStyle = "firebrick"
+				//ctx.fillRect(8+(j*52), 24+(i*52), 40, 40)
+				if(playArea[i][j] == "P"){
+					calculateHealthEmoji()
+				}
+			}
+		}
+	}
+}
+
+function updatePlayArea(){
+
+	//PlayerPosition
+	playArea[player.y][player.x] = "_"
+	playArea[player.newY][player.newX] = "P"
+	player.x = player.newX
+	player.y = player.newY
+
+	drawPlayArea()
+}
+
+function attackEnemy(type, enemyY,enemyX){
+	if(sound == true){
+		attackAudio.load()
+		attackAudio.play()
+	}
+	if(Number.isInteger(type/2) != true){
+		playArea[enemyY][enemyX] = "_" //Makes normal ground.
+		enemyArea[enemyY][enemyX] = "." //Removes enemy.
+		score++
+	} else if (Number.isInteger(type/2) == true){
+		enemyArea[enemyY][enemyX]-- //Makes even numbers from odd numbers
+	}
+
+
+	
+}
+
+function arrowKeysControl(e){ //Additional code makes it a label for the break statement later in the function
+	e = e || window.event
+	e.preventDefault()
+	var checkNewTileY = player.y
+	var checkNewTileX = player.x
+	if(e.keyCode > 36 && e.keyCode < 41){
+		if(e.keyCode == "38"){
+		//up arrow
+		checkNewTileY = player.y-1
+
+		if(player.y > 0){
+			if(playArea[checkNewTileY][checkNewTileX] != 0 && Number.isInteger(enemyArea[checkNewTileY][checkNewTileX]) != true
+			){ 
+				player.newY = checkNewTileY
+			}
+		}
+		playerimg.src = "playerNorth.png"
+		}
+		else if (e.keyCode == "40"){
+			//down narrow
+			checkNewTileY = player.y+1
+
+			if(player.y < 4){
+				if(playArea[checkNewTileY][checkNewTileX] != 0 && Number.isInteger(enemyArea[checkNewTileY][checkNewTileX]) != true
+				){ 
+					player.newY = checkNewTileY
+				}
+			}
+			playerimg.src = "playerSouth.png"
+		}
+		else if (e.keyCode == "37"){
+			//left arrow
+			checkNewTileX = player.x-1
+
+			if(player.x > 0){
+				if(playArea[checkNewTileY][checkNewTileX] != 0 && Number.isInteger(enemyArea[checkNewTileY][checkNewTileX]) != true
+				){ 
+					player.newX = checkNewTileX
+				}
+			}
+			playerimg.src = "playerWest.png"
+		}
+		else if (e.keyCode == "39"){
+			//right arrow
+			checkNewTileX = player.x+1
+
+			if(player.x < 4){
+				if(playArea[checkNewTileY][checkNewTileX] != 0 && Number.isInteger(enemyArea[checkNewTileY][checkNewTileX]) != true
+				){ 
+					player.newX = checkNewTileX
+				}
+			}
+			playerimg.src = "playerEast.png"
+		}
+
+		//Attack enemy
+		if(player.x > -1 && player.x < 5 && player.y > -1 && player.y < 5){
+			if(Number.isInteger(enemyArea[checkNewTileY][checkNewTileX])){ //Walk into enemy1
+				attackEnemy(enemyArea[checkNewTileY][checkNewTileX], checkNewTileY, checkNewTileX)
+			}
+		}
+		turnCounter()
+		updatePlayArea()
+		calculateTurnBar()
+	}
+}
+document.addEventListener("keydown", arrowKeysControl, false)
+
+//IMAGE.ONLOAD(){ //ONLY AFTER ALL IMAGES ARE LOADED, INITIATE DOCUMENT
+
+
+function start(){
+	playArea = [
+	["_","_","_","_","_"],
+	["_","_","_","_","_"],
+	["_","_","_","_","_"],
+	["_","_","_","_","_"],
+	["_","_","_","_","_"]
+]
+
+	enemyArea = [
+	[ 14,".",".",".","."],
+	[".",".", 11,".","."],
+	[".",".",".",".","."],
+	[".",".",".",".","."],
+	[".",".",".",".","."]
+]
+
+	player.x = 1
+	player.y = 3
+	player.newX = 1
+	player.newY = 3
+
+
+	score = 0
+	turn = 4
+	health = "💙💙💙💙"
+	healthNumber = 8 //Emoji's count as two characters each
+
+	currentTrack = 0
+
+	skyimg = "background-image-1.png"
+	grassimg.src = "floor-grass-192-day.png"
+	dirtimg.src = "floor-dirt-1.png"
+
+
+	document.getElementById("playbutton").innerHTML = "Restart"
+	document.getElementById("playbutton").style.left = "0px"
+	document.getElementById("playbutton").style.top = "570px"
+	updatePlayArea()
+	calculateTurnBar()
+	playMusic()
+}
+// //Preload enemyimgs
+// ctx.drawImage(enemy1img,0,0)
+// ctx.drawImage(enemy2img,0,0)
+// //Preload playerimgs
+// playerimg.src = "playerEast.png"
+// ctx.drawImage(playerimg,0,0)
+// playerimg.src = "playerSouth.png"
+// ctx.drawImage(playerimg,0,0)
+// playerimg.src = "playerWest.png"
+// ctx.drawImage(playerimg,0,0)
+// playerimg.src = "playerNorth.png"
+// ctx.drawImage(playerimg,0,0)
+
+// function preloadPlayer(i){
+// 	var array = ["playerEast.png", "playerSouth.png", "playerWest.png", "playerNorth.png"]
+		
+// 	playerimg.onload = function(){
+// 		i++
+// 		if(i < array.length){
+// 			preloadPlayer()
+// 		} else {
+// 			document.getElementById("playbutton").disabled = false
+// 		}
+		
+// 	}
+// 	playerimg.src = array[i]
+// 	ctx.drawImage(playerimg,0,0)
+// }
+document.getElementById("playbutton").addEventListener("click", start, false)
+//}
+
+</script>
+
+</body>
+
+</html>
