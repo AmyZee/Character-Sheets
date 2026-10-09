@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Druid charsheet</title>
+<style>
+h1, h2, h3{
+	margin: 0;
+	font-family: "Scala Sans";
+	font-variant: small-caps;
+}
+h1{
+	border-bottom: 1px solid black;
+	font-family: "mr-eaves";
+}
+#spells h1{
+	border-bottom: 0;
+}
+body{
+	font-family: "Scala Sans";
+	margin: 0;
+	padding: 0;
+	background: rgba(24,30,24,1);
+}
+@font-face{
+	font-family: "Game Icons";
+	src:url("GameIcons.otf");
+}
+@font-face{
+	font-family: "Scala Sans";
+	src:url("scala-sans.otf");
+}
+@font-face{
+	font-family: "mr-eaves";
+	src:url("mr-eaves-small-caps.otf");
+}
+
+
+::selection{
+	background: greenyellow;
+}
+#header{
+	background: #eff;
+	width: 100%;
+	height: 180px;
+	background-image: url("ori-style-banner-v1.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+	position: absolute;
+
+}
+	#ego{
+		background: white;
+		border-bottom: 1px solid black;
+	}
+	#abilities_base{
+		background: rgba(255,255,255,0.5);
+		display: inline-flex;
+		flex-direction: column;
+		text-align: center;
+		font-family: "Scala Sans";
+		vertical-align: top;
+	}
+		#abilities_base #row1{
+			flex: 1;
+			display: inline-flex;
+			font-weight: bold;
+			background: rgba(0,0,0,0.5);
+			color: white;
+
+		}
+		#abilities_base #row1 div{
+			flex: 1;
+			font-family: "Scala Sans";
+			font-variant: small-caps;
+			padding: 8px;
+		}
+		#abilities_base #row2{
+			flex: 1;
+			display: inline-flex;
+			font-size: 0.8em;
+		}
+		#abilities_base #row2 div{
+			flex: 1;
+			padding: 4px;
+		}
+		#abilities_base #row3{
+			flex: 1;
+			display: inline-flex;
+			font-size: 1.2em;
+			background: rgba(240,240,240,0.5);
+		}
+		#abilities_base #row3 div{
+			flex: 1;
+			padding: 6px;
+		}
+		#abilities_base #row4{
+			flex: 1;
+			display: inline-flex;
+			border-bottom: 1px solid rgba(0,0,0,0.5);
+
+		}
+		#abilities_base #row4 div{
+			flex: 1;
+			padding: 8px;
+		}
+	#abilities_other{
+		display: inline-flex;
+		vertical-align: top;
+	}
+	#abilities_other div{
+		display: inline-block;
+		margin: 4px;
+	}
+	#abilities_other div div{
+		margin: 0;
+		display: block;
+	}
+		#ac{
+			width: 120px;
+			height: 120px;
+			background-image: url("ac.png");
+			background-size: cover;
+			position: relative;
+		}
+		#ac_title{
+			position: absolute;
+			color: white;
+			text-align: center;
+			width: 120px;
+			top: 10px;
+		}
+		#ac_content{
+			position: absolute;
+			text-align: center;
+			width: 120px;
+			top: 40px;
+			font-size: 2em;
+		}
+		#initiative{
+			width: 120px;
+			height: 120px;
+			background-image: url("initiative.png");
+			background-size: cover;
+			position: relative;
+		}
+		#initiative_title{
+			position: absolute;
+			color: white;
+			text-align: center;
+			width: 120px;
+			top: 10px;
+		}
+		#initiative_content{
+			position: absolute;
+			text-align: center;
+			width: 120px;
+			top: 40px;
+			font-size: 2em;
+		}
+		#hitpoints{
+			background-image: url("health-hd.png");
+			background-size: cover;
+			width: 160px;
+			height: 125px;
+			position: relative;
+		}
+			#currenthp{
+				position: absolute;
+				top: 40px;
+				right: 95px;
+				font-size: 1.2em;
+			}
+			#hitpointbar{
+				position: absolute;
+				top: 22px;
+				left: 26px;
+				background-image: url("health-red.png");
+				width: 112px;
+				height: 53px;
+				display: block;
+			}
+			#temphp{
+				position: absolute;
+				top: 44px;
+				left: 65px;
+
+			}
+				#temphp:before{
+					content: "+";
+				}
+			#maxhp{
+				position: absolute;
+				top: 40px;
+				left: 90px;
+			}
+				#maxhp:before{
+					content: "/ ";
+				}
+		#hit_dice_orbs{
+			position: relative;
+		}
+		#hit_dice_orbs input{
+			display: none;
+		}
+		#hit_dice_orbs label{
+			position: absolute;
+			background-image: url("hp-40px-off.png");
+			width: 20px;
+			height: 20px;
+			background-size: cover;
+		}
+		#orb1:checked ~ #orb1orb, #orb2:checked ~ #orb2orb, #orb3:checked ~ #orb3orb, #orb4:checked ~ #orb4orb, #orb5:checked ~ #orb5orb, #orb6:checked ~ #orb6orb, #orb7:checked ~ #orb7orb, #orb8:checked ~ #orb8orb, #orb9:checked ~ #orb9orb{
+			background-image: url("hd8.png");
+		}
+			#orb0:checked ~#orb0orb{
+				background-image: url("hd6.png") !important;
+			}
+			#orb0orb{
+				left: -142px;
+				top: 78px;
+			}
+			#orb1orb{
+				left: -119px;
+				top: 78px;
+				display: none;
+			}
+			#orb2orb{
+				left: -95px;
+				top: 78px;
+				display: none;
+			}
+			#orb3orb{
+				left: -72px;
+				top: 78px;
+				display: none;
+			}
+			#orb4orb{
+				left: -50px;
+				top: 78px;
+				display: none;
+			}
+			#orb5orb{
+				left: -142px;
+				top: 100px;
+				display: none;
+			}
+			#orb6orb{
+				left: -119px;
+				top: 100px;
+				display: none;
+			}
+			#orb7orb{
+				left: -96px;
+				top: 100px;
+				display: none;
+			}
+			#orb8orb{
+				left: -73px;
+				top: 100px;
+				display: none;
+			}
+			#orb9orb{
+				left: -50px;
+				top: 100px;
+				display: none;
+			}
+		#spell_save_dc{
+			width: 120px;
+			height: 120px;
+			background-image: url("spell_attack.png");
+			background-size: cover;
+			position: relative;
+		}
+			#spell_save_dc_title{
+				position: absolute;
+				color: white;
+				text-align: center;
+				width: 120px;
+				top: 10px;
+			}
+			#spell_save_dc_content{
+				position: absolute;
+				text-align: center;
+				width: 120px;
+				top: 40px;
+				font-size: 2em;
+			}
+		#spell_attack{
+			width: 120px;
+			height: 120px;
+			background-image: url("spell_attack.png");
+			background-size: cover;
+			position: relative;
+		}
+			#spell_attack_title{
+				position: absolute;
+				color: white;
+				text-align: center;
+				width: 120px;
+				top: 10px;
+			}
+			#spell_attack_content{
+				position: absolute;
+				text-align: center;
+				width: 120px;
+				top: 40px;
+				font-size: 2em;
+			}
+
+#container{
+	margin: 0 8px;
+	position: relative;
+	/*pointer-events: none;*/
+}
+
+
+
+#spells{
+	background: transparent;
+	color: white;
+	width: 100%;
+	position: absolute;
+	top: 160px;
+	padding-top: 40px;
+}
+	
+	.spelllevel{
+		display: inline-block;
+		width: 120px;
+	}
+
+#thorns{
+	background-image: url("border-deep.png");
+	background-repeat: repeat-x;
+	position: absolute;
+	top: 155px;
+	width: 100%;
+	height: 140px;
+	pointer-events: none;
+}
+
+#main{
+	display: flex;
+	position: absolute;
+	top: 295px;
+	width: 100%;
+	
+}
+	#noncombat{
+		background: rgba(100,120,100,0.5);
+		padding: 4px;
+		border-radius: 8px;
+		width: 515px;
+		height: 630px;
+		box-shadow: 0 0 12px rgba(0,0,0,0.2);
+
+	}
+	#combat1, #combat2{
+		border-radius: 8px;
+		background: rgba(200,220,200,0.5);
+		/*flex: 10;*/
+		width: 695px;
+		padding: 4px;
+		position: relative;
+		box-shadow: 0 0 12px rgba(0,0,0,0.2);
+
+	}
+
+	#combat1 h2, #combat1 h3, #combat1 hr{
+		width: 50%;
+	}
+	#combatdescription{
+		display: none;
+		position: absolute;
+		right: 8px;
+		height: 550px;
+		width: 360px;
+		background: rgba(255,218,185,0.5);
+		top: 56px;
+		border-radius: 4px;
+		box-shadow: 0 0 4px 0 rgba(0,0,0,0.5);
+	}
+	#combatdescription h1{
+		color: rgba(128,0,0,1);
+		border-bottom: 1px solid rgba(128,0,0,1);
+	}
+	#combatdescription h1, #combatdescription p{
+		margin: 4px;
+	}
+
+	#combatdescription hr{
+		border: 0;
+    	height: 1px;
+    	background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+    	width: 100%;
+    }
+
+    #main:has(#combat1 span:hover) .spelldescription{
+    	display: block;
+    }
+    #main:has(#noncombat span:hover) .spelldescription{
+    	display: block;
+    }
+
+		#toggleables1{
+			/*background: orange;*/
+			width: 64px;
+		}
+	}
+.spelllevel1spell, .spelllevel2spell, .spelllevel3spell, .spelllevel4spell, .spelllevel5spell{
+	color: green;
+	cursor: pointer;
+}
+
+
+input[type="radio"], #mistysteptoggle, #noconcentration{
+	display: none;
+}
+input[type="radio"] + label{
+	background-image: url("hp-40px-disabled.png");
+	background-repeat: no-repeat;
+	display: inline-block;
+	height: 1.5em;
+	width: 1.5em;
+	background-size: cover;
+	margin-left:-2em;
+	margin-right: 0.75em;
+	position: absolute;
+	margin-top: -0.25em;
+	transition: all 300ms;
+}
+input[type="radio"]:disabled + label{
+	background-image: url("hp-40px-off.png");
+}
+input[type="radio"]:checked + label{
+	background-image: url("hp-40px-on.png");
+	opacity: 1;
+}
+#noconcentration + label{
+	height: 3em;
+	width: 3em;
+}
+
+#mistysteptoggle + label{
+	background-image: url("mana-40px.png");
+	background-repeat: no-repeat;
+	display: inline-block;
+	height: 1.5em;
+	width: 1.5em;
+	background-size: cover;
+	margin-left:-2em;
+	margin-right: 0.75em;
+	position: absolute;
+	margin-top: -0.25em;
+	transition: all 300ms;
+}
+#mistysteptoggle:checked + label{
+	background-image: url("no-mana-40px.png");
+}
+hr{
+	border: 0;
+	height: 0.5em;
+	display: block;
+	/*background: pink;*/
+	margin: 0;
+
+}
+
+.inactive{
+	color: rgba(10,20,10, 0.5);
+	transition: all 500ms ease;
+}
+.active{
+	transition: all 500ms ease;
+}
+
+
+#equipment{
+		background: rgba(150,170,150,1);
+		flex-direction: column;
+		text-align: center;
+		font-family: "Scala Sans";
+		vertical-align: top;
+		width: 504px;
+		height: 270px;
+		border-radius: 8px;
+		box-shadow: 0 3px 6px rgba(50, 70, 50, 0.5);
+		overflow: hidden;
+
+		opacity: 1;
+		overflow: hidden;
+		margin: 8px;
+	}
+	.equipment-row{
+		flex: 1;
+		display: flex;
+		font-size: 0.9em;
+		background: rgba(150,170,150,1);
+		margin: 8px;
+		border-bottom: 1px solid rgba(50, 70, 50, 0.5);
+		overflow: hidden;
+		height: 60px;
+
+	}
+	.equipment-row div{
+		flex: 1;
+		padding: 10px 20px;
+		overflow: hidden;
+	}
+
+.level-2, .level-3, .level-4, .level-5, .level-6, .level-7, .level-8, .level-9, .level-10{
+	display: none;
+}
+.level--6, .level-0{
+	display: inline;
+}
+
+</style>
+</head>
+<body>
+<div id="header">
+	<div id="ego">
+		<div id="ego_row1">
+			<b>Name: Tamara</b>
+			<b>Species:</b> High Elf
+			<b>Alignment:</b> Good
+		</div>
+		<div id="ego_row2">
+			<b>Background:</b> Sage (+1 Con, +2 Wis)
+			<b>Languages:</b> Common, Common Sign Language, Elvish
+			<b>Speed:</b> 30 ft.
+			<b>Vision:</b> Darkvision 60 ft.
+			<b>Origin Feat:</b> Magic Initiate (Wizard)
+			<b>Level 4 Druid Feat:</b> Slasher
+		</div>
+	</div>
+	<div id="abilities_base">
+			<div id="row1">
+				<div>Str</div>
+				<div>Dex</div>
+				<div>Con</div>
+				<div>Int</div>
+				<div>Wis</div>
+				<div>Cha</div>
+			</div>
+			<div id="row3">
+				<div>+0</div>
+				<div>+1</div>
+				<div>+2</div>
+				<div>+1</div>
+				<div>+3</div>
+				<div>+0</div>
+			</div>
+			<div id="row4">
+				<div>&nbsp;</div>
+				<div>&nbsp;</div>
+				<div>&nbsp;</div>
+				<div>&nbsp;+3</div>
+				<div>&nbsp;+5</div>
+				<div>&nbsp;</div>
+			</div>
+			<div id="row2">
+				<div>10</div>
+				<div>13</div>
+				<div>14</div>
+				<div>12</div>
+				<div>17</div>
+				<div>10</div>
+			</div>
+
+	</div>
+	<div id="abilities_other">
+		<div id="ac">
+			<div id="ac_title">AC</div>
+			<div id="ac_content">17</div>
+		</div>
+		<div id="initiative">
+			<div id="initiative_title">Initiative</div>
+			<div id="initiative_content">+1</div>
+		</div>
+		<div id="hitpoints">
+			<div id="hitpointbar"></div>
+			<div><span id="currenthp">10</span><span id="temphp">0</span><span id="maxhp">10</span></div>
+		</div>
+		<div id="hit_dice_orbs">
+			<input type="checkbox" id="orb0" checked><label for="orb0" id="orb0orb"></label>
+			<input type="checkbox" id="orb1"><label for="orb1" id="orb1orb"></label>
+			<input type="checkbox" id="orb2"><label for="orb2" id="orb2orb"></label>
+			<input type="checkbox" id="orb3"><label for="orb3" id="orb3orb"></label>
+			<input type="checkbox" id="orb4"><label for="orb4" id="orb4orb"></label>
+			<input type="checkbox" id="orb5"><label for="orb5" id="orb5orb"></label>
+			<input type="checkbox" id="orb6"><label for="orb6" id="orb6orb"></label>
+			<input type="checkbox" id="orb7"><label for="orb7" id="orb7orb"></label>
+			<input type="checkbox" id="orb8"><label for="orb8" id="orb8orb"></label>
+			<input type="checkbox" id="orb9"><label for="orb9" id="orb9orb"></label>
+		</div>
+<!-- 		<div id="hit_dice">
+			<div>Hit Dice</div>
+			<div><span id="currenthitdice6">1</span>d6<br>+<span id="currenthitdice8">0</span>d8</div>
+		</div> -->
+		<div id="death_saves">
+			<div>Death Saving Throws</div>
+			<div id="death_saves_successes">
+				Successes:
+				<input type="checkbox">
+				<input type="checkbox">
+				<input type="checkbox">
+			</div>
+			<div id="death_saves_failures">
+				Failures:
+				<input type="checkbox">
+				<input type="checkbox">
+				<input type="checkbox">
+			</div>
+		</div>
+		<div id="spell_save_dc">
+			<div id="spell_save_dc_title">Spell Save DC</div>
+			<div id="spell_save_dc_content">13</div>
+		</div>
+		<div id="spell_attack">
+			<div id="spell_attack_title">Spell attack</div>
+			<div id="spell_attack_content">+5</div>
+		</div>
+		<div id="char_level">
+			<div id="char_level_title">Character level</div>
+			<div id="char_level_content">1</div>
+		</div>
+		<div id="rest">
+			<div><button id="shortrest">Short rest</button></div>
+			<div><button id="longrest">Long rest</button></div>
+		</div>
+	</div>
+
+</div>
+<div id="thorns"></div>
+<div id="container">
+<div id="spells">
+		<h1>Spell slots</h1>
+		<div class="spelllevel" id="spelllevel1slots">
+			<h2>Level 1</h2>
+		</div>
+		<div class="spelllevel" id="spelllevel2slots">
+			<h2>Level 2</h2>
+		</div>
+		<div class="spelllevel" id="spelllevel3slots">
+			<h2>Level 3</h2>
+		</div>
+		<div class="spelllevel" id="spelllevel4slots">
+			<h2>Level 4</h2>
+		</div>
+		<div class="spelllevel" id="spelllevel5slots">
+			<h2>Level 5</h2>
+		</div>
+		<input type="radio" name="concentration" id="noconcentration" checked><label for="noconcentration"></label>
+
+	</div> 
+<div id="main">
+	<div id="noncombat">
+		<div id="noncombat-skills" style="display: inline-block; vertical-align: top;">
+		<h1>Non-combat</h1>
+		<h2>Skills &amp; Tools</h2>
+		+3 Arcana<br>
+		+3 History<br>
+		+3 Nature<br>
+		+5 Perception<br>
+		+2 Calligrapher's Tools<br>
+		+2 Herbalism Kit
+		</div>
+		<div id="noncombat-spells" style="display: inline-block; width: 138px; margin-left: 4em; vertical-align: top;">
+		<h2>Cantrips</h2>
+			<span id="elementalism">Elementalism<br></span>
+			<hr>
+			<span id="prestidigitation">Prestidigitation<br></span>
+			<hr>
+			<input type="radio" name="concentration" id="dancing_lightstoggle"><label for="dancing_lightstoggle"></label><span id="dancing_lights"><label for="dancing_lightstoggle">Dancing Lights</label><br></span>
+			<hr>
+			<div><h2>Spells</h2></div>
+			<div><hr></div>
+			<span><span id="goodberry" class="spelllevel1spell active">Goodberry</span><br></span>
+			<div class="level-2"><hr></div>
+			<span class="level-5"><input type="radio" name="concentration" id="pass_without_trace_toggle"><label for="pass_without_trace_toggle"></label><span style="font-family: 'Game Icons'; font-size: 0.6em">A</span><label for="pass_without_trace_toggle" class="spelllevel2spell active" id="pass_without_trace">Pass Without Trace (level 2)</label><br></span>
+			<div class="level-5"><hr></div>
+			<span class="level-7"><input type="radio" name="concentration" id="aura_of_vitality_toggle"><label for="aura_of_vitality_toggle"></label><span style="font-family: 'Game Icons'; font-size: 0.6em">A</span><label for="aura_of_vitality_toggle" class="spelllevel3spell active" id="aura_of_vitality">Aura of Vitality (level 3)</label><br></span>
+			<div class="level-7"><hr></div>
+			<span class="level-6"><span style="font-family:'Game Icons'; font-size: 0.6em">A</span><span class="spelllevel3spell active" id="water_breathing">Water Breathing</span><br></span>
+		<span class="level-6"><hr></span>
+		</div>
+		<div id="noncombat-actions" style="display: inline-block; margin-left: 4em; vertical-align: top;">
+			<div><h2>Actions</h2>
+			<span id="action-attack">Attack<br></span>
+			<span id="action-dash">Dash<br></span>
+			<span id="action-disengage">Disengage<br></span>
+			<span id="action-dodge">Dodge<br></span>
+			<span id="action-help">Help<br></span>
+			<span id="action-hide">Hide<br></span>
+			<span id="action-influence">Influence<br></span>
+			<span id="action-magic">Magic<br></span>
+			<span id="action-ready">Ready<br></span>
+			<span id="action-search">Search<br></span>
+			<span id="action-study">Study<br></span>
+			<span id="action-utilize">Utilize<br></span></div>
+		</div>		
+		<h2>Equipment</h2>
+		<b>Coin</b> 8 gp<br><br>
+		<div id="equipment">
+			<div class="equipment-row">
+				<div>Whip</div>
+				<div>Scale armor</div>
+				<div>Shield</div>
+				<div>Quarterstaff</div>
+				<div>Robe</div>
+			</div>
+			<div class="equipment-row">
+				<div>Backpack</div>
+				<div>Bedroll</div>
+				<div>10 days of rations</div>
+				<div>Waterskin</div>
+			</div>
+			<div class="equipment-row">
+				<div>Tinderbox</div>
+				<div>Rope</div>
+				<div>Iron Pot</div>
+				<div>Tent</div>
+			</div>
+			<div class="equipment-row">
+				<div>Calligrapher's Supplies</div>
+				<div>3x Parchment</div>
+				<div></div>
+			</div>
+		</div>
+
+	</div>
+	<div id="toggleables1">
+	</div>
+	<div id="combat1">
+		<h1>Combat</h1>
+		<h2>Actions</h2>
+		<span id="thornwhip"><span style="font-family:'Game Icons'; font-size: 0.6em">m</span> <b>Thorn Whip vs AC</b>—1d6 pierce<br></span>
+		<span><span style="font-family:'Game Icons'; font-size: 0.6em">M</span> <span id="quarterstaff"><b>Quarterstaff vs AC</b>—1d6 bludg, vers, topple</span><br></span>
+		<span><span style="font-family:'Game Icons'; font-size: 0.6em">M</span> <span id="whip"><b>Whip vs AC</b>—1d4+1 slash, reach, slow</span><br></span>
+		<span class="level-3"><span style="font-family:'Game Icons'; font-size: 0.6em">R</span> <span id="sling"><b>Ray of Frost</b></span><br></span>
+		<hr>
+
+		<hr>
+		<h3>Spells</h3>
+		<hr>
+		<span class="spelllevel1spell active" id="grease"><span style="font-family:'Game Icons'; font-size: 0.6em">A</span> Grease<br></span>
+		<hr>
+		<span><input type="radio" name="concentration" id="entangletoggle"><label for="entangletoggle"></label><span style="font-family:'Game Icons'; font-size: 0.6em">A</span> <label for="entangletoggle" class="spelllevel1spell active" id="entangle">Entangle STR save</label for="entangletoggle"><br></span>
+		<span><hr></span>
+		<span><input type="radio" name="concentration" id="faerie_firetoggle"><label for="faerie_firetoggle"></label><span style="font-family:'Game Icons'; font-size: 0.6em">A</span> <label for="faerie_firetoggle" class="spelllevel1spell active" id="faerie_fire">Faerie Fire DEX save</label><br></span>
+		<span><hr></span>
+		<span class="level-3"><span style="font-family:'Game Icons'; font-size: 0.6em">A</span><span class="spelllevel1spell active" id="thunderwave">Thunderwave CON save</span><br></span>
+		<span class="level-3"><hr></span>
+		<span class="level-3"><input type="radio" name="concentration" id="spike_growthtoggle"><label for="spike_growthtoggle"></label><span style="font-family: 'Game Icons'; font-size: 0.6em">A</span><label for="spike_growthtoggle" class="spelllevel2spell active" id="spike_growth">Spike Growth (level 2)</label><br></span>
+		<span class="level-3"><hr></span>
+		<span class="level-3"><input type="radio" name="concentration" id="moonbeamtoggle"><label for="moonbeamtoggle"></label><span style="font-family: 'Game Icons'; font-size: 0.6em">A</span><label for="moonbeamtoggle" class="spelllevel2spell active" id="moonbeam">Moonbeam CON save (level 2)</label><br></span>
+		<span class="level-3"><hr></span>
+		<span class="level-3"><input type="radio" name="concentration" id="gust_of_windtoggle"><label for="gust_of_windtoggle"></label><span style="font-family: 'Game Icons'; font-size: 0.6em">A</span><label for="gust_of_windtoggle" class="spelllevel2spell active" id="gust_of_wind">Gust of Wind STR save (level 2)</label><br></span>
+		<span class="level-3"><hr></span>
+		<span class="level-6"><span style="font-family:'Game Icons'; font-size: 0.6em">A</span><span class="spelllevel3spell active" id="plant_growth">Plant Growth (level 3)</span><br></span>
+		<span class="level-6"><hr></span>
+		<span class="level-6"><span style="font-family:'Game Icons'; font-size: 0.6em">A</span><span class="spelllevel3spell active" id="lightning_bolt">Lightning Bolt DEX save (level 3)</span><br></span>
+		<span class="level-6"><hr></span>
+
+
+		<h2>Bonus actions</h2>
+		<hr>
+		<span class="level-3" id="wrath_of_the_sea">Wrath of the Sea CON save<hr></span>
+		<span class="level-2"><input type="checkbox" style="margin-left:-46px;" id="wildshapetoggle1"><input type="checkbox" id="wildshapetoggle2" style="margin-right: 13px"><label for="wildshapetoggle1" for="wildshapetoggle2" id="wildshape">Wild Shape / Wild Companion</label><br></span>
+		<span class="level-3"><hr></span>
+		<input type="checkbox" id="mistysteptoggle"><label for="mistysteptoggle" class="level-5"></label><span class="level-5 spelllevel1spell active" id="mistystep">Misty Step<br></span>
+		<span class="level-5"><hr></span>
+		<div><h3>Spells</h3></div>
+		<span><hr></span>
+		<span><span id="healing_word" class="spelllevel1spell active">Healing Word</span><br></span>
+		<hr>
+		<span class="level-4"><input type="checkbox" style="margin-left:-46px;" id="second_windtoggle1"><input type="checkbox" id="second_windtoggle2" style="margin-right: 13px"><label for="second_windtoggle1" for="second_windtoggle2" id="second_wind">Second Wind</label><br></span>
+		<h2>Reactions</h2>
+		<hr>
+		<span class="level-4" id="interception"><label for="interception">Interception</label><br><hr></span>
+		<hr>
+		<div id="combatdescription" class="spelldescription">
+			<h1 id="combatdescriptiontitle">Title</h1>
+			<p id="combatdescriptioncontent">Description</p>
+		</div>
+	</div>
+
+</div>
+</div>
+<script>
+
+document.getElementById("mistystep").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Misty Step"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Bonus action</b> Self<br>
+	<i>Verbal</i><br>
+	<br>
+	Teleport up to 30 feet to an unoccupied space that you can see.<br><br>
+	<hr><br>
+	<i>You are briefly surrounded by silvery mist, before teleporting away.</i>
+	`
+}, false)
+
+document.getElementById("entangle").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Entangle"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> 90 feet<br>
+	<i>Verbal, Somatic</i><br>
+	<b><i>Concentration,</i></b> up to 1 minute<br>
+	<br>
+	<div style="text-align: center;">o o o o<br>
+	o o o o<br>
+	o o o o<br>
+	o o o o<br></div>
+	<br>
+	Grasping weeds and vines sprout from the ground in a 20-foot square starting from a point within range. For the duration, these plants turn the ground in the area into difficult terrain.<br>
+	<br>
+	A creature in the area when you cast the spell must succeed on a Strength saving throw or be restrained by the entangling plants until the spell ends. A creature restrained by the plants can use its action to make a Strength check against your spell save DC. On a success, it frees itself.<br>
+	<br>
+	When the spell ends, the conjured plants wilt away.
+	`
+}, false)
+
+document.getElementById("faerie_fire").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Faerie Fire"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> 60 feet range, 20 feet cube<br>
+	<i>Verbal</i><br>
+	<b><i>Concentration,</i></b> up to 1 minute<br>
+	<br>
+	<div style="text-align: center;">o o o o<br>
+	o o o o<br>
+	o o o o<br>
+	o o o o<br></div>
+	<br>
+	Each object in a 20-foot cube within range is outlined in blue, green, or violet light (your choice).<br>
+	<br>
+	Any creature in the area when the spell is cast is also outlined in light if it fails a Dexterity saving throw. For the duration, objects and affected creatures shed dim light in a 10-foot radius.<br>
+	<br>
+	Any attack roll against an affected creature or object has advantage if the attacker can see it, and the affected creature or object can’t benefit from being invisible.
+	`
+}, false)
+
+document.getElementById("thunderwave").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Thunderwave"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> Self<br>
+	<i>Verbal, Somatic</i><br>
+	<br>
+	<div style="text-align: center;">o o o<br>
+	o o o<br>
+	o o o<br>
+	  x  </div>
+	<br>
+	Each creature in a 15-foot cube originating from you must make a Constitution saving throw. On a failed save, a creature takes 2d8 thunder damage and is pushed 10 feet away from you. On a successful save, the creature takes half as much damage and isn’t pushed.<br>
+	<br>
+	In addition, unsecured objects that are completely within the area of effect are automatically pushed 10 feet away from you by the spell’s effect, and the spell emits a thunderous boom audible out to 300 feet.<br><br><hr><br><i>A wave of thunderous force sweeps out from you.</i>
+	`
+}, false)
+
+document.getElementById("healing_word").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Healing Word"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Bonus action</b> 60 feet<br>
+	<i>Verbal</i><br>
+	<br>
+	A creature of your choice that you can see within range regains 2d4 + <b>${level < 9 ? "3" : "4"}</b> hit points. This spell has no effect on undead or constructs.
+	`
+}, false)
+
+document.getElementById("grease").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Grease"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> 60 feet<br>
+	<i>Verbal, Somatic, Material</i><br>
+	1 minute<br>
+	<br>
+	<div style="text-align: center;">o o<br>
+	o o<br></div>
+	<br>
+	Nonflammable grease covers the ground in a 10-foot square centered on a point within range and turns it into <b>Difficult Terrain</b> for the duration.<br>
+	<br>
+	When the grease appears, each creature standing in its area must succeed on a <b>Dexterity saving throw</b> or have the <b>Prone</b> condition.<br>
+	<br>
+	A creature that enters the area or ends its turn there must also succeed on that save or fall <b>Prone</b>.<br>
+	`
+}, false)
+
+document.getElementById("wildshape").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Wild Shape /<br>Wild Companion"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Wild Shape</b><br>
+	<i>Bonus action. Once per short rest, once per long rest</i><br>
+	You can stay into your wild shape for <b>`+parseInt(Math.round(level/2) - 1)+`</b> hours or until you drop to 0 hp.<br>
+	<b><i>Bonus action:</i></b> Revert back.<br><br>
+	&nbsp;&nbsp;&nbsp;&nbsp;Deer (Use to blend in with forest)<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;Cranium Rat (Use to blend in with poor society)<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;Cow: (Deep) Rothé / Stench Kow (Use to fight in<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;darkness)<br>
+	`+ String((level) < 5 ? "&nbsp;&nbsp;&nbsp;&nbsp;Elk (Use to fight in light)<br>" : "") + `
+	&nbsp;&nbsp;&nbsp;&nbsp;` + String((level) < 5 ? "Riding Horse (Use to go fast)" : "Warhorse (Use to go fast or to fight in light)") +`<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;Wolf (Use to scout)
+	<br><br>
+	<b>Wild Companion</b><br>
+	<i>Bonus action</i><br>
+	Cast the <i>Find Familiar</i> spell, without material components. Your familiar is a fey instead of a beast, and your familiar disappears when you take a long rest.<br><br>
+
+
+	`
+}, false)
+
+document.getElementById("spike_growth").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Spike Growth"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> 150 feet<br>
+	<i>Verbal, Somatic, Material</i><br>
+	<b>Concentration,</b> up to 10 minutes<br>
+	<br>
+	The ground in a 20-foot radius centered on a point within range twists and sprouts hard spikes and thorns. The area becomes difficult terrain for the duration. When a creature moves into or within the area, it takes 2d4 piercing damage for every 5 feet it travels.<br><br>
+
+	The transformation of the ground is camouflaged to look natural. Any creature that can’t see the area at the time the spell is cast must make a Wisdom (Perception) check against your spell save DC to recognize the terrain as hazardous before entering it.
+
+	`
+}, false)
+
+document.getElementById("moonbeam").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Moonbeam"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> 120 feet<br>
+	<i>Verbal, Somatic, Material</i><br>
+	<b>Concentration,</b> up to 1 minute<br>
+	<br>
+	<div style="text-align: center;">o o<br>
+	o o<br></div>
+	<br>
+	A silvery beam of pale light shines down in a 5-foot-radius, 40-foot-high Cylinder centered on a point within range. Until the spell ends, Dim Light fills the Cylinder, and you can take a Magic action on later turns to move the Cylinder up to 60 feet.<br>
+	<br>
+	When the Cylinder appears, each creature in it makes a Constitution saving throw. On a failed save, a creature takes 2d10 Radiant damage, and if the creature is shape-shifted (as a result of the Polymorph spell, for example), it reverts to its true form and can’t shape-shift until it leaves the Cylinder. On a successful save, a creature takes half as much damage only. A creature also makes this save when the spell’s area moves into its space and when it enters the spell’s area or ends its turn there. A creature makes this save only once per turn.<br>
+
+	`
+}, false)
+
+document.getElementById("gust_of_wind").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Gust of Wind"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> Self<br>
+	<i>Verbal, Somatic, Material</i><br>
+	<b>Concentration,</b> up to 1 minute<br>
+	<br>
+	A Line of strong wind 60 feet long and 10 feet wide blasts from you in a direction you choose for the duration. Each creature in the Line must succeed on a Strength saving throw or be pushed 15 feet away from you in a direction following the Line. A creature that ends its turn in the Line must make the same save.<br>
+	<br>
+	Any creature in the Line must spend 2 feet of movement for every 1 foot it moves when moving closer to you.<br>
+	<br>
+	The gust disperses gas or vapor, and it extinguishes candles and similar unprotected flames in the area. It causes protected flames, such as those of lanterns, to dance wildly and has a 50 percent chance to extinguish them.<br>
+	<br>
+	As a Bonus Action on your later turns, you can change the direction in which the Line blasts from you.<br>
+
+	`
+}, false)
+
+document.getElementById("plant_growth").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Plant Growth"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> or <b>8 hours</b> 150 feet<br>
+	<i>Verbal, Somatic</i><br>
+	<br>
+	
+
+	<b>Action:</b> Choose a point within range. All normal plants in a 100-foot radius centered on that point become thick and overgrown. A creature moving through the area must spend 4 feet of movement for every 1 foot it moves.<br><br>
+
+	You can exclude one or more areas of any size within the spell’s area from being affected.<br><br>
+
+	<b>8 hours:</b> You enrich the land. All plants in a half-mile radius centered on a point within range become enriched for 1 year. The plants yield twice the normal amount of food when harvested.<br><br><hr><br><i>This spell channels vitality into plants within a specific area.</i>
+
+	`
+}, false)
+
+document.getElementById("thornwhip").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Thorn Whip"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> 30 feet<br>
+	<i>Verbal, Somatic, Material</i><br>
+	<br>
+	
+
+	<i>Melee spell attack `+ String((level < 9) ? "+5" : "+6") +` vs AC</i><br>
+	<b>Hit: </b> <b>`+ String((level < 5) ? "1d6" : "2d6") +`</b> piercing damage, and if the creature is Large or smaller, you pull the creature up to 10 feet closer to you.<br><br><hr><br><i>You create a long, vine-like whip covered in thorns that lashes out at your command toward a creature in range.</i>
+
+	`
+}, false)
+
+document.getElementById("whip").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Whip"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> 10 feet<br>
+	<br>
+	
+
+	<i>Melee attack ${level < 5 ? "+3" : level < 9 ? "+5" : "+6"} vs AC</i><br>
+	<b>Hit:</b> ${level < 5 ? "1d4 + 1" : "1d4 + 2"} piercing damage${level < 4 ? "" : level < 5 ? ", and reduce their Speed by 10 ft" : ", and reduce their Speed by 20 ft"}.</i>
+
+	`
+}, false)
+
+document.getElementById("goodberry").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Goodberry"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> Touch<br>
+	<i>Verbal, Somatic, Material</i><br>
+	<br>
+	
+	Up to ten berries appear in your hand and are infused with magic for the duration. A creature can use its action to eat one berry. Eating a berry restores 1 hit point, and the berry provides enough nourishment to sustain a creature for one day.<br><br>
+
+	The berries lose their potency if they have not been consumed within 24 hours of the casting of this spell.
+
+	`
+}, false)
+
+document.getElementById("pass_without_trace").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Pass Without Trace"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> Self<br>
+	<i>Verbal, Somatic, Material</i><br>
+	<b>Concentration,</b> up to 1 hour<br>
+	<br>
+	
+	For the duration, each creature you choose within 30 feet of you (including you) has a +10 bonus to Dexterity (Stealth) checks and can’t be tracked except by magical means. A creature that receives this bonus leaves behind no tracks or other traces of its passage.<br><br><hr><br>
+
+	A veil of shadows and silence radiates from you, masking you and your companions from detection
+
+	`
+}, false)
+
+document.getElementById("aura_of_vitality").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Aura of Vitality"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> Self (30-foot radius)<br>
+	<i>Verbal</i><br>
+	<b>Concentration,</b> up to 1 minute<br>
+	<br>
+	
+	Healing energy radiates from you in an aura with a 30-foot radius. Until the spell ends, the aura moves with you, centered on you.
+	<b>Bonus action:</b> One creature in the aura (including you) regains to regain 2d6 hit points.
+
+	`
+}, false)
+
+document.getElementById("dancing_lights").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Dancing Lights"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> 120 feet<br>
+	<i>Verbal, Somatic, Material</i><br>
+	<b>Concentration,</b> up to 1 minute<br>
+	<br>
+	
+	You create up to four torch-sized lights within range, making them appear as torches, lanterns, or glowing orbs that hover in the air for the duration. You can also combine the four lights into one glowing vaguely humanoid form of Medium size. Whichever form you choose, each light sheds dim light in a 10-foot radius.<br><br>
+
+	<b>Bonus action:</b> Move the lights up to 60 feet to a new spot within range. A light must be within 20 feet of another light created by this spell, and a light winks out if it exceeds the spell’s range.
+	`
+}, false)
+
+document.getElementById("elementalism").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Elementalism"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> 30 feet<br>
+	<i>Verbal, Somatic</i><br>
+	<br>
+	
+	You exert control over the elements, creating one of the following effects within range.<br><br>
+
+&nbsp;&nbsp;•&nbsp;&nbsp;<b>Beckon Air</b> You create a breeze strong enough to ripple cloth, stir dust, rustle leaves, and close open doors and shutters, all in a 5-foot Cube. Doors and shutters being held open by someone or something aren’t affected.<br>
+&nbsp;&nbsp;•&nbsp;&nbsp;<b>Beckon Earth</b> You create a thin shroud of dust or sand that covers surfaces in a 5-foot-square area, or you cause a single word to appear in your handwriting in a patch of dirt or sand.<br>
+&nbsp;&nbsp;•&nbsp;&nbsp;<b>Beckon Fire</b> You create a thin cloud of harmless embers and colored, scented smoke in a 5-foot Cube. You choose the color and scent, and the embers can light candles, torches, or lamps in that area. The smoke’s scent lingers for 1 minute.<br>
+&nbsp;&nbsp;•&nbsp;&nbsp;<b>Beckon Water</b> You create a spray of cool mist that lightly dampens creatures and objects in a 5-foot Cube. Alternatively, you create 1 cup of clean water either in an open container or on a surface, and the water evaporates in 1 minute.<br>
+&nbsp;&nbsp;•&nbsp;&nbsp;<b>Sculpt Element</b> You cause dirt, sand, fire, smoke, mist, or water that can fit in a 1-foot Cube to assume a crude shape (such as that of a creature) for 1 hour.<br>
+	`
+}, false)
+
+document.getElementById("prestidigitation").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Prestidigitation"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> 10 feet<br>
+	<i>Verbal, Somatic</i><br>
+	<br>
+	
+	This spell is a minor magical trick that novice spellcasters use for practice. You create one of the following magical effects within range:
+&nbsp;&nbsp;•&nbsp;&nbsp;You create an instantaneous, harmless sensory effect, such as a shower of sparks, a puff of wind, faint musical notes, or an odd odor.<br><br>
+&nbsp;&nbsp;•&nbsp;&nbsp;You instantaneously light or snuff out a candle, a torch, or a small campfire.<br>
+&nbsp;&nbsp;•&nbsp;&nbsp;You instantaneously clean or soil an object no larger than 1 cubic foot.<br>
+&nbsp;&nbsp;•&nbsp;&nbsp;You chill, warm, or flavor up to 1 cubic foot of nonliving material for 1 hour.<br>
+&nbsp;&nbsp;•&nbsp;&nbsp;You make a color, a small mark, or a symbol appear on an object or a surface for 1 hour.<br>
+&nbsp;&nbsp;•&nbsp;&nbsp;You create a nonmagical trinket or an illusory image that can fit in your hand and that lasts until the end of your next turn.<br><br>
+
+If you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time, and you can dismiss such an effect as an action.
+
+	`
+}, false)
+
+document.getElementById("lightning_bolt").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Lightning Bolt"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action</b> Self<br>
+	<i>Verbal, Somatic, Material</i><br>
+	<br>
+	
+	A stroke of lightning forming a 100-foot-long, 5-foot-wide Line blasts out from you in a direction you choose. Each creature in the Line makes a Dexterity saving throw, taking 8d6 Lightning damage on a failed save or half as much damage on a successful one.<br>
+
+	`
+}, false)
+
+document.getElementById("water_breathing").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Water Breathing"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Action or Ritual</b> 30 feet<br>
+	<i>Verbal, Somatic, Material</i><br>
+	24 hours<br>
+	<br>
+	
+	This spell grants up to ten willing creatures of your choice within range the ability to breathe underwater until the spell ends. Affected creatures also retain their normal mode of respiration.<br>
+	
+	`
+}, false)
+
+document.getElementById("wrath_of_the_sea").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Second Wind"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Wild Shape</b><br>
+	<i>Bonus action</i><br>
+	10 minutes<br>
+	<br>
+	<div style="text-align: center;">o o o<br>
+	o x o<br>
+	o o o<br></div>
+	<br>
+	${level < 6 ? "5" : "10"}-foot emanation<br>
+	One creature in your emanation: Constitution saving throw against your spell DC<br>
+	<b>Fail:</b> ${level < 9 ? "3" : "4"}d6 cold damage, and pushed 15 feet away from you<br>
+	<b>Success:</b> –<br>
+		
+	`
+}, false)
+
+document.getElementById("interception").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Interception"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Reaction</b><br>
+	<br>
+	<b>Trigger</b> When a creature you can see hits another creature within 5 feet of you with an attack roll<br>
+	<br>
+	<b>Effect</b> Reduce the damage dealt to the target by 1d10&nbsp;+&nbsp;${level < 5 ? "2" : level < 9 ? "3" : "4"}. You must be holding a Shield or a Simple or Martial weapon to use this Reaction.<br>
+		
+	`
+}, false)
+
+document.getElementById("second_wind").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Second Wind"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+	<b>Bonus action</b> Once per short rest, once per long rest<br>
+	<br>
+	Regain 1d10 + ${"1"} hit points.<br>
+		
+	`
+}, false)
+
+document.getElementById("action-attack").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Attack"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		When you take the Attack action, you can make one attack roll with a weapon or an <b>Unarmed Strike</b>.<br>
+		<br>
+		<b>Equipping and Unequipping Weapons.</b> You can either equip or unequip one weapon when you make an attack as part of this action. You do so either before or after the attack. If you equip a weapon before an attack, you don’t need to use it for that attack. Equipping a weapon includes drawing it from a sheath or picking it up. Unequipping a weapon includes sheathing, stowing, or dropping it.<br>
+		<br>
+		<b>Moving between Attacks.</b> If you move on your turn and have a feature, such as Extra Attack, that gives you more than one attack as part of the Attack action, you can use some or all of that movement to move between those attacks.<br>
+
+	`
+}, false)
+
+document.getElementById("action-dash").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Dash"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		When you take the Dash action, you gain extra movement for the current turn. The increase equals your Speed after applying any modifiers. With a Speed of 30 feet, for example, you can move up to 60 feet on your turn if you Dash. If your Speed of 30 feet is reduced to 15 feet, you can move up to 30 feet this turn if you Dash.<br>
+		<br>
+		If you have a special speed, such as a <b>Fly Speed</b> or <b>Swim Speed</b>, you can use that speed instead of your Speed when you take this action. You choose which speed to use each time you take it.<br>
+
+	`
+}, false)
+
+document.getElementById("action-disengage").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Disengage"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		If you take the Disengage action, your movement doesn’t provoke <b>Opportunity Attacks</b> for the rest of the current turn.<br>
+
+	`
+}, false)
+
+document.getElementById("action-dodge").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Dodge"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		If you take the Dodge action, you gain the following benefits: until the start of your next turn, any attack roll made against you has <b>Disadvantage</b> if you can see the attacker, and you make <b>Dexterity saving throws</b> with <b>Advantage</b>.<br>
+		<br>
+		You lose these benefits if you have the <b>Incapacitated</b> condition or if your <b>Speed</b> is 0.<br>
+
+	`
+}, false)
+
+document.getElementById("action-help").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Help"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		When you take the Help action, you do one of the following.<br>
+		<br>
+		<b>Assist an Ability Check.</b> Choose one of your skill or tool proficiencies and one ally who is near enough for you to assist verbally or physically when they make an ability check. That ally has <b>Advantage</b> on the next ability check they make with the chosen skill or tool. This benefit expires if the ally doesn’t use it before the start of your next turn. The DM has final say on whether your assistance is possible.<br>
+		<br>
+		<b>Assist an Attack Roll.</b> You momentarily distract an enemy within 5 feet of you, giving <b>Advantage</b> to the next attack roll by one of your allies against that enemy. This benefit expires at the start of your next turn.<br>
+
+	`
+}, false)
+
+document.getElementById("action-hide").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Hide"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		With the Hide action, you try to conceal yourself. To do so, you must succeed on a DC 15 Dexterity (Stealth) check while you’re <b>Heavily Obscured</b> or behind <b>Three-Quarters Cover</b> or <b>Total Cover<b>, and you must be out of any enemy’s line of sight; if you can see a creature, you can discern whether it can see you.<br>
+		<br>
+		On a successful check, you have the <b>Invisible</b> condition. Make note of your check’s total, which is the DC for a creature to find you with a Wisdom (Perception) check.<br>
+		<br>
+		The condition ends on you immediately after any of the following occurs: you make a sound louder than a whisper, an enemy finds you, you make an attack roll, or you cast a spell with a Verbal component.<br>
+
+	`
+}, false)
+
+document.getElementById("action-influence").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Influence"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		With the Influence action, you urge a monster to do something. Describe or roleplay how you’re communicating with the monster. Are you trying to deceive, intimidate, amuse, or gently persuade? The DM then determines whether the monster feels willing, unwilling, or hesitant due to your interaction; this determination establishes whether an ability check is necessary, as explained below.<br>
+		<br>
+		<li><b>Willing.</b> If your urging aligns with the monster’s desires, no ability check is necessary; the monster fulfills your request in a way it prefers.<br>
+		<li><b>Unwilling.</b> If your urging is repugnant to the monster or counter to its alignment, no ability check is necessary; it doesn’t comply.<br>
+		<li><b>Hesitant.</b> If you urge the monster to do something that it is hesitant to do, you must make an ability check, which is affected by the monster’s attitude: <b>Indifferent, Friendly, or Hostile</b>, each of which is defined in this glossary. The Influence Checks table suggests which ability check to make based on how you’re interacting with the monster. The DM chooses the check, which has a default DC equal to 15 or the monster’s Intelligence score, whichever is higher. On a successful check, the monster does as urged. On a failed check, you must wait 24 hours (or a duration set by the DM) before urging it in the same way again.<br>
+		<br>
+
+	`
+}, false)
+
+document.getElementById("action-magic").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Magic"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		When you take the Magic action, you cast a spell that has a casting time of an action or use a feature or magic item that requires a Magic action to be activated.<br>
+		<br>
+		If you cast a spell that has a casting time of 1 minute or longer, you must take the Magic action on each turn of that casting, and you must maintain <b>Concentration</b> while you do so. If your Concentration is broken, the spell fails, but you don’t expend a spell slot.<br>
+
+	`
+}, false)
+
+document.getElementById("action-ready").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Ready"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		You take the Ready action to wait for a particular circumstance before you act. To do so, you take this action on your turn, which lets you act by taking a <b>Reaction</b> before the start of your next turn.<br>
+		<br>
+		First, you decide what perceivable circumstance will trigger your <b>Reaction</b>. Then, you choose the action you will take in response to that trigger, or you choose to move up to your <b>Speed</b> in response to it. Examples include “If the cultist steps on the trapdoor, I’ll pull the lever that opens it,” and “If the zombie steps next to me, I move away.”<br>
+		<br>
+		When the trigger occurs, you can either take your Reaction right after the trigger finishes or ignore the trigger.<br>
+		<br>
+		When you Ready a spell, you cast it as normal (expending any resources used to cast it) but hold its energy, which you release with your Reaction when the trigger occurs. To be readied, a spell must have a casting time of an action, and holding on to the spell’s magic requires <b>Concentration</b>, which you can maintain up to the start of your next turn. If your Concentration is broken, the spell dissipates without taking effect.<br>
+
+<br>
+
+	`
+}, false)
+
+document.getElementById("action-search").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Search"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		When you take the Search action, you make a Wisdom check to discern something that isn’t obvious. The Search table suggests which skills are applicable when you take this action, depending on what you’re trying to detect.<br>
+		<br>
+		<li><b>Insight</b> Creature's state of mind<br>
+		<li><b>Medicine</b> Creature's ailment or cause of death<br>
+		<li><b>Perception</b> Concealed creature or object<br>
+		<li><b>Survival</b> Tracks or food<br>
+
+	`
+}, false)
+
+document.getElementById("action-study").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Study"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		When you take the Study action, you make an Intelligence check to study your memory, a book, a clue, or another source of knowledge and call to mind an important piece of information about it.<br>
+		<br>
+		The Areas of Knowledge table suggests which skills are applicable to various areas of knowledge.<br>
+		<br>
+		<li><b>Arcana</b> Spells, magic items, eldritch symbols, magical traditions, planes of existence, and certain creatures (Aberrations, Constructs, Elementals, Fey, and Monstrosities)<br>
+		<li><b>History</b> Historic events and people, ancient civilizations, wars, and certain creatures (Giants and Humanoids)<br>
+		<li><b>Investigation</b> Traps, ciphers, riddles, and gadgetry<br>
+		<li><b>Nature</b> Terrain, flora, weather, and certain creatures (Beasts, Dragons, Oozes, and Plants)<br>
+		<li><b>Religion</b> Deities, religious hierarchies and rites, holy symbols, cults, and certain creatures (Celestials, Fiends, and Undead)<br>
+
+	`
+}, false)
+
+document.getElementById("action-utilize").addEventListener("mouseover", function(){
+	document.getElementById("combatdescriptiontitle").innerHTML = "Utilize"
+	document.getElementById("combatdescriptioncontent").innerHTML = `
+		You normally interact with an object while doing something else, such as when you draw a sword as part of the <b>Attack</b> action. When an object requires an action for its use, you take the Utilize action.<br>
+
+	`
+}, false)
+
+
+document.getElementById("goodberry").addEventListener("click", useSpell, false)
+document.getElementById("pass_without_trace").addEventListener("click", useSpell, false)
+document.getElementById("aura_of_vitality").addEventListener("click", useSpell, false)
+document.getElementById("mistystep").addEventListener("click", useSpell, false)
+document.getElementById("entangle").addEventListener("click", useSpell, false)
+document.getElementById("faerie_fire").addEventListener("click", useSpell, false)
+document.getElementById("thunderwave").addEventListener("click", useSpell, false)
+document.getElementById("spike_growth").addEventListener("click", useSpell, false)
+document.getElementById("moonbeam").addEventListener("click", useSpell, false)
+document.getElementById("gust_of_wind").addEventListener("click", useSpell, false)
+document.getElementById("healing_word").addEventListener("click", useSpell, false)
+document.getElementById("grease").addEventListener("click", useSpell, false)
+
+
+
+document.getElementById("longrest").addEventListener("click", takeLongRest, false)
+document.getElementById("shortrest").addEventListener("click", takeShortRest, false)
+
+
+var level = 1
+var currenthp = 8
+var maxhp = 10
+var currenthitdice = 0
+var currentlasthitdice = 1
+var maxhitdice = 0
+
+document.getElementById("hitpointbar").addEventListener("click", changeHP, false)
+function changeHP(input){
+	if(input == "rest"){
+		var changedhp = "="+maxhp
+	} else {
+		var changedhp = prompt("Change HP: + to add, = to equal, - or nothing to subtract", 0)
+	}
+	if(changedhp == ""){
+		changedhp = 0
+	}
+	else if(String(changedhp).charAt(0) == "+"){
+		changedhp = changedhp.slice(0,0) + changedhp.slice(1)
+		currenthp = parseInt(currenthp) + parseInt(changedhp)
+	} else if(String(changedhp).charAt(0) == "="){
+		changedhp = changedhp.slice(0,0) + changedhp.slice(1)
+		currenthp = changedhp
+	} else if(changedhp > 0) {
+		currenthp = parseInt(currenthp) - parseInt(changedhp)
+	} else if(isNaN(changedhp) != true) {
+		currenthp = parseInt(currenthp) + parseInt(changedhp)
+	}
+	document.getElementById("currenthp").innerHTML = currenthp
+	var percentagehp = currenthp / maxhp * 100
+
+	if(percentagehp > 100){
+	document.getElementById("hitpointbar").style.width = 112 + "px"
+	} else if (currenthp < 0){
+		document.getElementById("hitpointbar").style.width = 0 + "px"
+	} else {
+		document.getElementById("hitpointbar").style.width = percentagehp * 112 / 100 + "px"	
+	}
+	document.getElementById("maxhp").innerHTML = maxhp	
+
+
+}
+// document.getElementById("hit_dice_orbs").addEventListener("click", changeHitDice, false)
+function changeHitDice(input){
+	if(input == "rest"){
+		var changedhitdice = "+"+Math.ceil(maxhitdice / 2)
+		if(currenthitdice + parseInt((changedhitdice).charAt(1)) > maxhitdice){
+			changedhitdice = "="+maxhitdice
+			currentlasthitdice = 1
+		}
+	} else {
+		var changedhitdice = prompt("Change Hit Dice: + to add, = to equal, - or nothing to subtract", 0)
+	}
+	
+	if(String(changedhitdice).charAt(0) == "+"){
+		changedhitdice = changedhitdice.slice(0,0) + changedhitdice.slice(1)
+		currenthitdice = parseInt(currenthitdice) + parseInt(changedhitdice)
+	}
+	else if(String(changedhitdice).charAt(0) == "="){
+		changedhitdice = changedhitdice.slice(0,0) + changedhitdice.slice(1)
+		currenthitdice = changedhitdice
+	}
+	else if(changedhitdice > 0){
+		currenthitdice = parseInt(currenthitdice) - parseInt(changedhitdice)
+	}
+	else if(isNaN(changedhitdice) != true){
+		currenthitdice = parseInt(currenthitdice) + parseInt(changedhitdice)
+	}
+	if(currenthitdice < 0){
+		currenthitdice = 0
+		currentlasthitdice = 0
+	}
+
+	// document.getElementById("currenthitdice8").innerHTML = currenthitdice
+	// document.getElementById("currenthitdice6").innerHTML = currentlasthitdice
+
+}
+
+
+document.addEventListener("keypress", function(e){
+	if (e.code == "Enter"){
+		changeHP()
+	}
+
+	if (e.code == "Digit1"){
+		level = 1
+		document.getElementById("ac_content").innerHTML = 17
+		document.getElementById("spell_save_dc_content").innerHTML = 13
+		document.getElementById("spell_attack_content").innerHTML = "+5"
+		maxhp = 10
+	}
+	else if (e.code == "Digit2"){
+		level = 2
+		document.getElementById("ac_content").innerHTML = 17
+		document.getElementById("spell_save_dc_content").innerHTML = 13
+		document.getElementById("spell_attack_content").innerHTML = "+5"
+		maxhp = 17
+	}
+	else if (e.code == "Digit3"){
+		level = 3
+		document.getElementById("ac_content").innerHTML = 17
+		document.getElementById("spell_save_dc_content").innerHTML = 13
+		document.getElementById("spell_attack_content").innerHTML = "+5"
+		maxhp = 24
+	}
+	else if (e.code == "Digit4"){
+		level = 4
+		document.getElementById("ac_content").innerHTML = 17
+		document.getElementById("spell_save_dc_content").innerHTML = 13
+		document.getElementById("spell_attack_content").innerHTML = "+5"
+		maxhp = 32
+	}
+	else if (e.code == "Digit5"){
+		level = 5
+		document.getElementById("ac_content").innerHTML = 18
+		document.getElementById("spell_save_dc_content").innerHTML = 14
+		document.getElementById("spell_attack_content").innerHTML = "+6"
+		maxhp = 39
+	}
+	else if (e.code == "Digit6"){
+		level = 6
+		document.getElementById("ac_content").innerHTML = 18
+		document.getElementById("spell_save_dc_content").innerHTML = 14
+		document.getElementById("spell_attack_content").innerHTML = "+6"
+		maxhp = 46
+	}
+	else if (e.code == "Digit7"){
+		level = 7
+		document.getElementById("ac_content").innerHTML = 18
+		document.getElementById("spell_save_dc_content").innerHTML = 14
+		document.getElementById("spell_attack_content").innerHTML = "+6"
+		maxhp = 53
+	}
+	else if (e.code == "Digit8"){
+		level = 8
+		document.getElementById("ac_content").innerHTML = 18
+		document.getElementById("spell_save_dc_content").innerHTML = 14
+		document.getElementById("spell_attack_content").innerHTML = "+6"
+		maxhp = 60
+	}
+	else if (e.code == "Digit9"){
+		level = 9
+		document.getElementById("ac_content").innerHTML = 18
+		document.getElementById("spell_save_dc_content").innerHTML = 16
+		document.getElementById("spell_attack_content").innerHTML = "+8"
+		maxhp = 67
+	}
+	else if (e.code == "Digit0"){
+		level = 10
+		document.getElementById("ac_content").innerHTML = 18
+		document.getElementById("spell_save_dc_content").innerHTML = 16
+		document.getElementById("spell_attack_content").innerHTML = "+8"
+		maxhp = 74
+	}
+	maxhitdice = level - 1
+	// document.getElementById("currenthitdice8").innerHTML = maxhitdice
+
+	if(level == 1){
+		for(var i = 0; i < document.getElementsByClassName("level--6").length; i++){
+			document.getElementsByClassName("level--6")[i].style.display = "inline"
+		}
+		for(var j = 2; j <= 10; j++){
+			for(var i = 0; i < document.getElementsByClassName("level-"+j).length; i++){
+				document.getElementsByClassName("level-"+j)[i].style.display = "none"
+			}
+		}
+
+	} else {
+		if(level == 6){
+			for(var i = 0; i < document.getElementsByClassName("level--6").length; i++){
+				document.getElementsByClassName("level--6")[i].style.display = "none"
+			}
+		}
+		for(var j = 1; j <= level; j++){
+			for(var i = 0; i < document.getElementsByClassName("level-"+j).length; i++){
+				document.getElementsByClassName("level-"+j)[i].style.display = "inline"
+			}
+		}
+	}
+
+	if (e.code != "Enter" && e.code != "NumpadEnter"){
+		changeMaxSpells()
+	}
+
+
+	if(level < 10){
+		document.getElementById("orb9orb").style.display = "none"
+		if(level < 9){
+			document.getElementById("orb8orb").style.display = "none"
+			if(level < 8){
+				document.getElementById("orb7orb").style.display = "none"
+				if(level < 7){
+					document.getElementById("orb6orb").style.display = "none"
+					if(level < 6){
+						document.getElementById("orb5orb").style.display = "none"
+						if(level < 5){
+							document.getElementById("orb4orb").style.display = "none"
+							if(level < 4){
+								document.getElementById("orb3orb").style.display = "none"
+								if(level < 3){
+									document.getElementById("orb2orb").style.display = "none"
+									if(level < 2){
+										document.getElementById("orb1orb").style.display = "none"
+									} else {
+										document.getElementById("orb1orb").style.display = "block"
+									}
+								} else {
+									document.getElementById("orb2orb").style.display = "block"
+								}
+							} else {
+								document.getElementById("orb3orb").style.display = "block"
+							}
+						} else {
+							document.getElementById("orb4orb").style.display = "block"
+						}
+					} else {
+						document.getElementById("orb5orb").style.display = "block"
+					}
+				} else {
+					document.getElementById("orb6orb").style.display = "block"
+				}
+			} else {
+				document.getElementById("orb7orb").style.display = "block"
+			}
+		} else {
+			document.getElementById("orb8orb").style.display = "block"
+		}
+	} else {
+		document.getElementById("orb9orb").style.display = "block"
+	}
+	
+
+	document.getElementById("char_level_content").innerHTML = level
+
+})
+
+function changeMaxSpells(){
+	if(level == 1){
+		level1SpellSlotsMax = 2
+		level2SpellSlotsMax = 0
+		level3SpellSlotsMax = 0
+		level4SpellSlotsMax = 0
+		level5SpellSlotsMax = 0
+	} else if(level == 2){
+		level1SpellSlotsMax = 3
+		level2SpellSlotsMax = 0
+		level3SpellSlotsMax = 0
+		level4SpellSlotsMax = 0
+		level5SpellSlotsMax = 0
+	} else if(level == 3){
+		level1SpellSlotsMax = 4
+		level2SpellSlotsMax = 2
+		level3SpellSlotsMax = 0
+		level4SpellSlotsMax = 0
+		level5SpellSlotsMax = 0
+	} else if(level == 4){
+		level1SpellSlotsMax = 4
+		level2SpellSlotsMax = 2
+		level3SpellSlotsMax = 0
+		level4SpellSlotsMax = 0
+		level5SpellSlotsMax = 0
+	} else if(level == 5){
+		level1SpellSlotsMax = 4
+		level2SpellSlotsMax = 3
+		level3SpellSlotsMax = 0
+		level4SpellSlotsMax = 0
+		level5SpellSlotsMax = 0
+	} else if(level == 6){
+		level1SpellSlotsMax = 4
+		level2SpellSlotsMax = 3
+		level3SpellSlotsMax = 2
+		level4SpellSlotsMax = 0
+		level5SpellSlotsMax = 0
+	} else if(level == 7){
+		level1SpellSlotsMax = 4
+		level2SpellSlotsMax = 3
+		level3SpellSlotsMax = 3
+		level4SpellSlotsMax = 0
+		level5SpellSlotsMax = 0
+	} else if(level == 8){
+		level1SpellSlotsMax = 4
+		level2SpellSlotsMax = 3
+		level3SpellSlotsMax = 3
+		level4SpellSlotsMax = 2
+		level5SpellSlotsMax = 0
+	} else if(level == 9){
+		level1SpellSlotsMax = 4
+		level2SpellSlotsMax = 3
+		level3SpellSlotsMax = 3
+		level4SpellSlotsMax = 3
+		level5SpellSlotsMax = 0
+	} else {
+		level1SpellSlotsMax = 4
+		level2SpellSlotsMax = 3
+		level3SpellSlotsMax = 3
+		level4SpellSlotsMax = 3
+		level5SpellSlotsMax = 2
+	}
+	takeLongRest()
+}
+
+
+//Change this for leveling
+var level1SpellSlotsMax = 2
+var level2SpellSlotsMax = 0
+var level3SpellSlotsMax = 0
+var level4SpellSlotsMax = 0
+var level5SpellSlotsMax = 0
+
+var level1SpellSlots = level1SpellSlotsMax
+var level2SpellSlots = level2SpellSlotsMax
+var level3SpellSlots = level3SpellSlotsMax
+var level4SpellSlots = level4SpellSlotsMax
+var level5SpellSlots = level5SpellSlotsMax
+
+function useSpell(){
+
+	// event.stopPropagation()
+
+	//Check for exceptions
+		//Misty Step
+		if(this.id == "mistystep" && this.classList.contains("active")){
+			//Check if Misty Step toggle is on or off
+			if(mistysteptoggle.checked != true){
+				mistysteptoggle.checked = true
+				return
+			}
+		}
+
+	//If not, run the function as normal
+
+	if(this.classList.contains("spelllevel1spell") && this.classList.contains("active")){
+		if(level1SpellSlots != 0){
+			level1SpellSlots--
+		} else {
+			this.classList.replace("spelllevel1spell", "spelllevel2spell")
+		}
+	}
+	if(this.classList.contains("spelllevel2spell") && this.classList.contains("active")){
+		if(level2SpellSlots != 0){
+			level2SpellSlots--
+		}
+		else{
+			this.classList.replace("spelllevel2spell", "spelllevel3spell")
+		}
+	}
+	if(this.classList.contains("spelllevel3spell") && this.classList.contains("active")){
+		if(level3SpellSlots != 0){
+			level3SpellSlots--
+		} else {
+			this.classList.replace("spelllevel3spell", "spelllevel4spell")
+		}
+	}
+	if(this.classList.contains("spelllevel4spell") && this.classList.contains("active")){
+		if(level4SpellSlots != 0){
+			level4SpellSlots--
+		} else {
+			this.classList.replace("spelllevel4spell", "spelllevel5spell")
+		}
+	}
+	if(this.classList.contains("spelllevel5spell") && this.classList.contains("active")){
+		if(level5SpellSlots != 0){
+			level5SpellSlots--
+		}
+	}
+	updateSpellSlots()
+}
+
+function updateSpellSlots(){
+	var spelllevel1slotcalculation = "<h2>Level 1</h2>"
+	var spelllevel2slotcalculation = "<h2>Level 2</h2>"
+	var spelllevel3slotcalculation = "<h2>Level 3</h2>"
+	var spelllevel4slotcalculation = "<h2>Level 4</h2>"
+	var spelllevel5slotcalculation = "<h2>Level 5</h2>"
+
+	for(var i = 0; i < level1SpellSlots; i++){
+		spelllevel1slotcalculation += "<img src='mana-40px.png' width='22' style='margin: 3px;'>"
+	}
+	for(var i = level1SpellSlots; i < level1SpellSlotsMax; i++){
+		spelllevel1slotcalculation += "<img src='no-mana-40px.png' width='22' style='margin: 3px;'>"
+	}
+
+	for(var i = 0; i < level2SpellSlots; i++){
+		spelllevel2slotcalculation += "<img src='mana-40px.png' width='22' style='margin: 3px;'>"
+	}
+	for(var i = level2SpellSlots; i < level2SpellSlotsMax; i++){
+		spelllevel2slotcalculation += "<img src='no-mana-40px.png' width='22' style='margin: 3px;'>"
+	}
+	for(var i = 0; i < level3SpellSlots; i++){
+		spelllevel3slotcalculation += "<img src='mana-40px.png' width='22' style='margin: 3px;'>"
+	}
+	for(var i = level3SpellSlots; i < level3SpellSlotsMax; i++){
+		spelllevel3slotcalculation += "<img src='no-mana-40px.png' width='22' style='margin: 3px;'>"
+	}
+	for(var i = 0; i < level4SpellSlots; i++){
+		spelllevel4slotcalculation += "<img src='mana-40px.png' width='22' style='margin: 3px;'>"
+	}
+	for(var i = level4SpellSlots; i < level4SpellSlotsMax; i++){
+		spelllevel4slotcalculation += "<img src='no-mana-40px.png' width='22' style='margin: 3px;'>"
+	}
+	for(var i = 0; i < level5SpellSlots; i++){
+		spelllevel5slotcalculation += "<img src='mana-40px.png' width='22' style='margin: 3px;'>"
+	}
+	for(var i = level5SpellSlots; i < level5SpellSlotsMax; i++){
+		spelllevel5slotcalculation += "<img src='no-mana-40px.png' width='22' style='margin: 3px;'>"
+	}
+
+
+	document.getElementById("spelllevel1slots").innerHTML = spelllevel1slotcalculation
+	document.getElementById("spelllevel2slots").innerHTML = spelllevel2slotcalculation
+	document.getElementById("spelllevel3slots").innerHTML = spelllevel3slotcalculation
+	document.getElementById("spelllevel4slots").innerHTML = spelllevel4slotcalculation
+	document.getElementById("spelllevel5slots").innerHTML = spelllevel5slotcalculation
+}
+
+function takeLongRest(){
+	takeShortRest()
+	level1SpellSlots = level1SpellSlotsMax
+	level2SpellSlots = level2SpellSlotsMax
+	level3SpellSlots = level3SpellSlotsMax
+	level4SpellSlots = level4SpellSlotsMax
+	level5SpellSlots = level5SpellSlotsMax
+	//Refresh upcasted spells back to their ususal level
+	document.getElementById("goodberry").classList[0] = "spelllevel1spell"
+	document.getElementById("grease").classList[0] = "spelllevel1spell"
+	document.getElementById("mistystep").classList[0] = "spelllevel1spell"
+	document.getElementById("entangle").classList[0] = "spelllevel1spell"
+	document.getElementById("faerie_fire").classList[0] = "spelllevel1spell"
+	document.getElementById("thunderwave").classList[0] = "spelllevel1spell"
+	document.getElementById("healing_word").classList[0] = "spelllevel1spell"
+	document.getElementById("grease").classList[0] = "spelllevel1spell"
+	document.getElementById("pass_without_trace").classList[0] = "spelllevel2spell"
+	document.getElementById("spike_growth").classList[0] = "spelllevel2spell"
+	document.getElementById("moonbeam").classList[0] = "spelllevel2spell"
+	document.getElementById("gust_of_wind").classList[0] = "spelllevel2spell"
+	document.getElementById("aura_of_vitality").classList[0] = "spelllevel3spell"
+	document.getElementById("plant_growth").classList[0] = "spelllevel3spell"
+	updateSpellSlots()
+
+	document.getElementById("currenthp").innerHTML = document.getElementById("maxhp").innerHTML
+	document.getElementById("temphp").innerHTML = 0
+
+	changeHP("rest")
+	changeHitDice("rest")
+}
+function takeShortRest(){
+
+}
+
+function start(){
+	takeShortRest()
+	takeLongRest()
+}
+start()
+
+</script>
+</body>	
