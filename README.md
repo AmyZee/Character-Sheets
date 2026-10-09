@@ -34,3 +34,7 @@ https://amyzee.github.io/Character-Sheets/charsheet-druid/druid2024.html *(Numbe
 ### Character builder
 
 https://amyzee.github.io/Character-Sheets/weird-wizard-1.2.1-fezvez🌱-update.html *(Shadow of the Weird Wizard)*
+
+### Game
+
+https://amyzee.github.io/Character-Sheets/lyori *(Mix between Pyoro and a turn-based Bomberman) (controls: arrow keys)*
